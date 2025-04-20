@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Youtube Music Track & Recovery Service</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+<h1>You're Welcome Page</h1>
+<p>This is a welcome page after login</p>
+
+<!--<h2>1. Initially Add Videos With Details To The DataBase</h2>-->
+<!--<a th:href="@{/PLNj4bt23Rjfsm0Km4iNM6RSBwXXOEym74/initiallyAddVideoDetails}">'musicList for test' 플레이리스트아이템 최초 등록</a>-->
+<h2>0. Select Playlist to Register</h2>
+<a th:href="@{/playlist}">전체 플리에서 선택하기</a>
+
+
+
+<!--<h2>1. Initially Add All PlayLists To The DataBase</h2>-->
+<!--<a th:href="@{/playlist/{id}(id=${userId})}">플레이리스트 관리</a>-->
+
+<!--<h2>2. WhistleMissile Playlist</h2>-->
+<!--<a th:href="@{/whistleMissile/playlists}">whistleMissile playlist</a>-->
+
+<!--<h2>2. API - See Playlists</h2>-->
+<!--<a th:href="@{/UC6SN0-0k6z1fj5LmhYHd5UA/playlists}">플레이리스트 목록 단순 조회</a>-->
+<!--UCSm9kYU0rHDamSQeoy_LBWg ----- whistle_missile-->
+
+<!--<h2>3. API - See Particular Playlist items</h2>-->
+<!--<a th:href="@{/PLNj4bt23Rjfsm0Km4iNM6RSBwXXOEym74/getVideos}">특정 플레이리스트 내부 단순 조회</a>-->
+<!--&lt;!&ndash;PL_oN0G26h8rbshXsAoF_7GJ6LeixZNmB4&ndash;&gt; &lt;!&ndash;pkc1088 - musicListForTest&ndash;&gt;-->
+
+<!--<h2>1. API - Search Music</h2>-->
+<!--<a th:href="@{/search?keyword='The Manhattans - Kiss And Say GoodBye'}">The Manhattans - Kiss And Say GoodBye 검색</a>-->
+
+<!--<h2>5. Add Certain Video to Playlist</h2>
+<form action="/addVideoToPlaylist" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"> &lt;!&ndash; CSRF 토큰 &ndash;&gt;
+    <label for="playlistId">Playlist ID:</label>
+    <input type="text" id="playlistId" name="playlistId" required>
+    <br>
+    <label for="videoId">Video ID:</label>
+    <input type="text" id="videoId" name="videoId" required>
+    <br>
+    <button type="submit">Add Video</button>
+</form>
+
+<h2>6. Delete Certain Video from Playlist</h2>
+<form action="/deleteFromPlaylist" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <label for="playlistId">Playlist ID:</label>
+    <input type="text" id="deleteplaylistId" name="playlistId" required>
+    <br>
+    <label for="videoId">Video ID:</label>
+    <input type="text" id="deletevideoId" name="videoId" required>
+    <br>
+    <button type="submit">Delete Video</button>
+</form>-->
+
+<!--<h2>7. File Track And Recover Start</h2>-->
+<!--<form action="/fileTrackAndRecover" method="post">-->
+<!--    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">-->
+<!--    <label for="playlistIdForRecover">playlist Id To Recover:</label>-->
+<!--    <input type="text" id="playlistIdForRecover" name="playlistIdForRecover" required>-->
+<!--    <br>-->
+<!--    <button type="submit">File Track & Recover</button>-->
+<!--</form>-->
+
+<!--<h2>8. TokenTest</h2>-->
+<!--<a th:href="@{/tokenTest}">토큰 테스트</a>-->
+
+<!--<h2>9. TestAddVideoToPlaylist</h2>-->
+<!--<form action="/TestAddVideoToPlaylist" method="post">-->
+<!--    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">-->
+<!--    <label for="customerEmail">customerEmail:</label>-->
+<!--    <input type="text" id="customerEmail" name="customerEmail" required><br>-->
+<!--    <label for="playlistId">Playlist ID:</label>-->
+<!--    <input type="text" id="playlistId" name="playlistId" required><br>-->
+<!--    <label for="videoId">Video ID:</label>-->
+<!--    <input type="text" id="videoId" name="videoId" required><br>-->
+<!--    <button type="submit">Add Video</button>-->
+<!--</form>-->
+
+<!--<h2>10. ScheduledTest</h2>-->
+<!--<a th:href="@{/ScheduledTest}">스케쥴 테스트</a>-->
+
+</body>
+</html>

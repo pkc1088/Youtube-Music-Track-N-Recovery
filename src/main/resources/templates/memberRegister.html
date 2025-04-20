@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Member Register</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+<h1>Member Register Page</h1>
+<p>This is a Member Register page after Google login</p>
+
+<h2>Register Your Initial Information To Use Our Service</h2>
+<form action="/memberRegister" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"> <!-- CSRF 토큰 -->
+
+    <label for="userId">User ID:</label>
+    <input type="text" id="userId" name="userId" required><br>
+
+    <label for="userPwd">User Password:</label>
+    <input type="text" id="userPwd" name="userPwd" required><br>
+
+    <label for="userName">User Name:</label>
+    <input type="text" id="userName" name="userName" required><br>
+
+    <button type="submit">Register As a Member</button>
+</form>
+
+
+</body>
+</html>

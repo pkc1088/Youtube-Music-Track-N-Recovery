@@ -109,7 +109,7 @@ public class YoutubeControllerV5 {
 //        do {
 //            YouTube.Playlists.List request = youtube.playlists().list(Collections.singletonList("snippet, contentDetails"));
 //
-//            request.setKey("AIzaSyBxCTt9LEpU9Rb8AgUSW0lj-Z36_k-ysIQ");
+//            request.setKey;
 //            request.setChannelId("UCSm9kYU0rHDamSQeoy_LBWg");
 //            request.setMaxResults(50L); // API의 최대 허용값 (50)
 //            request.setPageToken(nextPageToken); // 다음 페이지 토큰 설정

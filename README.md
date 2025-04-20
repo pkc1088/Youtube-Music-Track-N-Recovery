@@ -51,7 +51,7 @@ Youtube 음원 파일의 비정상적인 삭제에 대한 추적 및 복구 서�
 - **개발 환경**
   - 언어 : Java
   - 프레임워크 : Spring Boot
-  - 데이터베이스 : H2 (차후 MySql로 대체 예정)
+  - 데이터베이스 : MySql
 - **리포지토리 구조**
 ```
 ├── youtubeProject

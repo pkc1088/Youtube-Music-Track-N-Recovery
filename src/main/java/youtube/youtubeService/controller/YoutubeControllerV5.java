@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.repository.users.UserRepository;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
 import youtube.youtubeService.service.youtube.YoutubeService;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -51,9 +54,15 @@ public class YoutubeControllerV5 {
 
     @GetMapping("/playlist/{userId}") // for user display
     public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
+        // 1. API로 사용자의 모든 플레이리스트를 가져옴
         List<Playlist> playlists = playlistService.getAllPlaylists(userId);
+        // 2. DB에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
+        List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
+        List<String> registeredPlaylistIds = registeredPlaylistIdFromDB.stream().map(Playlists::getPlaylistId).toList();
+
         model.addAttribute("userId", userId);
         model.addAttribute("playlists", playlists);
+        model.addAttribute("registeredPlaylistIds", registeredPlaylistIds);
         System.err.println("userRegisterPlaylists : " + userId);
         return "playlist_selection"; // 체크박스 뷰 템플릿
     }
@@ -61,13 +70,27 @@ public class YoutubeControllerV5 {
     @PostMapping("/playlist/register")
     public String registerSelectedPlaylists(@RequestParam String userId,
                                             @RequestParam(name = "selectedPlaylistIds", required = false) List<String> selectedPlaylistIds,
+                                            @RequestParam(name = "deselectedPlaylistIds", required = false) List<String> deselectedPlaylistIds,
                                             Model model) throws IOException {
 
-        if (selectedPlaylistIds != null && !selectedPlaylistIds.isEmpty()) {
-            playlistService.registerPlaylists(userId, selectedPlaylistIds);
+        // 1. DB에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
+        List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
+        List<String> registeredPlaylistIds = registeredPlaylistIdFromDB.stream().map(Playlists::getPlaylistId).toList();
+
+        // 2. 중복된 플레이리스트는 제외하고 등록
+        List<String> newSelectedPlaylistIds = selectedPlaylistIds.stream()
+                .filter(playlistId -> !registeredPlaylistIds.contains(playlistId)).toList();
+
+        if (!newSelectedPlaylistIds.isEmpty()) {
+            playlistService.registerPlaylists(userId, newSelectedPlaylistIds);  // 중복되지 않는 플레이리스트만 등록
         }
+
+        if (deselectedPlaylistIds != null && !deselectedPlaylistIds.isEmpty()) {
+            playlistService.removePlaylistsFromDB(userId, deselectedPlaylistIds); // 체크 해제된 플레이리스트 DB에서 삭제
+        }
+
         log.info("재생목록 등록 완료");
-        return "redirect:/welcome"; // 혹은 등록된 목록 보는 페이지로 이동
+        return "redirect:/welcome";
     }
 
 

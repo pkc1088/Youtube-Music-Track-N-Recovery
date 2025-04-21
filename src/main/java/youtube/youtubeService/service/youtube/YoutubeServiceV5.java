@@ -42,15 +42,7 @@ public class YoutubeServiceV5 implements YoutubeService {
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
-//    public PlaylistItemListResponse getPlaylistItemListResponse(String playlistId, Long maxResults) throws IOException { // 내부에서 호출해야함
-//        YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id, status"));
-//        request.setKey(apiKey);
-//        request.setPlaylistId(playlistId);
-//        request.setMaxResults(maxResults);
-//        return request.execute();
-//    }
-
-    public List<PlaylistItem> getPlaylistItemListResponse(String playlistId, Long maxResults) throws IOException { // 내부에서 호출해야함
+    public List<PlaylistItem> getPlaylistItemListResponse(String playlistId, Long maxResults) throws IOException {
         YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id, status"));
         request.setKey(apiKey);
         request.setPlaylistId(playlistId);
@@ -83,7 +75,6 @@ public class YoutubeServiceV5 implements YoutubeService {
         for (String videoIdToDelete : illegalVideos.keySet()) {
             // illegal video 가 여러개일 수 있으니
             long videoPosition = illegalVideos.get(videoIdToDelete);
-            //System.err.println("Tracked Illegal Music (" + videoIdToDelete + ") at index " + videoPosition);
             log.info("Tracked Illegal Music ({}) at index {}", videoIdToDelete, videoPosition);
         // 4. DB 에서 videoId로 검색해서 백업된 Music 객체를 가져옴
             Optional<Music> optionalBackUpMusic = musicRepository.getMusicFromDBThruMusicId(videoIdToDelete, playlistId);
@@ -128,15 +119,11 @@ public class YoutubeServiceV5 implements YoutubeService {
     }
 
     public Music searchVideoToReplace(Music musicToSearch, String playlistId) throws IOException {
-/**
- * searchPolicy 테스트 해보기
- */
-        // 방법 1. 단순 검색
+
+        // Gemini Policy 사용
         String query = searchPolicy.search(musicToSearch);
-//        String query = musicToSearch.getVideoTitle().concat("-").concat(musicToSearch.getVideoUploader());
+        // String query = musicToSearch.getVideoTitle().concat("-").concat(musicToSearch.getVideoUploader());
         log.info("searched with : {}", query);
-        // 방법 2. Gemini 사용
-        // getUsefulInfoFromDescription();
 
         YouTube.Search.List search = youtube.search().list(Collections.singletonList("id, snippet"));
         search.setKey(apiKey);
@@ -188,7 +175,6 @@ public class YoutubeServiceV5 implements YoutubeService {
         }
     }
 
-    // page 로 읽어들여야함
     // 불필요한 동작 수정 필요
     public void deleteFromActualPlaylist(String accessToken, String playlistId, String videoId) {
         try {
@@ -214,7 +200,6 @@ public class YoutubeServiceV5 implements YoutubeService {
                 playlistItems.addAll(response.getItems());
                 nextPageToken = response.getNextPageToken();
             } while (nextPageToken != null); // 더 이상 페이지가 없을 때까지 반복
-
 
             // 영상 ID와 일치하는 재생목록 항목을 찾음
             for (PlaylistItem playlistItem : playlistItems) {

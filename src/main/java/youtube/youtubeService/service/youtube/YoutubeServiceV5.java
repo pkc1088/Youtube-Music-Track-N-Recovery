@@ -6,12 +6,16 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.*;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.policy.SearchPolicy;
+import youtube.youtubeService.repository.ActionLogRepository;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.service.musics.MusicService;
@@ -32,13 +36,16 @@ public class YoutubeServiceV5 implements YoutubeService {
     private final PlaylistRepository playlistRepository;
     private final MusicService musicService;
     private final SearchPolicy searchPolicy; // Map<String, SearchPolicy> searchPolicyMap; 테스트 해보기
+    private final ActionLogRepository actionLogRepository;
 
     public YoutubeServiceV5(PlaylistRepository playlistRepository, MusicRepository musicRepository,
-                            MusicService musicService, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy) {
+                            MusicService musicService, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
+                            ActionLogRepository actionLogRepository) {
         this.playlistRepository = playlistRepository;
         this.musicRepository = musicRepository;
         this.musicService = musicService;
         this.searchPolicy = searchPolicy;
+        this.actionLogRepository = actionLogRepository;
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
@@ -84,16 +91,33 @@ public class YoutubeServiceV5 implements YoutubeService {
         // 6. backupMusic 이 null 이면 백업 안된 영상. 즉 사용자가 최근에 추가했지만 빠르게 삭제된 영상
                 deleteFromActualPlaylist(accessToken, playlistId, videoIdToDelete);
                 // updatePlaylist 행위때 그런 음악은 디비에 저장 안했으니 디비 수정할 이유는 없다
+                // 그러나 actionLog 에 기록은 해주자 (Deleted Before Saved)
+                // actionLogRecord(userId, playlistId, "DBS", ?, ?);
                 continue;
             }
         // 7. backupMusic 이 null 이 아니면 백업된 영상임 (search 알고리즘 강화 필요)
             Music videoForRecovery = searchVideoToReplace(backupMusic, playlistId);
+        // 10. log 기록 먼저 해야함 (musicRepository 는 trg 나 src 이나 공유하니까)
+            actionLogRecord(userId, playlistId, "recovery", backupMusic, videoForRecovery);
         // 8. DB를 업데이트한다 CRUD 동작은 service 가 아니라 repository 가 맡아서 한다.
             musicRepository.dBTrackAndRecover(videoIdToDelete, videoForRecovery, playlistId);
         // 9. 실제 유튜브 플레이리스트에도 add 와 delete
             addVideoToActualPlaylist(accessToken, playlistId, videoForRecovery.getVideoId(), videoPosition);
             deleteFromActualPlaylist(accessToken, playlistId, videoIdToDelete);
         }
+    }
+
+    public void actionLogRecord(String userId, String playlistId, String actionType, Music trgVid, Music srcVid) {
+        // 영상 제목 및 업로드자도 저장하는게 보기 좋을 듯
+        ActionLog log = new ActionLog();
+        log.setUserId(userId);
+        log.setPlaylistId(playlistId);
+        log.setActionType(actionType);
+        log.setTargetVideoId(trgVid.getVideoId());
+        log.setTargetVideoTitle(trgVid.getVideoTitle());
+        log.setSourceVideoId(srcVid.getVideoId());
+        log.setSourceVideoTitle(srcVid.getVideoTitle());
+        actionLogRepository.save(log);
     }
 
     // page 로 읽어들여야함

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import youtube.youtubeService.policy.SearchPolicy;
+import youtube.youtubeService.repository.ActionLogRepository;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.musics.MusicRepositoryV1;
 import youtube.youtubeService.repository.musics.SdjMusicRepository;
@@ -31,20 +32,23 @@ public class SpringDataJpaConfig {
     private final SdjPlaylistRepository sdjPlaylistRepository;
     private final SdjMusicRepository sdjMusicRepository;
     private final SearchPolicy searchPolicy;
+    private final ActionLogRepository actionLogRepository;
 
     @Autowired
     public SpringDataJpaConfig(
             SdjUserRepository sdjUserRepository, SdjPlaylistRepository sdjPlaylistRepository, SdjMusicRepository sdjMusicRepository,
-            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy) {
+            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
+            ActionLogRepository actionLogRepository) {
         this.sdjUserRepository = sdjUserRepository;
         this.sdjPlaylistRepository = sdjPlaylistRepository;
         this.sdjMusicRepository = sdjMusicRepository;
         this.searchPolicy = searchPolicy;
+        this.actionLogRepository = actionLogRepository;
     }
 
     @Bean
     public YoutubeService youtubeService() {
-        return new YoutubeServiceV5(playlistRepository(), musicRepository(), musicService(), searchPolicy);
+        return new YoutubeServiceV5(playlistRepository(), musicRepository(), musicService(), searchPolicy, actionLogRepository);
     }
 
     @Bean

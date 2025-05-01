@@ -58,11 +58,11 @@ public class YoutubeServiceV5 implements YoutubeService {
         List<PlaylistItem> allPlaylists = new ArrayList<>();
         String nextPageToken = null;
         do {
-            request.setPageToken(nextPageToken); // 다음 페이지 토큰 설정
+            request.setPageToken(nextPageToken);
             PlaylistItemListResponse response = request.execute();
             allPlaylists.addAll(response.getItems());
             nextPageToken = response.getNextPageToken();
-        } while (nextPageToken != null); // 더 이상 페이지가 없을 때까지 반복
+        } while (nextPageToken != null);
 
         return allPlaylists;
     }

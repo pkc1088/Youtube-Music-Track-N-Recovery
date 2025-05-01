@@ -43,15 +43,6 @@ public class ManagementScheduler {
         this.searchPolicy = searchPolicy;
     }
 
-//    @Scheduled(fixedRate = 30000, initialDelayString = "2000")
-    public void geminiTest() {
-        Music musicToSearch = new Music();
-        musicToSearch.setVideoTitle("kiss and say goodbye");
-        musicToSearch.setVideoUploader("the manhattans");
-        String text = searchPolicy.search(musicToSearch);
-        System.out.println(text);
-    }
-
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")  //    @Transactional
     public void allPlaylistsRecoveryOfOneParticularUserTest() throws IOException {
         log.info("auto scheduler activated");
@@ -74,6 +65,14 @@ public class ManagementScheduler {
         log.info("auto scheduler done");
     }
 
+    //    @Scheduled(fixedRate = 30000, initialDelayString = "2000")
+    public void geminiTest() {
+        Music musicToSearch = new Music();
+        musicToSearch.setVideoTitle("kiss and say goodbye");
+        musicToSearch.setVideoUploader("the manhattans");
+        String text = searchPolicy.search(musicToSearch);
+        System.out.println(text);
+    }
 
 //    @Scheduled(fixedRate = 30000, initialDelayString = "1000")
     public void updateTest() throws IOException {
@@ -82,6 +81,7 @@ public class ManagementScheduler {
         String videoId = "o6vCn2sBbBE";
         addTemp(accessToken, playlistId, videoId, 4L); // 포지션 잘 맞춰야함
     }
+
     public void addTemp(String accessToken, String playlistId, String videoId, long videoPosition) {
         try {
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);

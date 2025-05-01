@@ -66,7 +66,6 @@ public class SpringDataJpaConfig {
         return new MusicServiceV1(playlistRepository(), musicRepository());
     }
 
-
     @Bean
     public UserRepository userRepository() {
         return new UserRepositoryV1(sdjUserRepository);
@@ -81,4 +80,5 @@ public class SpringDataJpaConfig {
     public MusicRepository musicRepository() {
         return new MusicRepositoryV1(sdjMusicRepository);
     }
+
 }

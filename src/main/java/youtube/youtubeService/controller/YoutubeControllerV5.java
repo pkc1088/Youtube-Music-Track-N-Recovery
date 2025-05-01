@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.repository.ActionLogRepository;
 import youtube.youtubeService.repository.users.UserRepository;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
@@ -29,8 +31,9 @@ public class YoutubeControllerV5 {
 
     private final YoutubeService youtubeService;
     private final UserService userService;
-    private final PlaylistService playlistService;
     private final UserRepository userRepository;
+    private final PlaylistService playlistService;
+    private final ActionLogRepository actionLogRepository;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -93,7 +96,22 @@ public class YoutubeControllerV5 {
         return "redirect:/welcome";
     }
 
+    @GetMapping("/recovery")
+    public String redirectToRecoveryHistory(@AuthenticationPrincipal OAuth2User principal) {
+        return "redirect:/recovery/" + principal.getName();
+    }
 
+    @GetMapping("/recovery/{userId}")
+    public String searchRecoveryHistory(@PathVariable String userId, Model model) throws IOException {
+        // 1. userId로 ActionLogRepository 에서 내역 조회
+        List<ActionLog> logs = actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        model.addAttribute("logs", logs);
+        model.addAttribute("userId", userId);
+        return "recovery_history";
+    }
+
+
+}
 
 //    @GetMapping("/whistleMissile/playlists") // - just for test
 //    public String getPlaylists(Model model) throws IOException {
@@ -121,7 +139,8 @@ public class YoutubeControllerV5 {
 //
 //        return allPlaylists;
 //    }
-}
+
+
 
 //    @GetMapping("/mySignup")
 //    public String signup() {

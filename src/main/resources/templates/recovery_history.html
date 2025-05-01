@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>복구 내역</title>
+</head>
+<body>
+<h1 th:text="'사용자 ' + ${userId} + '의 복구 내역'">복구 내역</h1>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>날짜</th>
+        <th>대상 영상 ID</th>
+        <th>대상 영상 제목</th>
+        <th>출처 영상 ID</th>
+        <th>출처 영상 제목</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="log : ${logs}">
+        <td th:text="${log.createdAt}"></td>
+        <td th:text="${log.targetVideoId}"></td>
+        <td th:text="${log.targetVideoTitle}"></td>
+        <td th:text="${log.sourceVideoId}"></td>
+        <td th:text="${log.sourceVideoTitle}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

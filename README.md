@@ -1,6 +1,6 @@
 # Youtube music playlist track & recovery service
 Youtube 음원 파일의 비정상적인 삭제에 대한 추적 및 복구 서비스
-
+![img.png](img.png)
 # 1. 프로젝트 소개
 - **프로젝트 명**
   - Youtube 음원 파일의 비정상적인 삭제에 대한 추적 및 복구 서비스

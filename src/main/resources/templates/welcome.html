@@ -1,20 +1,88 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <title>Youtube Music Track & Recovery Service</title>-->
+<!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>You're Welcome Page</h1>-->
+<!--<p>This is a welcome page after login</p>-->
+
+<!--<h2>1. Register Playlists</h2>-->
+<!--<a th:href="@{/playlist}">전체 플리에서 선택하기</a>-->
+
+<!--<h2>2. Recovery History</h2>-->
+<!--<a th:href="@{/recovery}">내 복구 내역 조회하기</a>-->
+
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Youtube Music Track & Recovery Service</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Youtube Playlist Track & Recovery Service</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .center-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            width: 900px;
+            padding: 3rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .btn-custom {
+            width: 60%;
+            margin: 10px auto;
+        }
+
+        h1 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        h5 {
+            margin-top: 2rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-<h1>You're Welcome Page</h1>
-<p>This is a welcome page after login</p>
+<div class="center-wrapper">
+    <div class="card">
+        <h1 class="text-primary">Welcome 🎵</h1>
+        <p class="text-muted mb-4">Youtube Music Track & Recovery Service에 가입하신걸 환영합니다</p>
+
+        <h5>1. Register Playlists</h5>
+        <a th:href="@{/playlist}" class="btn btn-primary btn-custom">전체 플리에서 선택하기</a>
+
+        <h5>2. Recovery History</h5>
+        <a th:href="@{/recovery}" class="btn btn-success btn-custom">내 복구 내역 조회하기</a>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
 
 <!--<h2>1. Initially Add Videos With Details To The DataBase</h2>-->
 <!--<a th:href="@{/PLNj4bt23Rjfsm0Km4iNM6RSBwXXOEym74/initiallyAddVideoDetails}">'musicList for test' 플레이리스트아이템 최초 등록</a>-->
-<h2>1. Register Playlists</h2>
-<a th:href="@{/playlist}">전체 플리에서 선택하기</a>
-
-<h2>2. Recovery History</h2>
-<a th:href="@{/recovery}">내 복구 내역 조회하기</a>
 
 <!--<h2>1. Initially Add All PlayLists To The DataBase</h2>-->
 <!--<a th:href="@{/playlist/{id}(id=${userId})}">플레이리스트 관리</a>-->
@@ -83,6 +151,3 @@
 
 <!--<h2>10. ScheduledTest</h2>-->
 <!--<a th:href="@{/ScheduledTest}">스케쥴 테스트</a>-->
-
-</body>
-</html>

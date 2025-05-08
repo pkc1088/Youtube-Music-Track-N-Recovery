@@ -1,75 +1,165 @@
-<form action="/playlist/register" method="post">
-    <input type="hidden" name="userId" th:value="${userId}" />
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-    <input type="hidden" name="deselectedPlaylistIds" id="deselectedPlaylistIds" />
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>플레이리스트 선택</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
 
-    <!-- 모두 선택 버튼 -->
-    <button type="button" onclick="selectAllCheckboxes()">모두 선택</button>
+        .main-card {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            background-color: white;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
 
-    <!-- 모두 해제 버튼 -->
-    <button type="button" onclick="deselectAllCheckboxes()">모두 해제</button>
+        .playlist-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: background-color 0.2s ease;
+        }
 
-    <ul>
-        <!-- 플레이리스트 목록 출력 -->
-        <li th:each="playlist : ${playlists}">
-            <label>
+        .playlist-card:hover {
+            background-color: #f1f3f5;
+        }
+
+        .btn-group {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-group button {
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+<div class="main-card">
+    <h2 class="text-center mb-4">내 플레이리스트 선택</h2>
+
+    <form action="/playlist/register" method="post">
+        <input type="hidden" name="userId" th:value="${userId}" />
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="deselectedPlaylistIds" id="deselectedPlaylistIds" />
+
+        <div class="btn-group mb-4">
+            <button type="button" class="btn btn-outline-primary me-2" onclick="selectAllCheckboxes()">모두 선택</button>
+            <button type="button" class="btn btn-outline-danger" onclick="deselectAllCheckboxes()">모두 해제</button>
+        </div>
+
+        <div th:each="playlist : ${playlists}" class="playlist-card">
+            <label class="form-check-label">
                 <input type="checkbox"
-                    name="selectedPlaylistIds"
-                    th:value="${playlist.id}"
-                    th:data-playlist-id="${playlist.id}"
-                    th:checked="${registeredPlaylistIds.contains(playlist.id)}"
-                    th:disabled="${false}"
-                    onchange="handleCheckboxChange(this)"/>
-                <span th:text="${playlist.snippet.title}"></span>
+                       class="form-check-input me-2"
+                       name="selectedPlaylistIds"
+                       th:value="${playlist.id}"
+                       th:data-playlist-id="${playlist.id}"
+                       th:checked="${registeredPlaylistIds.contains(playlist.id)}"
+                       onchange="handleCheckboxChange(this)" />
+                <span th:text="${playlist.snippet.title}">플레이리스트 제목</span>
             </label>
-        </li>
-    </ul>
+        </div>
 
-    <button type="submit">등록</button>
-</form>
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success btn-lg px-5">선택 완료</button>
+        </div>
+    </form>
+</div>
 
 <script>
-    // 모두 선택
     function selectAllCheckboxes() {
-        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => checkbox.checked = true); // 모든 체크박스를 체크
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
     }
 
-    // 모두 해제
     function deselectAllCheckboxes() {
-        let checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(checkbox => checkbox.checked = false); // 모든 체크박스를 해제
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
     }
 
     function handleCheckboxChange(checkbox) {
-        const playlistId = checkbox.dataset.playlistId;  // data-playlist-id 값 추출
+        const playlistId = checkbox.dataset.playlistId;
         const deselectedInput = document.getElementById('deselectedPlaylistIds');
         let deselectedIds = deselectedInput.value ? deselectedInput.value.split(',') : [];
 
         if (!checkbox.checked) {
-            deselectedIds.push(playlistId);  // 실제 ID 추가 (e.g., "PL1234")
+            deselectedIds.push(playlistId);
         } else {
             deselectedIds = deselectedIds.filter(id => id !== playlistId);
         }
 
         deselectedInput.value = deselectedIds.join(',');
-        console.log("Deselected IDs:", deselectedInput.value);  // 디버깅 로그
     }
-
 </script>
+</body>
+</html>
 
-
-<!--기존 코드임-->
+<!--기존 코드 250508-->
 <!--<form action="/playlist/register" method="post">-->
 <!--    <input type="hidden" name="userId" th:value="${userId}" />-->
 <!--    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
-<!--    <ul>-->
-<!--        <li th:each="playlist : ${playlists}">-->
-<!--            <label>-->
-<!--                <input type="checkbox" name="selectedPlaylistIds" th:value="${playlist.id}" />-->
-<!--                <span th:text="${playlist.snippet.title}"></span>-->
-<!--            </label>-->
-<!--        </li>-->
-<!--    </ul>-->
-<!--    <button type="submit">등록</button>-->
+<!--    <input type="hidden" name="deselectedPlaylistIds" id="deselectedPlaylistIds" />-->
+
+<!--    &lt;!&ndash; 모두 선택 버튼 &ndash;&gt;-->
+<!--<button type="button" onclick="selectAllCheckboxes()">모두 선택</button>-->
+
+<!--&lt;!&ndash; 모두 해제 버튼 &ndash;&gt;-->
+<!--<button type="button" onclick="deselectAllCheckboxes()">모두 해제</button>-->
+
+<!--<ul>-->
+<!--    &lt;!&ndash; 플레이리스트 목록 출력 &ndash;&gt;-->
+<!--    <li th:each="playlist : ${playlists}">-->
+<!--        <label>-->
+<!--            <input type="checkbox"-->
+<!--                   name="selectedPlaylistIds"-->
+<!--                   th:value="${playlist.id}"-->
+<!--                   th:data-playlist-id="${playlist.id}"-->
+<!--                   th:checked="${registeredPlaylistIds.contains(playlist.id)}"-->
+<!--                   th:disabled="${false}"-->
+<!--                   onchange="handleCheckboxChange(this)"/>-->
+<!--            <span th:text="${playlist.snippet.title}"></span>-->
+<!--        </label>-->
+<!--    </li>-->
+<!--</ul>-->
+
+<!--<button type="submit">등록</button>-->
 <!--</form>-->
+
+<!--<script>-->
+<!--    // 모두 선택-->
+<!--    function selectAllCheckboxes() {-->
+<!--        let checkboxes = document.querySelectorAll('input[type="checkbox"]');-->
+<!--        checkboxes.forEach(checkbox => checkbox.checked = true); // 모든 체크박스를 체크-->
+<!--    }-->
+
+<!--    // 모두 해제-->
+<!--    function deselectAllCheckboxes() {-->
+<!--        let checkboxes = document.querySelectorAll('input[type="checkbox"]');-->
+<!--        checkboxes.forEach(checkbox => checkbox.checked = false); // 모든 체크박스를 해제-->
+<!--    }-->
+
+<!--    function handleCheckboxChange(checkbox) {-->
+<!--        const playlistId = checkbox.dataset.playlistId;  // data-playlist-id 값 추출-->
+<!--        const deselectedInput = document.getElementById('deselectedPlaylistIds');-->
+<!--        let deselectedIds = deselectedInput.value ? deselectedInput.value.split(',') : [];-->
+
+<!--        if (!checkbox.checked) {-->
+<!--            deselectedIds.push(playlistId);  // 실제 ID 추가 (e.g., "PL1234")-->
+<!--        } else {-->
+<!--            deselectedIds = deselectedIds.filter(id => id !== playlistId);-->
+<!--        }-->
+
+<!--        deselectedInput.value = deselectedIds.join(',');-->
+<!--        console.log("Deselected IDs:", deselectedInput.value);  // 디버깅 로그-->
+<!--    }-->
+
+<!--</script>-->
+
+
+
+

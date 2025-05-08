@@ -1,23 +1,23 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Add Videos</title>
-</head>
-<body>
-<h1>Add Videos</h1>
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <title>Add Videos</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Add Videos</h1>-->
 
-<!-- 에러 메시지 표시 -->
-<div th:if="${error}">
-    <p style="color: red;" th:text="${error}"></p>
-</div>
-<ul>
-    <li th:each="video : ${addVideos}">
-        <span th:text="${video.snippet.title}"></span>
-        <span th:text="${video.id}"></span>
-        <span th:text="${video.snippet.getChannelTitle()}"></span>
-        <span th:text="${video.status}"></span>
-        <span th:text="${video.status.failureReason}"></span>
-    </li>
-</ul>
-</body>
-</html>
+<!--&lt;!&ndash; 에러 메시지 표시 &ndash;&gt;-->
+<!--<div th:if="${error}">-->
+<!--    <p style="color: red;" th:text="${error}"></p>-->
+<!--</div>-->
+<!--<ul>-->
+<!--    <li th:each="video : ${addVideos}">-->
+<!--        <span th:text="${video.snippet.title}"></span>-->
+<!--        <span th:text="${video.id}"></span>-->
+<!--        <span th:text="${video.snippet.getChannelTitle()}"></span>-->
+<!--        <span th:text="${video.status}"></span>-->
+<!--        <span th:text="${video.status.failureReason}"></span>-->
+<!--    </li>-->
+<!--</ul>-->
+<!--</body>-->
+<!--</html>-->

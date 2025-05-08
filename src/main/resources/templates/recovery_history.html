@@ -3,29 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <title>복구 내역</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .log-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .log-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 300px;
+        }
+
+        .log-card h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #007bff;
+        }
+
+        .log-detail {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .log-detail span {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
 </head>
 <body>
 <h1 th:text="'사용자 ' + ${userId} + '의 복구 내역'">복구 내역</h1>
 
-<table border="1">
-    <thead>
-    <tr>
-        <th>날짜</th>
-        <th>대상 영상 ID</th>
-        <th>대상 영상 제목</th>
-        <th>출처 영상 ID</th>
-        <th>출처 영상 제목</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="log : ${logs}">
-        <td th:text="${log.createdAt}"></td>
-        <td th:text="${log.targetVideoId}"></td>
-        <td th:text="${log.targetVideoTitle}"></td>
-        <td th:text="${log.sourceVideoId}"></td>
-        <td th:text="${log.sourceVideoTitle}"></td>
-    </tr>
-    </tbody>
-</table>
+<div class="log-container">
+    <div class="log-card" th:each="log : ${logs}">
+        <h3 th:text="${log.createdAt}">날짜</h3>
+        <div class="log-detail">
+            <div><span>대상 영상 ID:</span> <span th:text="${log.targetVideoId}"></span></div>
+            <div><span>대상 영상 제목:</span> <span th:text="${log.targetVideoTitle}"></span></div>
+            <div><span>출처 영상 ID:</span> <span th:text="${log.sourceVideoId}"></span></div>
+            <div><span>출처 영상 제목:</span> <span th:text="${log.sourceVideoTitle}"></span></div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>복구 내역</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1 th:text="'사용자 ' + ${userId} + '의 복구 내역'">복구 내역</h1>-->
+
+<!--<table border="1">-->
+<!--    <thead>-->
+<!--    <tr>-->
+<!--        <th>날짜</th>-->
+<!--        <th>대상 영상 ID</th>-->
+<!--        <th>대상 영상 제목</th>-->
+<!--        <th>출처 영상 ID</th>-->
+<!--        <th>출처 영상 제목</th>-->
+<!--    </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--    <tr th:each="log : ${logs}">-->
+<!--        <td th:text="${log.createdAt}"></td>-->
+<!--        <td th:text="${log.targetVideoId}"></td>-->
+<!--        <td th:text="${log.targetVideoTitle}"></td>-->
+<!--        <td th:text="${log.sourceVideoId}"></td>-->
+<!--        <td th:text="${log.sourceVideoTitle}"></td>-->
+<!--    </tr>-->
+<!--    </tbody>-->
+<!--</table>-->
+<!--</body>-->
+<!--</html>-->

@@ -29,7 +29,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'com.google.apis:google-api-services-youtube:v3-rev20240926-2.0.0' // 최신 버전
 	implementation 'com.google.http-client:google-http-client-jackson2:1.39.2'
-
+	implementation 'com.google.cloud.sql:mysql-socket-factory-connector-j-8:1.14.1' // 250509 추가
 
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
@@ -49,4 +49,8 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.named('bootJar') {
+	archiveFileName = 'app.jar'
 }

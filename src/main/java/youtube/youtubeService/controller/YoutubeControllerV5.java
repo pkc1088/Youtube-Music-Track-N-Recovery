@@ -42,7 +42,7 @@ public class YoutubeControllerV5 {
 
     @GetMapping("/")
     public String initRegister() {
-        return "/welcome";
+        return "redirect:/login";
     }
 
     @GetMapping("/welcome")
@@ -66,7 +66,7 @@ public class YoutubeControllerV5 {
         model.addAttribute("userId", userId);
         model.addAttribute("playlists", playlists);
         model.addAttribute("registeredPlaylistIds", registeredPlaylistIds);
-        System.err.println("userRegisterPlaylists : " + userId);
+        log.info("userRegisterPlaylists {}", userId);
         return "playlist_selection"; // 체크박스 뷰 템플릿
     }
 
@@ -109,7 +109,7 @@ public class YoutubeControllerV5 {
         model.addAttribute("userId", userId);
         return "recovery_history";
     }
-// token test
+
 
 }
 

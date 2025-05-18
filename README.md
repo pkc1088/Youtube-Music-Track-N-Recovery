@@ -52,7 +52,8 @@ Youtube 음원 파일의 비정상적인 삭제에 대한 추적 및 복구 서�
 - **개발 환경**
   - 언어 : Java
   - 프레임워크 : Spring Boot
-  - 데이터베이스 : MySql
+  - 데이터베이스 : MySql, Cloud SQL
+  - 인프라 : Cloud Run, Cloud Scheduler
 - **리포지토리 구조**
 ```
 ├── youtubeProject
@@ -75,6 +76,7 @@ Youtube 음원 파일의 비정상적인 삭제에 대한 추적 및 복구 서�
   - 삭제 및 비공개 영상과 'unavailable video'의 차이
 - SecurityConfig와 loginSuccessHandler() 위치
 - scheduler, controller, service(youtube & user), repository, domain 의존성
+- 브라우저 캐시 삭제 후 refreshToken이 mysql에 업데이트 되지 않는 버그 (JPA 영속성)
 # 5. 기술 및 API 분석
 - Youtube Data API V3 할당량 정책
 # 6. 프로젝트 결론 및 리뷰

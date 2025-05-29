@@ -70,6 +70,11 @@
 
         <h5>2. Recovery History</h5>
         <a th:href="@{/recovery}" class="btn btn-success btn-custom">내 복구 내역 조회하기</a>
+
+        <h5>3. 회원 탈퇴</h5>
+        <form th:action="@{/delete}" method="post">
+            <button type="submit" class="btn btn-danger btn-custom">탈퇴하기</button>
+        </form>
     </div>
 </div>
 </body>

@@ -8,7 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.repository.ActionLogRepository;
 import youtube.youtubeService.repository.users.UserRepository;
 
 import java.io.IOException;
@@ -23,7 +25,7 @@ public class UserServiceV1 implements UserService {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
     private final UserRepository userRepository;
-
+    private final ActionLogRepository actionLogRepository;
 
     @Override
     public Users getUserByUserId(String userId) {
@@ -38,6 +40,24 @@ public class UserServiceV1 implements UserService {
     public void saveUser(Users user) {
         userRepository.saveUser(user);
     }
+
+    @Override
+    public void deleteUser(Users user) {
+        String refreshToken = user.getRefreshToken();
+        RestTemplate restTemplate = new RestTemplate();
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + refreshToken;
+
+            try {
+                restTemplate.postForEntity(revokeUrl, null, String.class);
+                userRepository.deleteUser(user); // 유저 DB에서 삭제
+                actionLogRepository.deleteByUserId(user.getUserId());// ActionLog 도 삭제
+            } catch (Exception e) {
+                log.warn("Failed to revoke Google token for user: {}", user.getUserId(), e);
+            }
+        }
+    }
+
 
     @Override
     public String getNewAccessTokenByUserId(String userId) {

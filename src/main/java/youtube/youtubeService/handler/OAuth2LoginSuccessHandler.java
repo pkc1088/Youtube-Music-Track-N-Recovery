@@ -64,15 +64,15 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
                 if(authorizedClient.getRefreshToken() != null) {
                     String updatedRefreshToken = authorizedClient.getRefreshToken().getTokenValue();
-                    log.info("리프레시 토큰이 null은 아니고 authorizedClient.getRefreshToken().getTokenValue() : {}", updatedRefreshToken);
-                    log.info("DB에 저장된 refreshToken 2 : {}", user.getRefreshToken());
+                    log.info("발급된 리프레시 토큰이 null은 아니고 : {}", updatedRefreshToken);
+                    log.info("DB에 저장된 기존 refreshToken : {}", user.getRefreshToken());
                     if(!user.getRefreshToken().equals(updatedRefreshToken)) {
 //                        user.setRefreshToken(updatedRefreshToken);
                         saveUpdatedRefreshToken(user, updatedRefreshToken);
                         log.info("refreshToken Updated");
                     }
                 } else {
-                    log.info("리프레시 토큰이 null");
+                    log.info("발급된 리프레시 토큰이 null");
                     log.info("DB에 저장된 refreshToken : {}", user.getRefreshToken());
                 }
                 // ~ done

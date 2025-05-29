@@ -53,7 +53,7 @@ public class SpringDataJpaConfig {
 
     @Bean
     public UserService userService() {
-        return new UserServiceV1(userRepository());
+        return new UserServiceV1(userRepository(), actionLogRepository);
     }
 
     @Bean

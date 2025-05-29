@@ -53,5 +53,19 @@
 //        return OAuth2AuthorizationRequest.from(original)
 //                .additionalParameters(additionalParams)
 //                .build();
+//
+//
+//        /*
+//        // 회원가입 버튼에서 온 경우라면 force prompt
+//        if (request.getRequestURI().contains("/signup")) {
+//            additionalParams.put("prompt", "consent");
+//            additionalParams.put("access_type", "offline");
+//        }
+//
+//        return OAuth2AuthorizationRequest.from(original)
+//                .additionalParameters(additionalParams)
+//                .build();
+//
+//         */
 //    }
 //}

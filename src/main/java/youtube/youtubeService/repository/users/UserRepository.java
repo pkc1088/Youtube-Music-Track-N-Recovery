@@ -6,7 +6,7 @@ public interface UserRepository {
 
     Users findByUserId(String userId);
     void saveUser(Users user);
-
+    void deleteUser(Users user);
 }
 //    void updateRefreshTokenByLogin(String email, String refreshToken);
 //    Users findByUserEmail(String email);

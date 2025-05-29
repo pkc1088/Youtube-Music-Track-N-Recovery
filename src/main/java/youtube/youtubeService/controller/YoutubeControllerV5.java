@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.repository.ActionLogRepository;
 import youtube.youtubeService.repository.users.UserRepository;
 import youtube.youtubeService.service.playlists.PlaylistService;
@@ -76,16 +77,15 @@ public class YoutubeControllerV5 {
                                             @RequestParam(name = "deselectedPlaylistIds", required = false) List<String> deselectedPlaylistIds,
                                             Model model) throws IOException {
 
-        // 1. DB에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
+        // 1. DB 에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
         List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
         List<String> registeredPlaylistIds = registeredPlaylistIdFromDB.stream().map(Playlists::getPlaylistId).toList();
 
         // 2. 중복된 플레이리스트는 제외하고 등록
-        List<String> newSelectedPlaylistIds = selectedPlaylistIds.stream()
-                .filter(playlistId -> !registeredPlaylistIds.contains(playlistId)).toList();
+        List<String> newlySelectedPlaylistIds = selectedPlaylistIds.stream().filter(playlistId -> !registeredPlaylistIds.contains(playlistId)).toList();
 
-        if (!newSelectedPlaylistIds.isEmpty()) {
-            playlistService.registerPlaylists(userId, newSelectedPlaylistIds);  // 중복되지 않는 플레이리스트만 등록
+        if (!newlySelectedPlaylistIds.isEmpty()) {
+            playlistService.registerPlaylists(userId, newlySelectedPlaylistIds);  // 중복되지 않는 플레이리스트만 등록
         }
 
         if (deselectedPlaylistIds != null && !deselectedPlaylistIds.isEmpty()) {
@@ -110,6 +110,27 @@ public class YoutubeControllerV5 {
         return "recovery_history";
     }
 
+
+    @PostMapping("/delete")
+    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal) {
+        String userId = principal.getName();
+        Users user = userRepository.findByUserId(userId);
+
+        userService.deleteUser(user); // 토큰 revoke + DB 삭제
+
+//        세션 무효화 및 쿠키 삭제
+//        파라미터 : , HttpServletRequest request, HttpServletResponse response
+//        request.getSession().invalidate();
+//        Cookie cookie = new Cookie("JSESSIONID", null);
+//        cookie.setMaxAge(0);
+//        cookie.setPath("/");
+//        response.addCookie(cookie);
+
+//        SecurityContextHolder.clearContext();
+//        request.logout();
+
+        return "redirect:/login";
+    }
 
 }
 

@@ -21,6 +21,10 @@ public class UserRepositoryV1 implements UserRepository {
     public void saveUser(Users user) {
         repository.save(user);
     }
+
+    public void deleteUser(Users user) {
+        repository.delete(user);
+    }
 }
 
 //    @Override

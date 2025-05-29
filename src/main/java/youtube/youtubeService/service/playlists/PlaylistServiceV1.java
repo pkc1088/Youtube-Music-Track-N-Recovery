@@ -92,12 +92,10 @@ public class PlaylistServiceV1 implements PlaylistService {
 
     @Override
     public void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds) {
-        System.err.println("here");
         for (String deselectedPlaylist : deselectedPlaylistIds) {
             System.err.println(deselectedPlaylist + " is deleted from DB");
             playlistRepository.deletePlaylistByPlaylistId(deselectedPlaylist);
         }
-        System.err.println("there");
     }
 
 

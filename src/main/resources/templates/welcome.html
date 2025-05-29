@@ -1,22 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <title>Youtube Music Track & Recovery Service</title>-->
-<!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
-<!--</head>-->
-<!--<body>-->
-<!--<h1>You're Welcome Page</h1>-->
-<!--<p>This is a welcome page after login</p>-->
-
-<!--<h2>1. Register Playlists</h2>-->
-<!--<a th:href="@{/playlist}">전체 플리에서 선택하기</a>-->
-
-<!--<h2>2. Recovery History</h2>-->
-<!--<a th:href="@{/recovery}">내 복구 내역 조회하기</a>-->
-
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -41,6 +22,7 @@
             border-radius: 1.5rem;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
             text-align: center;
+            position: relative; /* 추가: 부모 요소를 기준으로 위치 지정 */
         }
 
         .btn-custom {
@@ -57,6 +39,24 @@
             margin-top: 2rem;
             font-weight: 600;
         }
+
+        /* 탈퇴 버튼 스타일 추가 */
+        .withdraw-btn {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            color: #dc3545; /* 빨간색 글자 */
+            border-color: #dc3545; /* 빨간색 테두리 */
+            background-color: transparent;
+        }
+
+        .withdraw-btn:hover {
+            background-color: #dc3545; /* 호버 시 빨간색 배경 */
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -66,19 +66,86 @@
         <p class="text-muted mb-4">Youtube Music Track & Recovery Service에 가입하신걸 환영합니다</p>
 
         <h5>1. Register Playlists</h5>
-        <a th:href="@{/playlist}" class="btn btn-primary btn-custom">전체 플리에서 선택하기</a>
+        <a th:href="@{/playlist}" class="btn btn-primary btn-custom">재생목록 선택하기</a>
 
         <h5>2. Recovery History</h5>
-        <a th:href="@{/recovery}" class="btn btn-success btn-custom">내 복구 내역 조회하기</a>
+        <a th:href="@{/recovery}" class="btn btn-success btn-custom">복구 내역 조회하기</a>
 
-        <h5>3. 회원 탈퇴</h5>
-        <form th:action="@{/delete}" method="post">
-            <button type="submit" class="btn btn-danger btn-custom">탈퇴하기</button>
+        <!-- 탈퇴 버튼 위치 및 스타일 변경 -->
+        <form th:action="@{/delete}" method="post" class="withdraw-form">
+            <button type="submit" class="btn withdraw-btn">
+                Delete Account
+            </button>
         </form>
     </div>
 </div>
 </body>
 </html>
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <title>Youtube Playlist Track & Recovery Service</title>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            background-color: #f8f9fa;-->
+<!--        }-->
+
+<!--        .center-wrapper {-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            height: 100vh;-->
+<!--        }-->
+
+<!--        .card {-->
+<!--            width: 900px;-->
+<!--            padding: 3rem;-->
+<!--            border-radius: 1.5rem;-->
+<!--            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .btn-custom {-->
+<!--            width: 60%;-->
+<!--            margin: 10px auto;-->
+<!--        }-->
+
+<!--        h1 {-->
+<!--            font-weight: 700;-->
+<!--            margin-bottom: 1rem;-->
+<!--        }-->
+
+<!--        h5 {-->
+<!--            margin-top: 2rem;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="center-wrapper">-->
+<!--    <div class="card">-->
+<!--        <h1 class="text-primary">Welcome 🎵</h1>-->
+<!--        <p class="text-muted mb-4">Youtube Music Track & Recovery Service에 가입하신걸 환영합니다</p>-->
+
+<!--        <h5>1. Register Playlists</h5>-->
+<!--        <a th:href="@{/playlist}" class="btn btn-primary btn-custom">재생목록 선택하기</a>-->
+
+<!--        <h5>2. Recovery History</h5>-->
+<!--        <a th:href="@{/recovery}" class="btn btn-success btn-custom">복구 내역 조회하기</a>-->
+
+<!--        <h5>3. Delete Account</h5>-->
+<!--        <form th:action="@{/delete}" method="post">-->
+<!--            <button type="submit" class="btn btn-danger btn-custom">탈퇴하기</button>-->
+<!--        </form>-->
+
+
+<!--    </div>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
 
 
 

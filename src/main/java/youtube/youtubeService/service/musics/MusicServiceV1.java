@@ -48,7 +48,7 @@ public class MusicServiceV1 implements MusicService{
         request.setKey(apiKey);
         request.setPlaylistId(playlistId);
         request.setMaxResults(maxResults);
-        // page
+
         List<PlaylistItem> allPlaylists = new ArrayList<>();
         String nextPageToken = null;
         try {
@@ -111,9 +111,17 @@ public class MusicServiceV1 implements MusicService{
             music.setVideoId(videoId);
             music.setVideoTitle(video.getSnippet().getTitle());
             music.setVideoUploader(video.getSnippet().getChannelTitle());
-            music.setVideoDescription("someDescription"); // video.getSnippet().getDescription();
-            music.setVideoTags("someTags"); // video.getSnippet().getTags();
-//            music.setVideoPlaylistPosition(5);  // 굳이? 필요한지 판단
+
+//            music.setVideoDescription("someDescription"); // video.getSnippet().getDescription();
+//            music.setVideoTags("someTags"); // video.getSnippet().getTags();
+//            //  music.setVideoPlaylistPosition(5);  // 굳이? 필요한지 판단
+            music.setVideoDescription(video.getSnippet().getDescription());
+            List<String> tags = video.getSnippet().getTags();
+            String joinedTags = (tags != null) ? String.join(",", tags) : null;
+            music.setVideoTags(joinedTags);
+            System.err.println("joinedTags : " + joinedTags);
+
+
             music.setPlaylist(playlistRepository.findByPlaylistId(playlistId));
             musicRepository.addUpdatePlaylist(playlistId, music);
 

@@ -19,7 +19,9 @@ public class Music {
     private String videoId;
     private String videoTitle;
     private String videoUploader;
+    @Column(length = 5010)
     private String videoDescription;
+    @Column(length = 510)
     private String videoTags; //    @ElementCollection private List<String> videoTags;
 //    private int videoPlaylistPosition;
 

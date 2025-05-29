@@ -45,7 +45,7 @@ public class MusicRepositoryV1 implements MusicRepository{
 //        Optional<Music> optionalMusic = repository.findByVideoId(videoIdToDelete);
         if (optionalMusic.isPresent()) {
             Music musicToUpdate = optionalMusic.get();
-            System.err.println("PK : " + musicToUpdate.getId() + ", videoId : " + musicToUpdate.getVideoId());
+            System.err.println("Illegal videoId : " + musicToUpdate.getVideoId());
             log.info("Found Record : {}", musicToUpdate.getVideoId());
 //            musicToUpdate.setId(videoToRecover.getId());
             musicToUpdate.setVideoId(videoToRecover.getVideoId());// videoToRecover의 정보로 엔티티 업데이트

@@ -43,7 +43,7 @@ public class ManagementScheduler {
         this.searchPolicy = searchPolicy;
     }
 
-//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")  //    @Transactional
+    @Scheduled(fixedRate = 50000, initialDelayString = "1000")  //    @Transactional
     public void allPlaylistsRecoveryOfOneParticularUserTest() throws IOException {
         log.info("auto scheduler activated");
         // 0. 전체 유저 목록에서 순차적으로 유저를 뽑아 오는 시나리오 있다 치고

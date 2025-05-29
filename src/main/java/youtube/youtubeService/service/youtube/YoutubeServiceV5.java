@@ -161,9 +161,11 @@ public class YoutubeServiceV5 implements YoutubeService {
         music.setVideoId(searchResult.getId().getVideoId());
         music.setVideoTitle(searchResult.getSnippet().getTitle());
         music.setVideoUploader(searchResult.getSnippet().getChannelTitle());
-        music.setVideoDescription("someDescription"); // searchResult.getSnippet().getDescription();
-        music.setVideoTags("someTags"); // String videoTags = not available here
-        // music.setVideoPlaylistPosition(5);  // 굳이 필요한지 판단
+        music.setVideoTags(musicToSearch.getVideoTags());
+        music.setVideoDescription(searchResult.getSnippet().getDescription());
+        // search 결과로는 tags 얻을 수 없음. 그렇다고 또 video Id로 검색하긴 귀찮음. 그냥 놔두자.
+        // 그냥 놔둘거면 기존 tags 도 얻어와야함.
+
         music.setPlaylist(playlistRepository.findByPlaylistId(playlistId));
         log.info("Found a music to replace : {}, {}", music.getVideoTitle(), music.getVideoUploader());
 

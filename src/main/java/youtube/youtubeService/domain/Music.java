@@ -22,13 +22,12 @@ public class Music {
     @Column(length = 5010)
     private String videoDescription;
     @Column(length = 510)
-    private String videoTags; //    @ElementCollection private List<String> videoTags;
-//    private int videoPlaylistPosition;
+    private String videoTags;
 
     @ManyToOne
     @JoinColumn(name = "playlistId", nullable = false) // Playlists playlistId 를 FK 로 지정. name은 DB에 저장될 이름임
     private Playlists playlist;
-
+}
 
 //    public Music(String videoId, String videoTitle, Playlists playlist) {
 //        this.videoId = videoId;
@@ -46,4 +45,3 @@ public class Music {
 ////        this.videoPlaylistPosition = videoPlaylistPosition;
 //        this.playlist = playlist;
 //    }
-}

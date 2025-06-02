@@ -18,7 +18,6 @@ public class Users {
     private String userName;
     private String userChannelId;
     private String userEmail;
-//    private boolean available;
     private String refreshToken;
 }
 

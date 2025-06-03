@@ -1,94 +1,101 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <title>Youtube Playlist Track & Recovery Service</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f9f9f9;
-      font-family: 'Segoe UI', sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8">
+    <title>Youtube Playlist Track & Recovery Service</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', sans-serif;
+      }
 
-    .card {
-      width: 900px;
-      max-width: 100%;
-      margin: 50px auto;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    }
+      .card {
+        width: 900px;
+        max-width: 100%;
+        margin: 50px auto;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      }
 
-    .card h2 {
-      font-weight: bold;
-    }
+      .card h2 {
+        font-weight: bold;
+      }
 
-    .info-section {
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      gap: 20px; /* 이미지 간 간격 */
-      flex-wrap: wrap; /* 화면 작을 때 줄바꿈 */
-    }
+      .info-section {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+        gap: 20px; /* 이미지 간 간격 */
+        flex-wrap: wrap; /* 화면 작을 때 줄바꿈 */
+      }
 
-    .info-image {
-      width: 400px;
-      height: auto;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+      .info-image {
+        width: 400px;
+        height: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
 
-    .feature-list {
-      margin-top: 20px;
-    }
+      .feature-list {
+        margin-top: 20px;
+      }
 
-    .feature-list li {
-      margin-bottom: 8px;
-    }
+      .feature-list li {
+        margin-bottom: 8px;
+      }
 
-    .login-link {
-      margin-top: 20px;
-      display: inline-block;
-      font-size: 1.1rem;
-      text-decoration: underline;
-      color: #5a3eff;
-    }
+      .login-link {
+        margin-top: 20px;
+        display: inline-block;
+        font-size: 1.1rem;
+        text-decoration: underline;
+        color: #5a3eff;
+      }
 
-    .login-link:hover {
-      color: #3a2bbb;
-    }
-  </style>
-</head>
-<body>
-<div class="card">
-  <h2 class="text-center">Youtube Playlist Track & Recovery Service</h2>
-  <p class="text-center">비정상 처리된 유튜브 영상을 탐지하고 자동으로 복구하는 서비스를 제공합니다</p>
+      .login-link:hover {
+        color: #3a2bbb;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2 class="text-center">Youtube Playlist Track & Recovery Service</h2>
+      <p class="text-center">비정상 처리된 유튜브 영상을 탐지하고 자동으로 복구하는 서비스를 제공합니다</p>
 
-  <div class="text-center">
-    <a href="/oauth2/authorization/google" class="login-link">Google 로그인 및 회원가입</a>
-  </div>
+      <div class="text-center">
+        <a href="/oauth2/authorization/google" class="login-link">Google 로그인 및 회원가입</a>
+      </div>
 
-  <div class="feature-list">
-    <h5>📌 서비스 기능 안내</h5>
-    <ul>
-      <li>비공개, 삭제, 차단 등 모든 비정상 처리된 영상을 자동 탐지</li>
-      <li>1일 1회 AI 기반 복구 시스템 가동</li>
-      <li>등록된 플레이리스트의 최신화 기능</li>
-      <li>플레이리스트 복구 내역 확인 기능</li>
-    </ul>
-    <h5>📌 서비스 이용 방법</h5>
-    <ul>
-      <li>구글 로그인 및 권한 인증</li>
-      <li>한 번의 클릭으로 본인의 플레이리스트 등록</li>
-    </ul>
-  </div>
+      <div class="feature-list">
+        <h5>📌 서비스 기능 안내</h5>
+        <ul>
+          <li>비공개, 삭제, 차단 등 모든 비정상 처리된 영상 자동 탐지</li>
+          <li>1일 1회 AI 기반 복구 시스템</li>
+          <li>등록된 플레이리스트의 최신화</li>
+          <li>플레이리스트 복구 내역 확인</li>
+        </ul>
+        <h5>📌 서비스 이용 방법</h5>
+        <ul>
+          <li>구글 로그인 및 권한 허용</li>
+          <li>한 번의 클릭으로 본인의 플레이리스트 등록</li>
+        </ul>
+      </div>
 
-  <div class="info-section">
-    <img th:src="@{/images/privateEnv.png}" alt="비공개 영상 예시" class="info-image">
-    <img th:src="@{/images/recoveredEnv.png}" alt="복구된 영상 예시" class="info-image">
-  </div>
-</div>
-</body>
+      <div class="info-section">
+        <img th:src="@{/images/privateEnv.png}" alt="비공개 영상 예시" class="info-image">
+        <img th:src="@{/images/recoveredEnv.png}" alt="복구된 영상 예시" class="info-image">
+      </div>
+
+      <div class="text-center mt-4">
+        <a th:href="@{/privacy-policy.html}" class="login-link me-3">개인정보처리방침</a>
+        <a th:href="@{/terms-of-service.html}" class="login-link">서비스 이용약관</a>
+      </div>
+
+    </div>
+
+  </body>
 </html>
 
 

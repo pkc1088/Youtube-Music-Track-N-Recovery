@@ -48,7 +48,7 @@ public class ManagementScheduler {
     }
 
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")  //    @Transactional
-    public void allPlaylistsRecoveryOfOneParticularUserTest() throws IOException {
+    public void allPlaylistsRecoveryOfAllUsersTest() throws IOException {
         log.info("auto scheduler activated");
 
         // 0. 전체 유저 목록에서 순차적으로 유저를 뽑기
@@ -75,6 +75,30 @@ public class ManagementScheduler {
 
         log.info("auto scheduler done");
     }
+
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void allPlaylistsRecoveryOfOneParticularUserTest() throws IOException {
+        log.info("auto scheduler activated");
+        // 0. 전체 유저 목록에서 순차적으로 유저를 뽑아 오는 시나리오 있다 치고
+        String userId  = "112735690496635663877";
+        // 1. 유저 아이디로 accessToken 발급
+        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        // 2. 유저 아이디로 조회한 모든 플레이리스트 & 음악을 디비에서 뽑아서 복구 시스템 가동
+        List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
+        for (Playlists playlist : playListsSet) {
+            log.info("{} start", playlist.getPlaylistTitle());
+            // playlist 자체가 제거된 경우 예외처리 필요
+            try {
+                youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
+            } catch (IOException e) {
+                log.info("scheduler caught and then move to next playlist");
+            }
+        }
+
+        log.info("auto scheduler done");
+    }
+
+
 
     //    @Scheduled(fixedRate = 30000, initialDelayString = "2000")
     public void geminiTest() {

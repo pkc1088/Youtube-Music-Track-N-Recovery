@@ -38,14 +38,18 @@ public class YoutubeControllerV5 {
     private final PlaylistService playlistService;
     private final ActionLogRepository actionLogRepository;
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
-    }
-
+//    @GetMapping("/login")
+//    public String loginPage() {
+//        return "login";
+//    }
+//
+//    @GetMapping("/")
+//    public String initRegister() {
+//        return "redirect:/login";
+//    }
     @GetMapping("/")
     public String initRegister() {
-        return "redirect:/login";
+        return "login";
     }
 
     @GetMapping("/welcome")
@@ -120,18 +124,8 @@ public class YoutubeControllerV5 {
 
         userService.deleteUser(user); // 토큰 revoke + DB 삭제
 
-//        세션 무효화 및 쿠키 삭제
-//        파라미터 : , HttpServletRequest request, HttpServletResponse response
-//        request.getSession().invalidate();
-//        Cookie cookie = new Cookie("JSESSIONID", null);
-//        cookie.setMaxAge(0);
-//        cookie.setPath("/");
-//        response.addCookie(cookie);
-
-//        SecurityContextHolder.clearContext();
-//        request.logout();
-
-        return "redirect:/login";
+        return "redirect:/";
+//        return "redirect:/login";
     }
 
 }

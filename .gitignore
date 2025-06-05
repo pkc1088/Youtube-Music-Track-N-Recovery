@@ -27,7 +27,7 @@ env.yaml
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+src/main/resources/static/google9cce108361f8ecd7.html
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

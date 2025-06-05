@@ -30,8 +30,10 @@ public class SecurityConfig {
                     .ignoringRequestMatchers("/api/scheduler/**") // CSRF 비활성화
             )
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/images/**", "/css/**", /*"/login"*/ "/", "/api/scheduler/**", "/privacy-policy.html", "/terms-of-service.html").permitAll()  // 로그인되지 않은 사용자라면 /login으로 리다이렉트
-                    .anyRequest().authenticated()                        // 해당 경로 외 모든 요청은 인증 필요
+                    .requestMatchers("/js/**", "/images/**", "/css/**", /*"/login"*/ "/", "/api/scheduler/**",
+                            "/google9cce108361f8ecd7.html","/privacy-policy.html", "/terms-of-service.html")
+                    .permitAll() //
+                    .anyRequest().authenticated()   // 해당 경로 외 모든 요청은 인증 필요, 로그인되지 않은 사용자라면 / 으로 리다이렉트
             )
 //            .formLogin(form -> form
 ////                    .loginPage("/login")

@@ -1,4 +1,4 @@
-# 🎧 FixMyPlaylist <img src="https://github.com/user-attachments/assets/909279d0-aa93-4f17-aa15-ab710ef82bbb" alt="Logo" width="22" style="vertical-align: text-bottom;">
+# <img src="https://github.com/user-attachments/assets/909279d0-aa93-4f17-aa15-ab710ef82bbb" alt="Logo" width="40" style="vertical-align: text-bottom;"> FixMyPlaylist 🎧
 
 Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 및 복구 서비스**  
 유튜브의 재생목록에서 갑작스럽게 사라진 음악들, 이제는 자동으로 복구하세요.

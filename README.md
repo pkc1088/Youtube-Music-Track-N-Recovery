@@ -1,11 +1,12 @@
-# <img src="https://github.com/user-attachments/assets/909279d0-aa93-4f17-aa15-ab710ef82bbb" alt="Logo" width="35" style="vertical-align: text-bottom;"> FixMyPlaylist
+# <img src="https://github.com/user-attachments/assets/647e2441-5740-4443-a3f6-12a6502bd7dc" alt="Logo" width="35" style="vertical-align: text-bottom;">   FixMyPlaylist
 
 Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 및 복구 서비스**  
 유튜브의 재생목록에서 갑작스럽게 사라진 음악들, 이제는 자동으로 복구하세요.
 
 <p align="center">
-  <img src="src/main/resources/static/images/ui1.png" alt="FixMyPlaylist UI" width="80%">
+  <img src="https://github.com/user-attachments/assets/d1322ef4-2753-41ba-8f83-43b5183996cd" alt="FixMyPlaylist UI" width="80%">
 </p>
+
 
 ---
 
@@ -63,7 +64,9 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
   - 고려 대상이 아님
   - 음악 수, 존재 여부 넘사벽이라는 지표 추가하기
 
+- 기본적으로 유튜브와 유튜브 뮤직은 호환됨
 
+  
 - 유튜브 뮤직도 유사한 기능 제공하지만
 
 

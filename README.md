@@ -4,7 +4,7 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 유튜브의 재생목록에서 갑작스럽게 사라진 음악들, 이제는 자동으로 복구하세요.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/d1322ef4-2753-41ba-8f83-43b5183996cd" alt="FixMyPlaylist UI" width="80%">
+  <img src="https://github.com/user-attachments/assets/64686b55-75b2-4581-aa0b-5b9e229b5d1b" alt="FixMyPlaylist UI" width="80%">
 </p>
 
 
@@ -139,6 +139,12 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 
 - 자동화된 복구로 사용자 개입 최소화
+
+<img width="700" height="400" alt="ui2" src="https://github.com/user-attachments/assets/4e0d8b21-2767-49e0-8f38-a6c2f0bb15de" />
+
+<img width="700" height="400" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" />
+
+
 
 ---
 

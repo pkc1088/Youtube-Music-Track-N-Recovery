@@ -140,13 +140,6 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 - 자동화된 복구로 사용자 개입 최소화
 
-<br/></br>
-<p align="center">
-  <img src="src/main/resources/static/images/ui2.png" alt="UI 2" width="80%">
-  <br/><br/><br/></br>
-  <img src="src/main/resources/static/images/ui3.png" alt="UI 3" width="80%">
-</p>
-
 ---
 
 ## 🧩 4. 트러블슈팅 & 기술 과제

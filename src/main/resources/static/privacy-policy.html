@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>개인정보처리방침</title>
+    <title>Privacy Policy</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
         h1 { color: #4285F4; border-bottom: 1px solid #eee; padding-bottom: 10px; }
@@ -12,90 +12,180 @@
     </style>
 </head>
 <body>
-<h1>개인정보처리방침</h1>
-<p><strong>최종 업데이트:</strong> 2025년 06월 04일</p>
+<h1>Privacy Policy</h1>
+<p><strong>Last Updated:</strong> July 17, 2025</p>
 
-<h2>1. 수집하는 정보</h2>
-<p>Google OAuth2 인증을 통해 다음 정보를 수집합니다:</p>
+<p>This service uses Google’s YouTube API Services (YouTube Data API v3). By using this service, you understand and agree that your Google user data (such as playlists and video metadata) may be processed through the API.
+    This is subject to the YouTube Terms of Service (<a href="https://www.youtube.com/t/terms" target="_blank">https://www.youtube.com/t/terms</a>) and Google Privacy Policy (<a href="https://policies.google.com/privacy" target="_blank">https://policies.google.com/privacy</a>).</p>
+
+<h2>1. Information Collected</h2>
+<p>We collect the following information through Google OAuth2 authentication:</p>
 <ul>
-    <li>Google 계정 기본 정보 (이메일 주소, 고유 식별자)</li>
-    <li>YouTube 데이터 액세스를 위한 액세스 토큰 및 리프레시 토큰</li>
-    <li>사용자의 YouTube 재생목록 및 동영상 메타데이터</li>
+    <li>Basic Google account information (email address, unique identifier)</li>
+    <li>Access token and refresh token for accessing YouTube data</li>
+    <li>User’s YouTube playlists and video metadata</li>
 </ul>
 
-<h2>2. 정보 사용 목적</h2>
-<p>본 서비스는 YouTube 재생목록 항목을 삭제 및 추가하는 기능을 구현하기 위해 Google에서 지정한 민감 권한인 `youtube.force-ssl` 범위를 사용합니다.
-    해당 권한은 Google OAuth 인증을 통해 사용자로부터 명시적으로 동의를 받아 사용되며, 다른 범위의 권한은 요청하지 않습니다. 수집한 정보는 다음 목적으로만 사용됩니다:</p>
+<h2>2. Purpose of Use</h2>
+<p>This service uses the sensitive scope `youtube.force-ssl` granted by Google to implement playlist item deletion and addition.
+    This scope is explicitly consented to by users through Google OAuth authentication. No other scopes are requested. The collected information is used only for the following purposes:</p>
 <ul>
-    <li>서비스 제공을 위한 사용자 식별</li>
-    <li>YouTube 재생목록 변경 사항 추적</li>
-    <li>재생목록 내 비정상 동영상 삭제 및 새 영상 추가</li>
+    <li>User identification for providing the service</li>
+    <li>Tracking changes to YouTube playlists</li>
+    <li>Deleting broken videos and adding new ones to playlists</li>
 </ul>
 
-<h2>3. 데이터 보관 및 삭제</h2>
-<p>사용자 데이터는 다음 기준에 따라 관리됩니다:</p>
+<h2>3. Third-Party Sharing</h2>
+<p>This service transmits Google user data (such as playlists and tokens) to Google APIs (YouTube Data API v3) to perform playlist modification as requested by users.
+    User data is not shared with any other third parties (e.g., advertisers, external servers) except in the following cases:</p>
 <ul>
-    <li>회원 탈퇴 시 모든 개인정보 및 연동 데이터 즉시 삭제</li>
-    <li>수집된 사용자 데이터는 Google Cloud SQL 인스턴스에 저장</li>
-    <li>해당 데이터베이스는 암호화 및 접근제어를 통해 보호</li>
-    <li>서비스 제공 목적 외에는 어떠한 방식으로도 접근 금지</li>
-    <li>리프레시 토큰은 Google OAuth 철회 API를 통해 즉시 무효화</li>
+    <li>For normal service operation with Google YouTube API</li>
+    <li>When required by law</li>
 </ul>
 
-<h2>4. 제3자 공유</h2>
-<p>본 서비스는 Google 사용자 데이터(YouTube 재생목록, 토큰 등)를 Google API (YouTube Data API v3)에 전송하여 사용자 요청에 따른 재생목록 수정 기능을 수행합니다.
-    사용자 데이터는 다음 경우를 제외하고 어떠한 외부 제3자(예: 광고업체, 외부 서버 등)와도 공유하지 않습니다:</p>
+<h2>4. Use of Cookies and Similar Technologies</h2>
+<p>
+    This service uses web browser cookies (JSESSIONID) and sessions to maintain user authentication status.
+    These cookies are essential for user login processing and securing the OAuth2 authentication flow. They are not used for any other purposes (e.g., advertising).
+</p>
+
+<h2>5. Data Storage and Deletion</h2>
+<p>User data is safely managed according to the following standards:</p>
 <ul>
-    <li>Google YouTube API 와의 정상적인 서비스 운영을 위한 전송</li>
-    <li>법적 요구사항이 있는 경우</li>
+    <li>Detect broken videos and remove them from the playlist</li>
+    <li>Use information of broken videos to find replacements on YouTube</li>
+    <li>Add replacement videos to the corresponding playlist</li>
 </ul>
 
-<h2>5. 보안 조치</h2>
-<p>데이터 보호를 위해 다음 조치를 시행합니다:</p>
+<h2>6. Data Deletion and Revocation of Access</h2>
+<p>User data is safely managed according to the following standards:</p>
 <ul>
-    <li>최소 권한 원칙에 따른 엄격한 접근 제어</li>
-    <li>정기적인 보안 감사</li>
+    <li>By clicking the ‘Delete Account’ button after logging in, all personal and linked data (registered accounts, playlists, recovery history) stored by this service will be immediately deleted.</li>
+    <li>When a playlist registration checkbox is unchecked, that playlist is immediately removed from FixMyPlaylist’s managed list. This does not affect the actual YouTube playlist.</li>
+    <li>Collected data is stored in Google Cloud SQL and protected through encryption and access controls.</li>
+    <li>Refresh tokens can be invalidated via the Google OAuth revocation API, and users can directly revoke OAuth access at any time via the Google Security Settings page (<a href="https://security.google.com/settings/security/permissions" target="_blank">https://security.google.com/settings/security/permissions</a>).</li>
+    <li>This service does not store or access user data beyond the purpose of providing the service. If requested by the user, data will be deleted at any time.</li>
 </ul>
 
-<h2>6. Google 사용자 데이터 처리 흐름 요약</h2>
-<p>전반적인 서비스 등록 및 사용자 데이터 처리는 다음의 순서를 따릅니다:</p>
+<h2>7. Security Measures</h2>
+<p>To protect data, we implement the following measures:</p>
 <ul>
-    <li>사용자는 OAuth 인증을 통해 이메일 및 YouTube 데이터에 대한 접근을 허용합니다.</li>
-    <li>본 서비스는 해당 정보를 사용하여 재생목록을 분석하고, 비정상 동영상을 탐지합니다.</li>
-    <li>1일 1회, 감지된 항목에 대해 곡 정보를 유추하고, YouTube API를 통해 대체 동영상을 삽입합니다.</li>
-    <li>이 과정에서 토큰 및 재생목록 정보는 Google Cloud SQL에 저장됩니다.</li>
-    <li>사용자가 계정을 삭제하면 모든 정보가 즉시 삭제되며, Google OAuth 토큰도 철회됩니다.</li>
+    <li>Strict access control based on the principle of least privilege</li>
+    <li>Regular security audits</li>
 </ul>
 
-
+<h2>8. Summary of Google User Data Processing Flow</h2>
+<p>The overall service registration and user data processing follow this sequence:</p>
+<ul>
+    <li>The user grants access to their email and YouTube data via OAuth authentication.</li>
+    <li>This service analyzes the information to detect broken videos in the playlist.</li>
+    <li>Once per day, the detected items are used to infer song information and insert replacement videos via the YouTube API.</li>
+    <li>In this process, tokens and playlist information are stored in Google Cloud SQL.</li>
+    <li>When the user deletes their account, all information is immediately deleted, and the Google OAuth token is also revoked.</li>
+</ul>
 
 <div class="contact">
-    <h2>문의처</h2>
-    <p>개인정보 보호 관련 문의 사항이 있을 경우 아래로 연락주세요:</p>
-    <p>이메일: <a href="mailto:pkc1088@gmail.com">pkc1088@gmail.com</a></p>
+    <h2>Contact</h2>
+    <p>If you have any questions about privacy protection, please contact:</p>
+    <p>Email: <a href="mailto:pkc1088@gmail.com">pkc1088@gmail.com</a></p>
 </div>
 </body>
 </html>
+
 <!--<!DOCTYPE html>-->
-<!--<html>-->
+<!--<html lang="ko">-->
 <!--<head>-->
-<!--    <title>Privacy Policy</title>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>개인정보처리방침</title>-->
+<!--    <style>-->
+<!--        body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }-->
+<!--        h1 { color: #4285F4; border-bottom: 1px solid #eee; padding-bottom: 10px; }-->
+<!--        h2 { color: #34A853; margin-top: 25px; }-->
+<!--        .contact { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-top: 20px; }-->
+<!--    </style>-->
 <!--</head>-->
 <!--<body>-->
-<!--<h1>Privacy Policy</h1>-->
+<!--<h1>개인정보처리방침</h1>-->
+<!--<p><strong>최종 업데이트:</strong> 2025년 07월 17일</p>-->
+
+<!--<p>본 서비스는 Google의 YouTube API Services(YouTube Data API v3)를 사용하며,-->
+<!--    사용자는 본 서비스를 통해 Google 사용자 데이터(재생목록, 동영상 메타데이터 등)가 API를 통해 처리될 수 있음을 이해하고 동의합니다.-->
+<!--    이는 YouTube 서비스 약관(<a href="https://www.youtube.com/t/terms" target="_blank">https://www.youtube.com/t/terms</a>)과-->
+<!--    Google 개인정보처리방침(<a href="https://policies.google.com/privacy" target="_blank">https://policies.google.com/privacy</a>)의 적용을 받습니다.</p>-->
+
+<!--<h2>1. 수집하는 정보</h2>-->
+<!--<p>Google OAuth2 인증을 통해 다음 정보를 수집합니다:</p>-->
+<!--<ul>-->
+<!--    <li>Google 계정 기본 정보 (이메일 주소, 고유 식별자)</li>-->
+<!--    <li>YouTube 데이터 액세스를 위한 액세스 토큰 및 리프레시 토큰</li>-->
+<!--    <li>사용자의 YouTube 재생목록 및 동영상 메타데이터</li>-->
+<!--</ul>-->
+
+<!--<h2>2. 정보 사용 목적</h2>-->
+<!--<p>본 서비스는 YouTube 재생목록 항목을 삭제 및 추가하는 기능을 구현하기 위해 Google에서 지정한 민감 권한인 `youtube.force-ssl` 범위를 사용합니다.-->
+<!--    해당 권한은 Google OAuth 인증을 통해 사용자로부터 명시적으로 동의를 받아 사용되며, 다른 범위의 권한은 요청하지 않습니다. 수집한 정보는 다음 목적으로만 사용됩니다:</p>-->
+<!--<ul>-->
+<!--    <li>서비스 제공을 위한 사용자 식별</li>-->
+<!--    <li>YouTube 재생목록 변경 사항 추적</li>-->
+<!--    <li>재생목록 내 비정상 동영상 삭제 및 새 영상 추가</li>-->
+<!--</ul>-->
+
+<!--<h2>3. 제3자 공유</h2>-->
+<!--<p>본 서비스는 Google 사용자 데이터(YouTube 재생목록, 토큰 등)를 Google API (YouTube Data API v3)에 전송하여 사용자 요청에 따른 재생목록 수정 기능을 수행합니다.-->
+<!--    사용자 데이터는 다음 경우를 제외하고 어떠한 외부 제3자(예: 광고업체, 외부 서버 등)와도 공유하지 않습니다:</p>-->
+<!--<ul>-->
+<!--    <li>Google YouTube API 와의 정상적인 서비스 운영을 위한 전송</li>-->
+<!--    <li>법적 요구사항이 있는 경우</li>-->
+<!--</ul>-->
+
+<!--<h2>4. 쿠키 및 유사 기술 사용</h2>-->
 <!--<p>-->
-<!--    This service uses Google OAuth2 to access your YouTube account with your permission.-->
-<!--    We use your Google account ID and email address to identify users and fetch your YouTube playlists.-->
+<!--    본 서비스는 사용자의 인증 상태 유지를 위해 웹 브라우저 쿠키(JSESSIONID)와 세션을 사용합니다.-->
+<!--    이 쿠키는 사용자 로그인 처리 및 OAuth2 인증 흐름의 안전성을 위해 필수적이며, 다른 목적(광고 등)으로는 사용되지 않습니다.-->
 <!--</p>-->
-<!--<p>-->
-<!--    We store only the information necessary to provide core features (like tracking deleted YouTube videos).-->
-<!--    This may include your YouTube playlist IDs and tokens required for background API access.-->
-<!--</p>-->
-<!--<p>-->
-<!--    We do not share your data with third parties. You can delete your account and data at any time via the settings page.-->
-<!--</p>-->
-<!--<p>-->
-<!--    For questions, please contact: <a href="mailto:pkc1088@gmail.com">pkc1088@gmail.com</a>-->
-<!--</p>-->
+
+<!--<h2>5. 데이터 저장 및 삭제</h2>-->
+<!--<p>사용자 데이터는 아래 기준에 따라 안전하게 관리됩니다:</p>-->
+<!--<ul>-->
+<!--    <li>비정상 영상 탐지 시 해당 영상을 재생목록에서 제거</li>-->
+<!--    <li>해당 비정상 영상의 정보를 이용해 대체로 추가할 영상을 유튜브 상에서 탐지</li>-->
+<!--    <li>복구할 영상을 해당 재생목록에 추가</li>-->
+<!--</ul>-->
+
+<!--<h2>6. 데이터 삭제 및 접근 권한 철회</h2>-->
+<!--<p>사용자 데이터는 아래 기준에 따라 안전하게 관리됩니다:</p>-->
+<!--<ul>-->
+<!--    <li>로그인 후 'Delete Account' 버튼 클릭 시 본 서비스에 저장된 모든 개인정보 및 연동 데이터(등록된 계정, 플레이리스트, 복구 기록 포함)가 즉시 삭제됩니다.</li>-->
+<!--    <li>Playlist 등록 체크박스를 해제하면 해당 재생목록은 FixMyPlaylist에서 관리될 목록에서 즉시 제거됩니다. 실제 유튜브 재생목록이 제거되는 것은 아닙니다.</li>-->
+<!--    <li>수집된 데이터는 Google Cloud SQL에 저장되며, 암호화와 접근제어를 통해 보호됩니다.</li>-->
+<!--    <li>리프레시 토큰은 Google OAuth 철회 API를 통해 무효화할 수 있고, 사용자는-->
+<!--        Google 보안 설정 페이지(<a href="https://security.google.com/settings/security/permissions" target="_blank">https://security.google.com/settings/security/permissions</a>)에서 직접 OAuth 권한을 언제든지 철회할 수 있습니다.</li>-->
+<!--    <li>본 서비스는 서비스 제공 목적 외에는 사용자 데이터를 저장하거나 접근하지 않으며, 사용자가 요청할 경우 언제든지 삭제됩니다.</li>-->
+<!--</ul>-->
+
+<!--<h2>7. 보안 조치</h2>-->
+<!--<p>데이터 보호를 위해 다음 조치를 시행합니다:</p>-->
+<!--<ul>-->
+<!--    <li>최소 권한 원칙에 따른 엄격한 접근 제어</li>-->
+<!--    <li>정기적인 보안 감사</li>-->
+<!--</ul>-->
+
+<!--<h2>8. Google 사용자 데이터 처리 흐름 요약</h2>-->
+<!--<p>전반적인 서비스 등록 및 사용자 데이터 처리는 다음의 순서를 따릅니다:</p>-->
+<!--<ul>-->
+<!--    <li>사용자는 OAuth 인증을 통해 이메일 및 YouTube 데이터에 대한 접근을 허용합니다.</li>-->
+<!--    <li>본 서비스는 해당 정보를 사용하여 재생목록을 분석하고, 비정상 동영상을 탐지합니다.</li>-->
+<!--    <li>1일 1회, 감지된 항목에 대해 곡 정보를 유추하고, YouTube API를 통해 대체 동영상을 삽입합니다.</li>-->
+<!--    <li>이 과정에서 토큰 및 재생목록 정보는 Google Cloud SQL에 저장됩니다.</li>-->
+<!--    <li>사용자가 계정을 삭제하면 모든 정보가 즉시 삭제되며, Google OAuth 토큰도 철회됩니다.</li>-->
+<!--</ul>-->
+
+<!--<div class="contact">-->
+<!--    <h2>문의처</h2>-->
+<!--    <p>개인정보 보호 관련 문의 사항이 있을 경우 아래로 연락주세요:</p>-->
+<!--    <p>이메일: <a href="mailto:pkc1088@gmail.com">pkc1088@gmail.com</a></p>-->
+<!--</div>-->
 <!--</body>-->
 <!--</html>-->
+

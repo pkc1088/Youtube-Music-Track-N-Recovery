@@ -95,7 +95,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 //        super.onAuthenticationSuccess(request, response, authentication);
         // >simpleUrlAuthenticationSuccessHandler>AbstractAuthenticationTargetUrlRequestHandler 타고 들어가보면
         // 기본 defaultTargetUrl = "/"; 이렇게 셋팅 되어서 에러 뜬거임.
-        response.sendRedirect("/welcome");
+//        response.sendRedirect("/welcome");
+        response.sendRedirect("/");
     }
 
     @Transactional

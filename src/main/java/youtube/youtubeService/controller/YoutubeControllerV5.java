@@ -21,8 +21,8 @@ import youtube.youtubeService.scheduler.ManagementScheduler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
 import youtube.youtubeService.service.youtube.YoutubeService;
-
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,18 +38,17 @@ public class YoutubeControllerV5 {
     private final PlaylistService playlistService;
     private final ActionLogRepository actionLogRepository;
 
-//    @GetMapping("/login")
-//    public String loginPage() {
-//        return "login";
-//    }
-//
 //    @GetMapping("/")
 //    public String initRegister() {
-//        return "redirect:/login";
+//        return "login";
 //    }
+
     @GetMapping("/")
-    public String initRegister() {
-        return "login";
+    public String index(Principal principal) {
+        if (principal != null) {
+            return "afterLogin"; // 로그인 사용자 전용 화면
+        }
+        return "login"; // 로그인 안한 사용자 화면
     }
 
     @GetMapping("/welcome")

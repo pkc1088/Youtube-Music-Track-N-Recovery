@@ -32,23 +32,23 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/js/**", "/images/**", "/css/**", /*"/login"*/ "/", "/api/scheduler/**",
                             "/google9cce108361f8ecd7.html","/privacy-policy.html", "/terms-of-service.html")
-                    .permitAll() //
+                    .permitAll()
                     .anyRequest().authenticated()   // 해당 경로 외 모든 요청은 인증 필요, 로그인되지 않은 사용자라면 / 으로 리다이렉트
             )
-//            .formLogin(form -> form
-////                    .loginPage("/login")
-//                    .loginPage("/")
-//                    .permitAll()
-//                    .defaultSuccessUrl("/welcome", true) // 로그인 성공 시 루트 페이지로 리다이렉트 "/" 이였는데 "/welcome"으로 바꿔봄
-//            )
             .oauth2Login(oauth2 -> oauth2
                     .loginPage("/")                                 // 커스텀 로그인 시작 페이지 (구글 로그인 버튼 있음), /login -> / 로 변경 0604
-                    .defaultSuccessUrl("/welcome", true) // 로그인 성공 시 루트 페이지로 리다이렉트  "/" 이였는데 "/welcome"으로 바꿔봄
+//                    .defaultSuccessUrl("/welcome", true) // 전용 핸들러있으면 default 없어도 됨. 로그인 성공 시 루트 페이지로 리다이렉트  "/" 이였는데 "/welcome"으로 바꿔봄
                     .successHandler(oauth2LoginSuccessHandler)
                     .authorizationEndpoint(authorization -> authorization
                             .baseUri("/oauth2/authorization")
                             .authorizationRequestRepository(cookieAuthorizationRequestRepository())
                     )
+            )
+            .logout(logout -> logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessUrl("/")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
             );
 
         return http.build();

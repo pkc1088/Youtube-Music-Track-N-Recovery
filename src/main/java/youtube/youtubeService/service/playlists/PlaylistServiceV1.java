@@ -83,7 +83,8 @@ public class PlaylistServiceV1 implements PlaylistService {
             playlist.setServiceType("track&recover");
             playlist.setUser(user);
             // 3.1 Playlist 객체를 DB에 저장
-            System.err.println(getPlaylist.getSnippet().getTitle() + " playlist added to DB");
+            log.info("playlist({}) is added to DB", getPlaylist.getSnippet().getTitle());
+//            System.err.println(getPlaylist.getSnippet().getTitle() + " playlist added to DB");
             playlistRepository.save(playlist);
             // 3.2 해당 플레이리스트에 딸린 모든 음악을 Music 도메인에 저장
             musicService.initiallyAddVideoDetails(getPlaylist.getId());
@@ -93,7 +94,8 @@ public class PlaylistServiceV1 implements PlaylistService {
     @Override
     public void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds) {
         for (String deselectedPlaylist : deselectedPlaylistIds) {
-            System.err.println(deselectedPlaylist + " is deleted from DB");
+            log.info("playlist({}) is deleted from DB", deselectedPlaylist);
+//            System.err.println(deselectedPlaylist + " is deleted from DB");
             playlistRepository.deletePlaylistByPlaylistId(deselectedPlaylist);
         }
     }

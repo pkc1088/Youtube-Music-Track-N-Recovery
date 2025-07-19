@@ -80,6 +80,7 @@ public class UserServiceV1 implements UserService {
             return tokenResponse.getAccessToken();
         } catch (IOException e) {
             e.printStackTrace();
+            // 여기서 예외 잡을때 유저 제거해줘야함 (만약 고객이 보안페이지에서 제거한거라면)
             throw new RuntimeException("Failed to refresh access token");
         }
     }

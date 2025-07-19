@@ -49,31 +49,33 @@ public class YoutubeServiceV5 implements YoutubeService {
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
-    public List<PlaylistItem> getPlaylistItemListResponse(String playlistId, Long maxResults) throws IOException {
-        YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id, status"));
-        request.setKey(apiKey);
-        request.setPlaylistId(playlistId);
-        request.setMaxResults(maxResults);
-        // page
-        List<PlaylistItem> allPlaylists = new ArrayList<>();
-        String nextPageToken = null;
-        do {
-            request.setPageToken(nextPageToken);
-            PlaylistItemListResponse response = request.execute();
-            allPlaylists.addAll(response.getItems());
-            nextPageToken = response.getNextPageToken();
-        } while (nextPageToken != null);
-
-        return allPlaylists;
-    }
+//    250719 removed
+//    public List<PlaylistItem> getPlaylistItemListResponse(String playlistId, Long maxResults) throws IOException {
+//        YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id, status"));
+//        request.setKey(apiKey);
+//        request.setPlaylistId(playlistId);
+//        request.setMaxResults(maxResults);
+//        // page
+//        List<PlaylistItem> allPlaylists = new ArrayList<>();
+//        String nextPageToken = null;
+//        do {
+//            request.setPageToken(nextPageToken);
+//            PlaylistItemListResponse response = request.execute();
+//            allPlaylists.addAll(response.getItems());
+//            nextPageToken = response.getNextPageToken();
+//        } while (nextPageToken != null);
+//
+//        return allPlaylists;
+//    }
 
     @Override
     public void fileTrackAndRecover(String userId, String playlistId, String accessToken) throws IOException {
         // 0. userId로 먼저 조회 후 거기에 딸린 많은 playlistId 추출해서 반복문 돌릴 수 있음
         // 1. 사용자의 업데이트된 목록 최신화 로직 <- Music 으로 편입
-        musicService.updatePlaylist(playlistId); // 주입 받아야함
+//        musicService.updatePlaylist(playlistId); // response = getPlaylistItemListResponse(playlistId, 50L); 리턴 받을 수 있음
+        List<PlaylistItem> response = musicService.updatePlaylist(playlistId); // 순수 api 로 호출된 정제 안된 리스트
         // 2. 비정상적인 파일 추적
-        Map<String, Long> illegalVideos = getIllegalPlaylistItemList(playlistId); // videoId, Position 뽑기
+        Map<String, Long> illegalVideos = getIllegalPlaylistItemList(playlistId, response); // videoId, Position 뽑기
         if(illegalVideos.isEmpty()) {
             log.info("There's no music to recover");
             return;
@@ -121,10 +123,11 @@ public class YoutubeServiceV5 implements YoutubeService {
     }
 
     // page 로 읽어들여야함
-    public Map<String, Long> getIllegalPlaylistItemList(String playlistId) throws IOException {
+    public Map<String, Long> getIllegalPlaylistItemList(String playlistId, List<PlaylistItem> response) {
+//    public Map<String, Long> getIllegalPlaylistItemList(String playlistId) throws IOException {
 
 //        PlaylistItemListResponse response = getPlaylistItemListResponse(playlistId, 50L);
-        List<PlaylistItem> response = getPlaylistItemListResponse(playlistId, 50L);
+//        List<PlaylistItem> response = getPlaylistItemListResponse(playlistId, 50L);
 
         Map<String, Long> videos = new HashMap<>();
 

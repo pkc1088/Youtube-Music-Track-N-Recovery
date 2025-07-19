@@ -67,11 +67,6 @@ public class MusicServiceV1 implements MusicService{
             }
             throw e;
         }
-//        catch (IOException e) {
-//            log.error("I/O error while fetching playlists for user : {}", e.getMessage());
-//            throw e; // propagate or wrap in custom exception if needed
-//        }
-
 
         return allPlaylists;
     }
@@ -119,7 +114,8 @@ public class MusicServiceV1 implements MusicService{
             List<String> tags = video.getSnippet().getTags();
             String joinedTags = (tags != null) ? String.join(",", tags) : null;
             music.setVideoTags(joinedTags);
-            System.err.println("joinedTags : " + joinedTags);
+            log.info("joinedTags : {}", joinedTags);
+//            System.err.println("joinedTags : " + joinedTags);
 
 
             music.setPlaylist(playlistRepository.findByPlaylistId(playlistId));
@@ -132,7 +128,8 @@ public class MusicServiceV1 implements MusicService{
 
     // page 로 읽어들여야함
     @Override
-    public void updatePlaylist(String playlistId) throws IOException {
+    public List<PlaylistItem> updatePlaylist(String playlistId) throws IOException {
+//    public void updatePlaylist(String playlistId) throws IOException {
         log.info("update playlist start ... {}", playlistId);
 
         // 1. 고객 플레이리스트 담긴 디비 불러오기
@@ -187,5 +184,7 @@ public class MusicServiceV1 implements MusicService{
         // 5-2. 플레이리스트 이름이 변경 됐을 수 있다.
         // 5-3. 고려하지 않아도 될 사항 : 플리 자체가 추가 됐다면 그건 고객이 다시 등록을 해야한다.
         log.info("update playlist done ... {}", playlistId);
+        return response;
     }
+
 }

@@ -1,10 +1,12 @@
 package youtube.youtubeService.policy.gemini;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClient;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.policy.SearchPolicy;
 
+@Slf4j
 public class GeminiSearchPolicy implements SearchPolicy {
 
     @Value("${googleai.api.key}")
@@ -41,7 +43,7 @@ public class GeminiSearchPolicy implements SearchPolicy {
 
     @Override
     public String search(Music musicToSearch) {
-        System.err.println("Gemini Search Policy");
+        log.info("searching technique : Gemini Search Policy");
         StringBuilder promptBuilder = new StringBuilder();
         promptBuilder.append("다음 유튜브에 게시된 음악 영상 정보를 보고, 노래 제목과 가수를 '노래제목-가수' 형식으로 정확히 알려줘. 반드시 이 양식을 지켜야 해.\n\n");
         promptBuilder.append("영상 제목: ").append(musicToSearch.getVideoTitle()).append("\n");

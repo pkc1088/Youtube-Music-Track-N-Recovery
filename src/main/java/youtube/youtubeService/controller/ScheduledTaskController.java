@@ -86,6 +86,8 @@ public class ScheduledTaskController {
             log.info("userId : {}", userId);
             // 1. 유저 아이디로 accessToken 발급
             String accessToken = userService.getNewAccessTokenByUserId(userId);
+            // 예외 터지면 getNewAccessToken에서 고객은 제거 했을꺼고, 다음 고객으로 넘기는 시나리오
+
             // 2. 유저 아이디로 조회한 모든 플레이리스트 & 음악을 디비에서 뽑아서 복구 시스템 가동
             List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
             for (Playlists playlist : playListsSet) {

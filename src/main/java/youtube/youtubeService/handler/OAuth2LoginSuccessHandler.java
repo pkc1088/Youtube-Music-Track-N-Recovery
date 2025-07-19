@@ -2,6 +2,7 @@ package youtube.youtubeService.handler;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Channel;
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.service.users.UserService;
 
@@ -81,7 +83,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 String channelId;
                 try {
                     channelId = getChannelIdByUserId(accessToken);
-                } catch (GeneralSecurityException e) { throw new RuntimeException(e); }
+                } catch (RuntimeException | GeneralSecurityException e) {
+                    log.info("{}", e.getMessage());
+                    response.sendRedirect("/denied");
+                    return;
+                }
                 String email = ((OidcUser) oauthToken.getPrincipal()).getEmail();
                 if (isTemporaryEmail(email)) {
                     log.info("Temporary Email");
@@ -132,6 +138,26 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                 .setApplicationName("youtube-channel-info").build();
 
+        ChannelListResponse response;
+        try {
+            response = youtube.channels().list(Collections.singletonList("snippet")).setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
+        } catch (RuntimeException | GoogleJsonResponseException e) {
+            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.postForEntity(revokeUrl, null, String.class);
+            throw new RuntimeException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
+        }
+
+        Channel channel = response.getItems().get(0);
+        return channel.getId();
+    }
+/*
+    public String getChannelIdByUserId(String accessToken) throws IOException, GeneralSecurityException {
+        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+        YouTube youtube = new YouTube.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                .setApplicationName("youtube-channel-info").build();
+
         ChannelListResponse response = youtube.channels().list(Collections.singletonList("snippet"))
                                         .setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
         if (response.getItems().isEmpty()) {
@@ -141,6 +167,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         return channel.getId();
     }
 
+ */
     private boolean isTemporaryEmail(String email) {
         return email != null && email.endsWith("@pages.plusgoogle.com");        // 임시 이메일 주소인지 확인
     }

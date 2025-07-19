@@ -64,7 +64,15 @@ public class UserServiceV1 implements UserService {
         log.info("once a day : accessToken <- refreshToken");
         Users user = userRepository.findByUserId(userId);
         String refreshToken = user.getRefreshToken();
-        return refreshAccessToken(refreshToken);
+        String accessToken;
+        try {
+            accessToken = refreshAccessToken(refreshToken);
+        } catch (RuntimeException e) {
+            log.info("{}", e.getMessage());
+            userRepository.deleteUser(user);
+            return "";
+        }
+        return accessToken;
     }
 
     public String refreshAccessToken(String refreshToken) { // 사실 이게 핵심인듯?
@@ -79,9 +87,10 @@ public class UserServiceV1 implements UserService {
             TokenResponse tokenResponse = refreshTokenRequest.execute();
             return tokenResponse.getAccessToken();
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
             // 여기서 예외 잡을때 유저 제거해줘야함 (만약 고객이 보안페이지에서 제거한거라면)
-            throw new RuntimeException("Failed to refresh access token");
+//            log.info("user quit thru security page -> gotta delete users from my service");
+            throw new RuntimeException("user quit thru security page -> gotta delete users from my service");
         }
     }
 

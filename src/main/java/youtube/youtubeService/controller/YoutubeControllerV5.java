@@ -42,6 +42,10 @@ public class YoutubeControllerV5 {
 //    public String initRegister() {
 //        return "login";
 //    }
+    @GetMapping("/denied")
+    public String permissionDenied(Principal principal) {
+        return "retry"; // 로그인 안한 사용자 화면
+    }
 
     @GetMapping("/")
     public String index(Principal principal) {

@@ -44,7 +44,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
         log.info("onAuthentication Success");
         if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
@@ -55,8 +56,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
             String accessToken = authorizedClient.getAccessToken().getTokenValue();
             String userId = oauthToken.getPrincipal().getName();    // 112735690496635663877, 107155055893692546350
-
-//            request.getSession().setAttribute("userId", userId); // addedaadded
 
             if(alreadyMember(userId)) {
                 log.info("you are already a member of this service");
@@ -77,14 +76,14 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     log.info("발급된 리프레시 토큰이 null");
                     log.info("DB에 저장된 refreshToken : {}", user.getRefreshToken());
                 }
-                // ~ done
             } else {
                 String fullName = ((OidcUser) oauthToken.getPrincipal()).getFullName(); // pkc1088, whistle_missile 등
                 String channelId;
                 try {
                     channelId = getChannelIdByUserId(accessToken);
-                } catch (RuntimeException | GeneralSecurityException e) {
+                } catch (/*RuntimeException | */IOException | GeneralSecurityException e) {
                     log.info("{}", e.getMessage());
+                    log.info("will send you /denied");
                     response.sendRedirect("/denied");
                     return;
                 }
@@ -105,7 +104,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         response.sendRedirect("/");
     }
 
-    @Transactional
+//    @Transactional // 250721 주석함
     void saveUpdatedRefreshToken(Users user, String updatedRefreshToken) {
         user.setRefreshToken(updatedRefreshToken);
         userService.saveUser(user); // 얘 추가해줘야 mysql 에 반영됨
@@ -141,16 +140,28 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         ChannelListResponse response;
         try {
             response = youtube.channels().list(Collections.singletonList("snippet")).setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
-        } catch (RuntimeException | GoogleJsonResponseException e) {
+        } catch (/*RuntimeException | */GoogleJsonResponseException e) {
             String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.postForEntity(revokeUrl, null, String.class);
-            throw new RuntimeException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
+
+            throw new IOException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");// throw new RuntimeException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
         }
 
         Channel channel = response.getItems().get(0);
         return channel.getId();
     }
+
+    private boolean isTemporaryEmail(String email) {
+        return email != null && email.endsWith("@pages.plusgoogle.com");        // 임시 이메일 주소인지 확인
+    }
+
+    private String getRealEmail(String email, OAuth2AuthenticationToken oauthToken) {
+        StringTokenizer st = new StringTokenizer(email, "-");
+        return st.nextToken() + "@gmail.com";
+    }
+
+}
 /*
     public String getChannelIdByUserId(String accessToken) throws IOException, GeneralSecurityException {
         GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
@@ -168,17 +179,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
  */
-    private boolean isTemporaryEmail(String email) {
-        return email != null && email.endsWith("@pages.plusgoogle.com");        // 임시 이메일 주소인지 확인
-    }
-
-    private String getRealEmail(String email, OAuth2AuthenticationToken oauthToken) {
-        StringTokenizer st = new StringTokenizer(email, "-");
-        return st.nextToken() + "@gmail.com";
-    }
-
-}
-
     /*@Bean
     public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
         return new DefaultOAuth2AuthorizationRequestResolver(

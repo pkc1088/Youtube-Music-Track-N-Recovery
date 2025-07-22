@@ -8,7 +8,7 @@ import youtube.youtubeService.domain.Users;
 import java.util.List;
 
 @Repository
-@Transactional
+//@Transactional
 @RequiredArgsConstructor
 public class UserRepositoryV1 implements UserRepository {
 

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Transactional
+//@Transactional
 @RequiredArgsConstructor
 public class MusicRepositoryV1 implements MusicRepository{
 
@@ -46,7 +46,6 @@ public class MusicRepositoryV1 implements MusicRepository{
         if (optionalMusic.isPresent()) {
             Music musicToUpdate = optionalMusic.get();
             log.info("Illegal videoId : {}", musicToUpdate.getVideoId());
-//            System.err.println("Illegal videoId : " + musicToUpdate.getVideoId());
 //            musicToUpdate.setId(videoToRecover.getId());
             musicToUpdate.setVideoId(videoToRecover.getVideoId());// videoToRecover의 정보로 엔티티 업데이트
             musicToUpdate.setVideoTitle(videoToRecover.getVideoTitle());

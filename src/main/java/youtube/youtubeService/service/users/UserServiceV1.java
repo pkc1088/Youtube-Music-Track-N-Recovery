@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserServiceV1 implements UserService {
 
@@ -30,10 +32,8 @@ public class UserServiceV1 implements UserService {
     @Override
     public Users getUserByUserId(String userId) {
         Users user = userRepository.findByUserId(userId);
-        if (user != null) {
-            return user;
-        }
-        throw new RuntimeException("User not found - getUserByUserId");
+        if (user != null) return user;
+        else throw new RuntimeException("User not found - getUserByUserId"); // db 작업 하는거 아니니 runtime 던져도 될 듯
     }
 
     @Override
@@ -47,7 +47,6 @@ public class UserServiceV1 implements UserService {
         RestTemplate restTemplate = new RestTemplate();
         if (refreshToken != null && !refreshToken.isBlank()) {
             String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + refreshToken;
-
             try {
                 restTemplate.postForEntity(revokeUrl, null, String.class);
                 userRepository.deleteUser(user); // 유저 DB에서 삭제
@@ -58,7 +57,6 @@ public class UserServiceV1 implements UserService {
         }
     }
 
-
     @Override
     public String getNewAccessTokenByUserId(String userId) {
         log.info("once a day : accessToken <- refreshToken");
@@ -67,15 +65,15 @@ public class UserServiceV1 implements UserService {
         String accessToken;
         try {
             accessToken = refreshAccessToken(refreshToken);
-        } catch (RuntimeException e) {
+        } catch (IOException e) {
             log.info("{}", e.getMessage());
-            userRepository.deleteUser(user);
+            userRepository.deleteUser(user);  // 여기서 예외 잡을때 유저 제거해줘야함 (만약 고객이 보안페이지에서 제거한거라면)
             return "";
         }
         return accessToken;
     }
 
-    public String refreshAccessToken(String refreshToken) { // 사실 이게 핵심인듯?
+    public String refreshAccessToken(String refreshToken) throws IOException { // 사실 이게 핵심인듯?
         try {
             GoogleRefreshTokenRequest refreshTokenRequest = new GoogleRefreshTokenRequest(
                     new NetHttpTransport(),
@@ -86,11 +84,8 @@ public class UserServiceV1 implements UserService {
             );
             TokenResponse tokenResponse = refreshTokenRequest.execute();
             return tokenResponse.getAccessToken();
-        } catch (IOException e) {
-            // e.printStackTrace();
-            // 여기서 예외 잡을때 유저 제거해줘야함 (만약 고객이 보안페이지에서 제거한거라면)
-//            log.info("user quit thru security page -> gotta delete users from my service");
-            throw new RuntimeException("user quit thru security page -> gotta delete users from my service");
+        } catch (IOException e) { // 이 메서드도 트잭 걸려있으나 IOException 던지니까 커밋 될 상태인거임
+            throw new IOException("user quit thru security page -> gotta delete users from my service");
         }
     }
 

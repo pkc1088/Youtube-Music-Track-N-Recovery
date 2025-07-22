@@ -16,6 +16,7 @@ import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.policy.SearchPolicy;
+import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.repository.users.UserRepository;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
@@ -35,20 +36,23 @@ public class ManagementScheduler {
     private final UserService userService;
     private final UserRepository userRepository;
     private final SearchPolicy searchPolicy;
+    private final PlaylistRepository playlistRepository;
 
     @Autowired
     public ManagementScheduler(PlaylistService playlistService, YoutubeService youtubeService, UserService userService,
-                               UserRepository userRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy) {
+                               UserRepository userRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
+                               PlaylistRepository playlistRepository) {
         this.playlistService = playlistService;
         this.youtubeService = youtubeService;
         this.userService = userService;
         this.userRepository = userRepository;
         this.searchPolicy = searchPolicy;
+        this.playlistRepository = playlistRepository;
         // @Qualifier("simpleSearchQuery")
     }
 
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")  //    @Transactional
-    public void allPlaylistsRecoveryOfAllUsersTest() throws IOException {
+    public void allPlaylistsRecoveryOfAllUsersTest() { // throws IOException
         log.info("auto scheduler activated");
 
         // 0. 전체 유저 목록에서 순차적으로 유저를 뽑기
@@ -59,16 +63,20 @@ public class ManagementScheduler {
             log.info("userId : {}", userId);
             // 1. 유저 아이디로 accessToken 발급
             String accessToken = userService.getNewAccessTokenByUserId(userId);
-            if(accessToken.equals("")) continue;
+            if(accessToken.equals("")) {
+                log.info("abort scheduling bc user left");
+                continue;
+            }
             // 2. 유저 아이디로 조회한 모든 플레이리스트 & 음악을 디비에서 뽑아서 복구 시스템 가동
             List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
-                // playlist 자체가 제거된 경우 예외처리 필요
                 try {
                     youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
-                } catch (IOException e) {
+                } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
                     log.info("scheduler caught and then move to next playlist");
+                    playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
+                    log.info("removed the playlist({}) from DB", e.getMessage());
                 }
             }
 
@@ -78,7 +86,7 @@ public class ManagementScheduler {
     }
 
 //    @Scheduled(fixedRate = 5000000, initialDelayString = "1000")
-    public void allPlaylistsRecoveryOfOneParticularUserTest() throws IOException {
+    public void allPlaylistsRecoveryOfOneParticularUserTest() {
         log.info("auto scheduler activated");
         // 0. 전체 유저 목록에서 순차적으로 유저를 뽑아 오는 시나리오 있다 치고
         String userId  = "112735690496635663877";
@@ -92,15 +100,20 @@ public class ManagementScheduler {
         List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
         for (Playlists playlist : playListsSet) {
             log.info("{} start", playlist.getPlaylistTitle());
-            // playlist 자체가 제거된 경우 예외처리 필요
             try {
                 youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
-            } catch (IOException e) {
+            } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
+                playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
+                log.info("remove the playlist({}) from DB", e.getMessage());
                 log.info("scheduler caught and then move to next playlist");
             }
         }
 
         log.info("auto scheduler done");
+    }
+
+    public void multiVideoDetailsTest() {
+
     }
 
 

@@ -1,10 +1,14 @@
 package youtube.youtubeService.controller;
 
 import com.google.api.services.youtube.model.Playlist;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,19 +36,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class YoutubeControllerV5 {
 
-    private final YoutubeService youtubeService;
     private final UserService userService;
-    private final UserRepository userRepository;
     private final PlaylistService playlistService;
     private final ActionLogRepository actionLogRepository;
 
-//    @GetMapping("/")
-//    public String initRegister() {
-//        return "login";
-//    }
     @GetMapping("/denied")
     public String permissionDenied(Principal principal) {
-        return "retry"; // 로그인 안한 사용자 화면
+        return "retry"; // session 끊는 행위 필요함
     }
 
     @GetMapping("/")
@@ -65,7 +63,7 @@ public class YoutubeControllerV5 {
         return "redirect:/playlist/" + principal.getName();
     }
 
-    @GetMapping("/playlist/{userId}") // for user display
+    @GetMapping("/playlist/{userId}")
     public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
         // 1. API로 사용자의 모든 플레이리스트를 가져옴
         List<Playlist> playlists = playlistService.getAllPlaylists(userId);
@@ -77,7 +75,7 @@ public class YoutubeControllerV5 {
         model.addAttribute("playlists", playlists);
         model.addAttribute("registeredPlaylistIds", registeredPlaylistIds);
         log.info("userRegisterPlaylists {}", userId);
-        return "playlist_selection"; // 체크박스 뷰 템플릿
+        return "playlist_selection";
     }
 
     @PostMapping("/playlist/register")
@@ -89,7 +87,6 @@ public class YoutubeControllerV5 {
         // 1. DB 에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
         List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
         List<String> registeredPlaylistIds = registeredPlaylistIdFromDB.stream().map(Playlists::getPlaylistId).toList();
-
         // 2. 중복된 플레이리스트는 제외하고 등록
         List<String> newlySelectedPlaylistIds = selectedPlaylistIds.stream().filter(playlistId -> !registeredPlaylistIds.contains(playlistId)).toList();
 
@@ -111,7 +108,7 @@ public class YoutubeControllerV5 {
     }
 
     @GetMapping("/recovery/{userId}")
-    public String searchRecoveryHistory(@PathVariable String userId, Model model) throws IOException {
+    public String searchRecoveryHistory(@PathVariable String userId, Model model) {
         // 1. userId로 ActionLogRepository 에서 내역 조회
         List<ActionLog> logs = actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
         model.addAttribute("logs", logs);
@@ -119,16 +116,20 @@ public class YoutubeControllerV5 {
         return "recovery_history";
     }
 
-
     @PostMapping("/delete")
-    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal) {
+    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal,
+                                HttpServletRequest request, HttpServletResponse response) {
         String userId = principal.getName();
-        Users user = userRepository.findByUserId(userId);
-
+        Users user = userService.getUserByUserId(userId);
         userService.deleteUser(user); // 토큰 revoke + DB 삭제
+        SecurityContextHolder.clearContext();
+        request.getSession().invalidate();
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID라면
+        cookie.setMaxAge(0); // 즉시 만료
+        response.addCookie(cookie);
 
-        return "redirect:/";
-//        return "redirect:/login";
+        return "redirect:/";//        return "redirect:/logout";
     }
 
 }

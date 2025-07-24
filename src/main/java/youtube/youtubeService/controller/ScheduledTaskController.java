@@ -82,6 +82,9 @@ public class ScheduledTaskController {
                     playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
                     log.info("remove the playlist({}) from DB", e.getMessage());
                     log.info("scheduler caught and then move to next playlist");
+                } catch (Exception e) {// 예상 못한 런타임 에러 방어
+                    log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
+                    e.printStackTrace();
                 }
             }
 
@@ -111,18 +114,12 @@ public class ScheduledTaskController {
                 playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
                 log.info("remove the playlist({}) from DB", e.getMessage());
                 log.info("scheduler caught and then move to next playlist");
+            } catch (Exception e) {// 예상 못한 런타임 에러 방어
+                log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
+                e.printStackTrace();
             }
         }
         log.info("auto scheduler done");
     }
 
-
 }
-/*for (Playlists playlist : playListsSet) {
-    log.info("{} start", playlist.getPlaylistTitle());
-    try {
-        youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
-    } catch (IOException e) {
-        log.info("scheduler caught and then move to next playlist");
-    }
-}*/

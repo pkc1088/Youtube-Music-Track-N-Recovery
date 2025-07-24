@@ -14,6 +14,7 @@ public class GeminiSearchPolicy implements SearchPolicy {
     private final RestClient restClient;
 
     public static final String GEMINI_FLASH = "gemini-1.5-flash";
+    public static final String GEMINI_FLASH_LITE = "gemini-2.5-flash-lite";
     public static final String GEMINI_PRO = "gemini-pro";
     public static final String GEMINI_ULTIMATE = "gemini-ultimate";
     public static final String GEMINI_PRO_VISION = "gemini-pro-vision";
@@ -59,6 +60,7 @@ public class GeminiSearchPolicy implements SearchPolicy {
 
 //        String query = musicToSearch.getVideoTitle().concat("-").concat(musicToSearch.getVideoUploader())
 //                .concat(" 이 정보를 보고 '노래제목-가수' 형태로 알려줘 무조건 저 양식을 지켜서");
-        return getCompletion(GEMINI_FLASH, query);
+        return getCompletion(GEMINI_FLASH_LITE, query);
+//        return getCompletion(GEMINI_FLASH, query);
     }
 }

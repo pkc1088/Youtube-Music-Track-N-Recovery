@@ -10,6 +10,6 @@ import java.util.List;
 public interface ActionLogRepository extends JpaRepository<ActionLog, Long> {
     List<ActionLog> findByUserIdOrderByCreatedAtDesc(String userId);
 
-    @Transactional
+    // @Transactional // ?
     void deleteByUserId(String userId);
 }

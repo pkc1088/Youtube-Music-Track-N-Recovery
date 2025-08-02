@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.ActionLogRepository;
+import youtube.youtubeService.repository.OutboxRepository;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.musics.MusicRepositoryV1;
 import youtube.youtubeService.repository.musics.SdjMusicRepository;
@@ -16,6 +17,7 @@ import youtube.youtubeService.repository.playlists.SdjPlaylistRepository;
 import youtube.youtubeService.repository.users.SdjUserRepository;
 import youtube.youtubeService.repository.users.UserRepository;
 import youtube.youtubeService.repository.users.UserRepositoryV1;
+import youtube.youtubeService.service.outbox.OutboxEventPublisher;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.playlists.PlaylistServiceV1;
 import youtube.youtubeService.service.users.UserService;
@@ -34,21 +36,29 @@ public class SpringDataJpaConfig {
     private final ActionLogRepository actionLogRepository;
     private final YoutubeApiClient youtubeApiClient;
 
+    private final OutboxRepository outboxRepository;
+    private final OutboxEventPublisher outboxEventPublisher;
+
     @Autowired
     public SpringDataJpaConfig(
             SdjUserRepository sdjUserRepository, SdjPlaylistRepository sdjPlaylistRepository, SdjMusicRepository sdjMusicRepository,
-            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, ActionLogRepository actionLogRepository, YoutubeApiClient youtubeApiClient) {
+            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, ActionLogRepository actionLogRepository, YoutubeApiClient youtubeApiClient,
+            OutboxRepository outboxRepository, OutboxEventPublisher outboxEventPublisher) {
         this.sdjUserRepository = sdjUserRepository;
         this.sdjPlaylistRepository = sdjPlaylistRepository;
         this.sdjMusicRepository = sdjMusicRepository;
         this.searchPolicy = searchPolicy;
         this.actionLogRepository = actionLogRepository;
         this.youtubeApiClient = youtubeApiClient;
+
+        this.outboxRepository = outboxRepository;
+        this.outboxEventPublisher = outboxEventPublisher;
     }
 
     @Bean
     public YoutubeService youtubeService() {
-        return new YoutubeServiceV5(playlistRepository(), musicRepository(), searchPolicy, actionLogRepository, youtubeApiClient);
+        return new YoutubeServiceV5(playlistRepository(), musicRepository(), searchPolicy, actionLogRepository, youtubeApiClient,
+                outboxRepository, outboxEventPublisher);
     }
 
     @Bean
@@ -60,11 +70,6 @@ public class SpringDataJpaConfig {
     public PlaylistService playlistService() {
         return new PlaylistServiceV1(userRepository(), playlistRepository(), musicRepository(), youtubeApiClient);
     }
-
-//    @Bean
-//    public MusicService musicService() {
-//        return new MusicServiceV1(playlistRepository(), musicRepository(), youtubeApiClient);
-//    }
 
     @Bean
     public UserRepository userRepository() {
@@ -82,3 +87,8 @@ public class SpringDataJpaConfig {
     }
 
 }
+
+//    @Bean
+//    public MusicService musicService() {
+//        return new MusicServiceV1(playlistRepository(), musicRepository(), youtubeApiClient);
+//    }

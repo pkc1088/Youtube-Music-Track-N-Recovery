@@ -9,5 +9,5 @@ import java.util.List;
 @AllArgsConstructor
 public class VideoFilterResult {
     private final List<Video> legalVideos;
-    private final List<Video> illegalVideos;
+    private final List<Video> unlistedCountryVideos;
 }

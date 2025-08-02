@@ -52,10 +52,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         log.info("onAuthentication Success");
         if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
+
             OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
-                    oauthToken.getAuthorizedClientRegistrationId(),
-                    oauthToken.getName()
-            );
+                    oauthToken.getAuthorizedClientRegistrationId(), oauthToken.getName());
 
             String accessToken = authorizedClient.getAccessToken().getTokenValue();
             String userId = oauthToken.getPrincipal().getName();    // 112735690496635663877, 107155055893692546350
@@ -107,6 +106,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         user.setRefreshToken(updatedRefreshToken);
         userService.saveUser(user); // 얘 추가해줘야 mysql 에 반영됨 (userService 에 트잭 있어서 영속성 컨텍스트 내 반영이 됨, 트잭 시작지점)
         // Transactional : 어차피 외부 메서드(및 현재 클래스)에 트잭이 안걸려있었기에 프록시가 없어서, 외부 메서드가 호출해도 이게 안 먹혔던거임
+        // 애초에  User 가 영속 상태가 아님(이 클래스엔 트잭 없으니까), 그래서 save 명시적으로 해줘야함
     }
 
     private boolean alreadyMember(String userId) {

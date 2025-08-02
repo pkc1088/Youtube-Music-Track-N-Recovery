@@ -23,6 +23,7 @@ public class Music {
     private String videoDescription;
     @Column(length = 510)
     private String videoTags;
+    // private String playlistItemId;
 
     @ManyToOne
     @JoinColumn(name = "playlistId", nullable = false) // Playlists playlistId 를 FK 로 지정. name은 DB에 저장될 이름임

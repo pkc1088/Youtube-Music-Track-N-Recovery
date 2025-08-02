@@ -72,7 +72,7 @@ public class YoutubeApiClient {
 
     public VideoFilterResult safeFetchVideos(List<String> videoIds) { // List<Video>
         List<Video> legal = new ArrayList<>();
-        List<Video> illegal = new ArrayList<>();
+        List<Video> unlistedCountryVideos = new ArrayList<>();
         if (videoIds.isEmpty()) return null; //legal;
 
         int batchSize = 50;
@@ -100,7 +100,7 @@ public class YoutubeApiClient {
                                 && video.getContentDetails().getRegionRestriction().getAllowed() != null
                                 && !video.getContentDetails().getRegionRestriction().getAllowed().contains("KR")) {
                             log.info("Illegal Video Filtered (KR not allowed) : {} ({})", video.getSnippet().getTitle(), video.getId());
-                            illegal.add(video);
+                            unlistedCountryVideos.add(video);
                             continue;
                         }
 
@@ -108,14 +108,14 @@ public class YoutubeApiClient {
                                 && video.getContentDetails().getRegionRestriction().getBlocked() != null
                                 && video.getContentDetails().getRegionRestriction().getBlocked().contains("KR")) {
                             log.info("Illegal Video Filtered (KR blocked) : {} ({})", video.getSnippet().getTitle(), video.getId());
-                            illegal.add(video);
+                            unlistedCountryVideos.add(video);
                             continue;
                         }
                         // log.info("Legal Video : {} ({})", video.getSnippet().getTitle(), video.getId());
                         legal.add(video);
                     } else {
                         log.info("Illegal Video Filtered (Unlisted): {} ({})", video.getSnippet().getTitle(), video.getId());
-                        illegal.add(video);
+                        unlistedCountryVideos.add(video);
                     }
                 }
 
@@ -123,7 +123,7 @@ public class YoutubeApiClient {
                 log.info("Batch {} 실패: {}", i + 1, ex.getMessage());
             }
         }
-        return new VideoFilterResult(legal, illegal);
+        return new VideoFilterResult(legal, unlistedCountryVideos);
     }
 
     public List<PlaylistItem> getPlaylistItemListResponse(String playlistId, Long maxResults) throws IOException {
@@ -152,8 +152,9 @@ public class YoutubeApiClient {
         return allPlaylists;
     }
 
-    // insert 할 떄 요구되는 속성 다시 점검
-    public void addVideoToActualPlaylist(String accessToken, String playlistId, String videoId, long videoPosition) {
+    public int addVideoToActualPlaylist(String accessToken, String playlistId, String videoId) {
+        //if(videoPosition % 2 == 0) throw new RuntimeException("addVideoToActualPlaylist intended RuntimeException"); // 고의적 예외 던짐
+
         try {
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
             YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
@@ -166,7 +167,7 @@ public class YoutubeApiClient {
             PlaylistItemSnippet playlistItemSnippet = new PlaylistItemSnippet();
             playlistItemSnippet.setPlaylistId(playlistId);
             playlistItemSnippet.setResourceId(resourceId);
-            playlistItemSnippet.setPosition(videoPosition); // added
+            //playlistItemSnippet.setPosition(videoPosition); // added
             PlaylistItem playlistItem = new PlaylistItem();
             playlistItem.setSnippet(playlistItemSnippet);
 
@@ -180,17 +181,71 @@ public class YoutubeApiClient {
             e.printStackTrace();
             // throw new RuntimeException(e);
         }
+
+        return 0;
     }
 
-    // 불필요한 동작 수정 필요
-    public void deleteFromActualPlaylist(String accessToken, String playlistId, String videoId) {
+    public int deleteFromActualPlaylist(String accessToken, String playlistId, String videoId) {
+        // if(videoId != null) throw new RuntimeException(); // 고의적 예외 던짐
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            log.warn("Delete failed for {} : {} : {}", playlistId, videoId, e.getMessage());
+        }
+
+        int duplicatedVideoRemovedCount = 0;
+
+        try {
+            GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+            YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                    .setApplicationName("youtube-delete-playlist-item")
+                    .build();
+
+            YouTube.PlaylistItems.List playlistItemsRequest = youtube.playlistItems().list(Collections.singletonList("id, snippet"));
+            playlistItemsRequest.setPlaylistId(playlistId);
+            playlistItemsRequest.setMaxResults(50L);
+
+            List<PlaylistItem> playlistItems = new ArrayList<>();
+            String nextPageToken = null;
+            do {
+                playlistItemsRequest.setPageToken(nextPageToken);
+                PlaylistItemListResponse response = playlistItemsRequest.execute();
+                playlistItems.addAll(response.getItems());
+                nextPageToken = response.getNextPageToken();
+            } while (nextPageToken != null);
+
+            // 영상 ID와 일치하는 재생목록 항목을 찾음
+            for (PlaylistItem playlistItem : playlistItems) {
+                if (playlistItem.getSnippet().getResourceId().getVideoId().equals(videoId)) {
+                    YouTube.PlaylistItems.Delete deleteRequest = youtube.playlistItems().delete(playlistItem.getId());
+                    deleteRequest.execute();
+                    duplicatedVideoRemovedCount++;
+                    log.info("duplicatedVideoCount: {}", duplicatedVideoRemovedCount);
+                    // return;
+                }
+            }
+
+        } catch (IOException | GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+
+        return duplicatedVideoRemovedCount;
+    }
+
+
+    /*public void deleteFromActualPlaylist(String accessToken, String playlistId, String videoId) {
+        //if(videoId != null) throw new RuntimeException(); // 고의적 예외 던짐
+
         try {
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
             YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName("youtube-delete-playlist-item")
                     .build();
             // 재생목록에서 영상을 찾기 위해 playlistItems.list 호출
-            YouTube.PlaylistItems.List playlistItemsRequest = youtube.playlistItems().list(Collections.singletonList("id,snippet"));
+            YouTube.PlaylistItems.List playlistItemsRequest = youtube.playlistItems().list(Collections.singletonList("id, snippet"));
             playlistItemsRequest.setPlaylistId(playlistId);
             playlistItemsRequest.setMaxResults(50L);
 
@@ -211,7 +266,6 @@ public class YoutubeApiClient {
                 if (playlistItem.getSnippet().getResourceId().getVideoId().equals(videoId)) {
                     YouTube.PlaylistItems.Delete deleteRequest = youtube.playlistItems().delete(playlistItem.getId());
                     deleteRequest.execute();
-                    // 조건에 맞으면 여러개 한번에 삭제할 수 있음
                     return;
                 }
             }
@@ -219,7 +273,7 @@ public class YoutubeApiClient {
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public SearchResult searchFromYoutube(String query) throws IOException {
         YouTube.Search.List search = youtube.search().list(Collections.singletonList("id, snippet"));

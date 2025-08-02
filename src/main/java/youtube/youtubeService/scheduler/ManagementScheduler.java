@@ -4,13 +4,22 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
+import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.Video;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
@@ -19,12 +28,16 @@ import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.repository.users.UserRepository;
+import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
 import youtube.youtubeService.service.youtube.YoutubeService;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -40,12 +53,16 @@ public class ManagementScheduler {
     private final PlaylistRepository playlistRepository;
     private final MusicRepository musicRepository;
     private final YoutubeApiClient youtubeApiClient;
+    private final RecoverOrchestrationService recoverOrchestrationService;
+    // private final OutboxRetryPoller outboxRetryPoller;
+    private final OutboxEventHandler outboxEventHandler;
     private final YouTube youtube;
 
     @Autowired
     public ManagementScheduler(PlaylistService playlistService, YoutubeService youtubeService, UserService userService,
                                UserRepository userRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
-                               MusicRepository musicRepository, PlaylistRepository playlistRepository, YoutubeApiClient youtubeApiClient) {
+                               MusicRepository musicRepository, PlaylistRepository playlistRepository, YoutubeApiClient youtubeApiClient,
+                               RecoverOrchestrationService recoverOrchestrationService, OutboxEventHandler outboxEventHandler) {
         this.playlistService = playlistService;
         this.youtubeService = youtubeService;
         this.userService = userService;
@@ -54,6 +71,8 @@ public class ManagementScheduler {
         this.searchPolicy = searchPolicy;
         this.playlistRepository = playlistRepository;
         this.youtubeApiClient = youtubeApiClient;
+        this.recoverOrchestrationService = recoverOrchestrationService;
+        this.outboxEventHandler = outboxEventHandler;
         // @Qualifier("simpleSearchQuery")
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
@@ -123,21 +142,67 @@ public class ManagementScheduler {
         log.info("auto scheduler done");
     }
 
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
+        log.info("auto scheduler activated");
+
+        // recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+        recoverOrchestrationService.allPlaylistsRecoveryOfOneParticularUserTest();
+
+        log.info("auto scheduler done");
+    }
+
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void retryOutbox() {
+        //outboxRetryPoller.retryFailedOutboxEvents();
+    }
+
+//    @Scheduled(fixedRate = 5000000, initialDelayString = "1000")
+    public String getLocaleFromGoogle(String accessToken, Authentication authentication) {
+
+        // 이것만 OAuth2LoginSuccessHandler 에 붙여주면 될 듯? <- ㄴㄴ GEO Service 이용해야함
+        OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2User oAuth2User = authToken.getPrincipal();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        String locale = (String) attributes.get("locale");
+        String location = (String) attributes.get("location");
+
+        System.out.println("locale = " + locale);
+        System.out.println("location = " + location);
+        // https://developers.google.com/people/api/rest/v1/people?hl=ko
+
+        String url = "https://www.googleapis.com/oauth2/v3/userinfo";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        RestTemplate restTemplate = new RestTemplate();
+
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+        Map userInfo = response.getBody();
+        return (String) userInfo.get("locale");
+
+    }
+
 //    @Scheduled(fixedRate = 5000000, initialDelayString = "1000")
     public void updateTest() throws IOException {
-        String playlistId = "PLNj4bt23RjfuyEuM_YnEDb-CvIkHxcZpU";
+        String playlistId = "PLNj4bt23RjfsNN7Id71Zehzs4GRretBru";
         String userId  = "112735690496635663877";
-        // String accessToken = userService.getNewAccessTokenByUserId(userId);
-        String videoId = "XzEoBAltBII";
-        Long position = 5L;
-        List<Music> backupMusicListFromDb = musicRepository.getMusicListFromDBThruMusicId(videoId, playlistId);
-        log.info("size : {}", backupMusicListFromDb.size());
-        for(Music music : backupMusicListFromDb) {
-            log.info("{}, {}, {}", music.getId(), music.getPlaylist(), music.getVideoId());
+        YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id, status"));
+        request.setKey(apiKey);
+        request.setPlaylistId(playlistId);
+        request.setMaxResults(50L);
+        PlaylistItemListResponse response = request.execute();
+        List<PlaylistItem> playlistItems = new ArrayList<>(response.getItems());
 
-        }
-        // youtubeApiClient.addVideoToActualPlaylist(accessToken, playlistId, videoId, position);
-        // youtubeApiClient.deleteFromActualPlaylist(accessToken, playlistId, videoId);
+        System.out.println("0: " + playlistItems.get(0).getSnippet().getPlaylistId() + ", " + playlistItems.get(0).getId());
+        System.out.println("3: " + playlistItems.get(3).getSnippet().getPlaylistId() + ", " + playlistItems.get(3).getId());
+        // getId :
+        // UExOajRidDIzUmpmc05ON0lkNzFaZWh6czRHUnJldEJydS5ENDU4Q0M4RDExNzM1Mjcy
+        // UExOajRidDIzUmpmc05ON0lkNzFaZWh6czRHUnJldEJydS4yMDhBMkNBNjRDMjQxQTg1
+        // 지웠다가 다시 추가하면 그 영상 playlist Item Id 도 바뀐다
+
+
         log.info("done..........");
     }
 

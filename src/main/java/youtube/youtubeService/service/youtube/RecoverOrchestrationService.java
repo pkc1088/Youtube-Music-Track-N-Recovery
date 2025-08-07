@@ -3,6 +3,7 @@ package youtube.youtubeService.service.youtube;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.repository.users.UserRepository;
@@ -18,7 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecoverOrchestrationService {
 
-    private final UserRepository userRepository;
     private final UserService userService;
     private final PlaylistService playlistService;
     private final YoutubeService youtubeService;
@@ -26,7 +26,7 @@ public class RecoverOrchestrationService {
 
     public void allPlaylistsRecoveryOfAllUsers() {
         // 0. 전체 유저 목록에서 순차적으로 유저를 뽑기
-        List<Users> users = userRepository.findAllUsers();
+        List<Users> users = userService.findAllUsers();
 
         for (Users user : users) {
             String userId = user.getUserId(); // String userId  = "112735690496635663877";
@@ -43,20 +43,14 @@ public class RecoverOrchestrationService {
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
                 try {
-                    youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
-                } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
-                    playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
-                    log.info("remove the playlist({}) from DB", e.getMessage());
-                    log.info("scheduler caught and then move to next playlist");
+                    youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
                 } catch (Exception e) {// 예상 못한 런타임 에러 방어
                     log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
-                    e.printStackTrace();
                 }
             }
             outboxEventHandler.retryFailedOutboxEvents();
         }
 
-        log.info("auto scheduler done");
     }
 
     public void allPlaylistsRecoveryOfOneParticularUserTest() {
@@ -72,17 +66,11 @@ public class RecoverOrchestrationService {
         for (Playlists playlist : playListsSet) {
             log.info("{} start", playlist.getPlaylistTitle());
             try {
-                youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
-            } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
-                playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
-                log.info("remove the playlist({}) from DB", e.getMessage());
-                log.info("scheduler caught and then move to next playlist");
+                youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
             } catch (Exception e) {// 예상 못한 런타임 에러 방어
                 log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
-                e.printStackTrace();
             }
         }
-
         // 고객별 마지막에 FAIL 난 얘들 한번 싹 재시도
         outboxEventHandler.retryFailedOutboxEvents();
     }

@@ -3,12 +3,14 @@ package youtube.youtubeService.service.outbox;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Outbox;
 
 // 실 API 호출
 @Slf4j
-@Component
+//@Component
+@Service
 @RequiredArgsConstructor
 public class OutboxProcessor {
 

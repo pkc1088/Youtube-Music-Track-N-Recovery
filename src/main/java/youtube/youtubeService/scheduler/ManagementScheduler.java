@@ -6,6 +6,7 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import com.google.api.services.youtube.model.Video;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +29,7 @@ import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.repository.users.UserRepository;
+import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
@@ -54,15 +56,15 @@ public class ManagementScheduler {
     private final MusicRepository musicRepository;
     private final YoutubeApiClient youtubeApiClient;
     private final RecoverOrchestrationService recoverOrchestrationService;
-    // private final OutboxRetryPoller outboxRetryPoller;
     private final OutboxEventHandler outboxEventHandler;
+    private final MusicService musicService;
     private final YouTube youtube;
 
     @Autowired
     public ManagementScheduler(PlaylistService playlistService, YoutubeService youtubeService, UserService userService,
                                UserRepository userRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
                                MusicRepository musicRepository, PlaylistRepository playlistRepository, YoutubeApiClient youtubeApiClient,
-                               RecoverOrchestrationService recoverOrchestrationService, OutboxEventHandler outboxEventHandler) {
+                               RecoverOrchestrationService recoverOrchestrationService, OutboxEventHandler outboxEventHandler, MusicService musicService) {
         this.playlistService = playlistService;
         this.youtubeService = youtubeService;
         this.userService = userService;
@@ -74,6 +76,7 @@ public class ManagementScheduler {
         this.recoverOrchestrationService = recoverOrchestrationService;
         this.outboxEventHandler = outboxEventHandler;
         // @Qualifier("simpleSearchQuery")
+        this.musicService = musicService;
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
@@ -98,7 +101,7 @@ public class ManagementScheduler {
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
                 try {
-                    youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
+                    youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
                 } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
                     playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
                     log.info("removed the playlist({}) from DB", e.getMessage());
@@ -129,7 +132,7 @@ public class ManagementScheduler {
         for (Playlists playlist : playListsSet) {
             log.info("{} start", playlist.getPlaylistTitle());
             try {
-                youtubeService.fileTrackAndRecover(userId, playlist.getPlaylistId(), accessToken);
+                youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
             } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
                 playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
                 log.info("remove the playlist({}) from DB", e.getMessage());
@@ -146,8 +149,60 @@ public class ManagementScheduler {
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
         log.info("auto scheduler activated");
 
-        // recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
-        recoverOrchestrationService.allPlaylistsRecoveryOfOneParticularUserTest();
+        recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+//        recoverOrchestrationService.allPlaylistsRecoveryOfOneParticularUserTest();
+
+        log.info("auto scheduler done");
+    }
+
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void queryTest() {
+        log.info("auto scheduler activated");
+
+        String userId = "112735690496635663877";
+        String playlistId = "PLNj4bt23RjfsNN7Id71Zehzs4GRretBru";
+        String videoIdToDelete = "wtjro7_R3-4";
+        Long pk = 500L;
+
+//        Playlists playlist = playlistService.getPlaylistsByUserId(userId).get(0);
+//        Music music = new Music(pk, "XzEoBAltBII", "The Manhattans - Kiss And Say GoodBye", "Whistle_Missile",
+//                "The Manhattans,R&B,Soul,7th album", "just a test video", playlist);
+
+
+
+//        log.info("[START] findByPlaylistId");
+//        playlistRepository.findByPlaylistId(playlistId);
+//        log.info("[DONE] findByPlaylistId");
+
+
+//        log.info("[START] dBTrackAndRecoverPosition");
+//        musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, videoToRecover, pk);
+//        log.info("[DONE] dBTrackAndRecoverPosition");
+
+
+//        log.info("[START] findByUserId");
+//        userRepository.findByUserId(userId);
+//        log.info("[START] findByUserId");
+
+        log.info("[START] playlistService.getPlaylistsByUserId(userId);");
+        List<Playlists> playlists = playlistService.getPlaylistsByUserId(userId); // findByUser_UserId (query : 2회)
+        for (Playlists p : playlists) {
+            log.info(p.getPlaylistTitle());
+            Users user = p.getUser();
+            log.info("ususu");
+        }
+        log.info("playlists size : {}", playlists.size());
+        log.info("[DONE] playlistService.getPlaylistsByUserId(userId);");
+//
+//        log.info("[START] musicService.findAllMusicByPlaylistId(playlistId)");
+//        List<Music> musics = musicService.findAllMusicByPlaylistId(playlistId); // findByPlaylist_PlaylistId (query : 2회)
+//        log.info("musics size : {}", musics.size());
+//        log.info("[DONE] musicService.findAllMusicByPlaylistId(playlistId)");
+//
+//        log.info("[START] musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId)");
+//        List<Music> duplicatedMusics = musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId); // findAllByVideoIdAndPlaylistId (query : 2회)
+//        log.info("duplicatedMusics : {}", duplicatedMusics.size());
+//        log.info("[DONE] musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId)");
 
         log.info("auto scheduler done");
     }

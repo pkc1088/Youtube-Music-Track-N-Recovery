@@ -7,12 +7,10 @@ import java.util.Optional;
 
 public interface MusicRepository {
     List<Music> findAllMusicByPlaylistId(String playlistId);
-    void addUpdatePlaylist(String playlistId, Music music);
-    void deleteUpdatePlaylist(String playlistId, String videoId);
+    void addUpdatePlaylist(Music music);
     void deleteById(Long pk);
     List<Music> getMusicListFromDBThruMusicId(String videoId, String playlistId);
-    void dBTrackAndRecoverPosition(String videoIdToDelete, Music videoToRecover, String playlistId, Long rowPk);
+    void dBTrackAndRecoverPosition(String videoIdToDelete, Music videoToRecover, Long rowPk);
+    void saveAll(List<Music> musicsToSave);
 
-    // void dBTrackAndRecover(String videoIdToDelete, Music videoToRecover, String playlistId);
-    // Optional<Music> getMusicFromDBThruMusicId(String videoIdToDelete, String playlistId);
 }

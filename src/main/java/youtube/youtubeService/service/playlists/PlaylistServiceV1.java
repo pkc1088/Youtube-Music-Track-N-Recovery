@@ -21,6 +21,8 @@ import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.repository.users.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import youtube.youtubeService.service.musics.MusicService;
+import youtube.youtubeService.service.users.UserService;
 
 
 import java.io.IOException;
@@ -33,17 +35,17 @@ import java.util.List;
 @Transactional
 public class PlaylistServiceV1 implements PlaylistService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PlaylistRepository playlistRepository;
-    private final MusicRepository musicRepository;
     private final YoutubeApiClient youtubeApiClient;
+    private final MusicService musicService;
 
-    public PlaylistServiceV1(UserRepository userRepository, PlaylistRepository playlistRepository,
-                             MusicRepository musicRepository, YoutubeApiClient youtubeApiClient) {
-        this.userRepository = userRepository;
+    public PlaylistServiceV1(UserService userService, PlaylistRepository playlistRepository,
+                             YoutubeApiClient youtubeApiClient, MusicService musicService) {
+        this.userService = userService;
         this.playlistRepository = playlistRepository;
-        this.musicRepository = musicRepository;
         this.youtubeApiClient = youtubeApiClient;
+        this.musicService = musicService;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class PlaylistServiceV1 implements PlaylistService {
 
     public List<Playlist> getAllPlaylists(String userId) throws IOException {
         // 1. userId 로 oauth2 인증 거쳐 DB 에 저장됐을 channelId 얻기
-        Users user = userRepository.findByUserId(userId);
+        Users user = userService.findByUserId(userId); // userRepository.findByUserId(userId);
         String channelId = user.getUserChannelId();
         // 2. channelId로 api 호출 통해 playlist 다 받아오기
         return youtubeApiClient.getApiPlaylists(channelId);
@@ -62,7 +64,6 @@ public class PlaylistServiceV1 implements PlaylistService {
 
     @Override
     public void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds) {
-        // log.info("removePlaylistsFromDB txActive : {} : {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionName());
         for (String deselectedPlaylist : deselectedPlaylistIds) {
             log.info("playlist({}) is deleted from DB", deselectedPlaylist);
             playlistRepository.deletePlaylistByPlaylistId(deselectedPlaylist);
@@ -70,9 +71,9 @@ public class PlaylistServiceV1 implements PlaylistService {
     }
 
     public void registerPlaylists(String userId, List<String> selectedPlaylistIds) {//throws IOException
-        Users user = userRepository.findByUserId(userId);
+        Users user = userService.findByUserId(userId); // userRepository.findByUserId(userId);
         // 1. 전체 플레이리스트 가져오기
-        List<Playlist> allPlaylists = null;
+        List<Playlist> allPlaylists;
         try {
             allPlaylists = getAllPlaylists(userId);
         } catch (IOException e) {
@@ -86,7 +87,7 @@ public class PlaylistServiceV1 implements PlaylistService {
             Playlists playlist = new Playlists();
             playlist.setPlaylistId(getPlaylist.getId());
             playlist.setPlaylistTitle(getPlaylist.getSnippet().getTitle());
-            playlist.setServiceType("track&recover");
+            playlist.setServiceType(Playlists.ServiceType.RECOVER);
             playlist.setUser(user);
             // 3.1 Playlist 객체를 DB에 저장
             log.info("playlist({}) is added to DB", getPlaylist.getSnippet().getTitle());
@@ -111,23 +112,9 @@ public class PlaylistServiceV1 implements PlaylistService {
         // 3. 페이지네이션으로 정상 음악만 세부사항 필터링 해오기
         List<Video> legalVideos = youtubeApiClient.safeFetchVideos(videoIds).getLegalVideos();
         // 4. DB 에 최초 등록
-        for (Video video : legalVideos) {
-            DBAddAction(video, playlistId);
-        }
-    }
 
-    public void DBAddAction(Video video, String playlistId) {
-        Music music = new Music();
-        music.setVideoId(video.getId());
-        music.setVideoTitle(video.getSnippet().getTitle());
-        music.setVideoUploader(video.getSnippet().getChannelTitle());
-        music.setVideoDescription(video.getSnippet().getDescription());
-        List<String> tags = video.getSnippet().getTags();
-        String joinedTags = (tags != null) ? String.join(",", tags) : null;
-        music.setVideoTags(joinedTags);
-        // log.info("joinedTags : {}", joinedTags);
-        music.setPlaylist(playlistRepository.findByPlaylistId(playlistId));
-        musicRepository.addUpdatePlaylist(playlistId, music);
+        Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+        musicService.saveAll(legalVideos, playlist);
     }
 
 }

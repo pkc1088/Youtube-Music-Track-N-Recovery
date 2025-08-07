@@ -10,6 +10,7 @@ import com.google.api.services.youtube.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.dto.VideoFilterResult;
 
@@ -30,6 +31,21 @@ public class YoutubeApiClient {
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
+    public Video getSingleVideo(String videoId) {
+
+        Video video = null;
+        try {
+            YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails"));
+            request.setKey(apiKey);
+            request.setId(Collections.singletonList(videoId));
+            video = request.execute().getItems().get(0);
+            log.info("Found the video with 'Single Video Search'");
+        } catch (IOException e) {
+            log.info("Cannot find Single(Duplicated) video with this VideoId({})", videoId);
+        }
+
+        return video;
+    }
 
     public String getChannelIdByUserId(String accessToken) throws IOException, GeneralSecurityException {
         GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
@@ -44,7 +60,7 @@ public class YoutubeApiClient {
             String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
             RestTemplate restTemplate = new RestTemplate();
             restTemplate.postForEntity(revokeUrl, null, String.class);
-            throw new IOException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");// throw new RuntimeException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
+            throw new IOException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
         }
 
         Channel channel = response.getItems().get(0);
@@ -70,10 +86,10 @@ public class YoutubeApiClient {
         return allPlaylists;
     }
 
-    public VideoFilterResult safeFetchVideos(List<String> videoIds) { // List<Video>
+    public VideoFilterResult safeFetchVideos(List<String> videoIds) {
         List<Video> legal = new ArrayList<>();
         List<Video> unlistedCountryVideos = new ArrayList<>();
-        if (videoIds.isEmpty()) return null; //legal;
+        if (videoIds.isEmpty()) return null;
 
         int batchSize = 50;
         int total = videoIds.size();
@@ -111,7 +127,6 @@ public class YoutubeApiClient {
                             unlistedCountryVideos.add(video);
                             continue;
                         }
-                        // log.info("Legal Video : {} ({})", video.getSnippet().getTitle(), video.getId());
                         legal.add(video);
                     } else {
                         log.info("Illegal Video Filtered (Unlisted): {} ({})", video.getSnippet().getTitle(), video.getId());
@@ -146,7 +161,7 @@ public class YoutubeApiClient {
             if (e.getStatusCode() == 403 || e.getStatusCode() == 404) {
                 log.warn("Playlist fetch forbidden or not found. Possibly deleted or private.");
             }
-            throw new IOException("the playlist is deleted");//            throw e;
+            throw new IOException("the playlist is deleted");
         }
 
         return allPlaylists;
@@ -234,46 +249,6 @@ public class YoutubeApiClient {
 
         return duplicatedVideoRemovedCount;
     }
-
-
-    /*public void deleteFromActualPlaylist(String accessToken, String playlistId, String videoId) {
-        //if(videoId != null) throw new RuntimeException(); // 고의적 예외 던짐
-
-        try {
-            GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-            YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-                    .setApplicationName("youtube-delete-playlist-item")
-                    .build();
-            // 재생목록에서 영상을 찾기 위해 playlistItems.list 호출
-            YouTube.PlaylistItems.List playlistItemsRequest = youtube.playlistItems().list(Collections.singletonList("id, snippet"));
-            playlistItemsRequest.setPlaylistId(playlistId);
-            playlistItemsRequest.setMaxResults(50L);
-
-//            PlaylistItemListResponse playlistItemsResponse = playlistItemsRequest.execute();
-//            List<PlaylistItem> playlistItems = playlistItemsResponse.getItems();
-
-            List<PlaylistItem> playlistItems = new ArrayList<>();
-            String nextPageToken = null;
-            do {
-                playlistItemsRequest.setPageToken(nextPageToken); // 다음 페이지 토큰 설정
-                PlaylistItemListResponse response = playlistItemsRequest.execute();
-                playlistItems.addAll(response.getItems());
-                nextPageToken = response.getNextPageToken();
-            } while (nextPageToken != null); // 더 이상 페이지가 없을 때까지 반복
-
-            // 영상 ID와 일치하는 재생목록 항목을 찾음
-            for (PlaylistItem playlistItem : playlistItems) {
-                if (playlistItem.getSnippet().getResourceId().getVideoId().equals(videoId)) {
-                    YouTube.PlaylistItems.Delete deleteRequest = youtube.playlistItems().delete(playlistItem.getId());
-                    deleteRequest.execute();
-                    return;
-                }
-            }
-
-        } catch (IOException | GeneralSecurityException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     public SearchResult searchFromYoutube(String query) throws IOException {
         YouTube.Search.List search = youtube.search().list(Collections.singletonList("id, snippet"));

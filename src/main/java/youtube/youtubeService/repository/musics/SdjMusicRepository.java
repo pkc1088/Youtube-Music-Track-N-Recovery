@@ -13,15 +13,14 @@ public interface SdjMusicRepository extends JpaRepository<Music, Long> {
 
     List<Music> findByPlaylist_PlaylistId(String playlistId);
 
-    void deleteByVideoId(String videoId);
-
-    @Query("SELECT m FROM Music m WHERE m.videoId = :videoId AND m.playlist.playlistId = :playlistId")
-    Optional<Music> findByVideoIdAndPlaylistId(@Param("videoId") String videoId, @Param("playlistId") String playlistId);
-
     @Query("SELECT m FROM Music m WHERE m.videoId = :videoId AND m.playlist.playlistId = :playlistId")
     List<Music> findAllByVideoIdAndPlaylistId(@Param("videoId") String videoId, @Param("playlistId") String playlistId);
 
-//    Optional<Music> findByVideoIdAndPlaylist(String videoId, String playlistId);
-//    Optional<Music> findByVideoId(String videoId);
+
+//    void deleteByVideoId(String videoId);
+//    @Query("SELECT m FROM Music m WHERE m.videoId = :videoId AND m.playlist.playlistId = :playlistId")
+//    Optional<Music> findByVideoIdAndPlaylistId(@Param("videoId") String videoId, @Param("playlistId") String playlistId);
 
 }
+//    Optional<Music> findByVideoIdAndPlaylist(String videoId, String playlistId);
+//    Optional<Music> findByVideoId(String videoId);

@@ -18,7 +18,10 @@ public class ActionLog {
 
     private String userId;
     private String playlistId;
-    private String actionType; // recover/notification
+
+    @Enumerated(EnumType.STRING)
+    private ActionType actionType = ActionType.RECOVER;
+
     private String targetVideoId;
     private String targetVideoTitle;
     private String sourceVideoId;
@@ -27,4 +30,5 @@ public class ActionLog {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    public enum ActionType { RECOVER, NOTIFY }
 }

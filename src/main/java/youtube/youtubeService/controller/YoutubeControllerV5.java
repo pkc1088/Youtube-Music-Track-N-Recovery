@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -19,17 +18,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
-import youtube.youtubeService.repository.ActionLogRepository;
-import youtube.youtubeService.repository.users.UserRepository;
-import youtube.youtubeService.scheduler.ManagementScheduler;
+import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.YoutubeService;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -38,10 +32,10 @@ public class YoutubeControllerV5 {
 
     private final UserService userService;
     private final PlaylistService playlistService;
-    private final ActionLogRepository actionLogRepository;
+    private final ActionLogService actionLogService;
 
     @GetMapping("/denied")
-    public String permissionDenied(Principal principal) {
+    public String permissionDenied() { // Principal principal
         return "retry"; // session 끊는 행위 필요함
     }
 
@@ -81,8 +75,7 @@ public class YoutubeControllerV5 {
     @PostMapping("/playlist/register")
     public String registerSelectedPlaylists(@RequestParam String userId,
                                             @RequestParam(name = "selectedPlaylistIds", required = false) List<String> selectedPlaylistIds,
-                                            @RequestParam(name = "deselectedPlaylistIds", required = false) List<String> deselectedPlaylistIds,
-                                            Model model) throws IOException {
+                                            @RequestParam(name = "deselectedPlaylistIds", required = false) List<String> deselectedPlaylistIds) {
 
         // 1. DB 에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
         List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
@@ -110,7 +103,7 @@ public class YoutubeControllerV5 {
     @GetMapping("/recovery/{userId}")
     public String searchRecoveryHistory(@PathVariable String userId, Model model) {
         // 1. userId로 ActionLogRepository 에서 내역 조회
-        List<ActionLog> logs = actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        List<ActionLog> logs = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
         model.addAttribute("logs", logs);
         model.addAttribute("userId", userId);
         return "recovery_history";
@@ -125,7 +118,7 @@ public class YoutubeControllerV5 {
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();
         Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID라면
+        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
         cookie.setMaxAge(0); // 즉시 만료
         response.addCookie(cookie);
 
@@ -134,87 +127,3 @@ public class YoutubeControllerV5 {
 
 }
 
-//    @GetMapping("/whistleMissile/playlists") // - just for test
-//    public String getPlaylists(Model model) throws IOException {
-//        List<Playlist> playlists = playlistService.getAllPlaylists("UC6SN0-0k6z1fj5LmhYHd5UA"); // pkc1088
-//        model.addAttribute("playlists", playlists);
-//        return "playlists";
-//    }
-
-//    public List<Playlist> getAllPlaylists() throws IOException {
-//        YouTube youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
-//        List<Playlist> allPlaylists = new ArrayList<>();
-//        String nextPageToken = null;
-//        do {
-//            YouTube.Playlists.List request = youtube.playlists().list(Collections.singletonList("snippet, contentDetails"));
-//
-//            request.setKey;
-//            request.setChannelId("UCSm9kYU0rHDamSQeoy_LBWg");
-//            request.setMaxResults(50L); // API의 최대 허용값 (50)
-//            request.setPageToken(nextPageToken); // 다음 페이지 토큰 설정
-//            PlaylistListResponse response = request.execute();
-//            allPlaylists.addAll(response.getItems());
-//
-//            nextPageToken = response.getNextPageToken();
-//        } while (nextPageToken != null); // 더 이상 페이지가 없을 때까지 반복
-//
-//        return allPlaylists;
-//    }
-
-
-
-//    @GetMapping("/mySignup")
-//    public String signup() {
-//        return "redirect:/oauth2/authorization/google?prompt=consent&access_type=offline";
-//    }
-//    // 로그인 시 (prompt=none)
-//    @GetMapping("/myLogin")
-//    public String login() {
-//        return "redirect:/oauth2/authorization/google?prompt=none";
-//    }
-//
-//    @GetMapping("/memberRegister")
-//    public String memberRegister() {
-//        return "memberRegister";
-//    }
-//
-//    @GetMapping("{playlistId}/getVideos") // - just for test
-//    public String getVideos(@PathVariable String playlistId, Model model) {
-//        try {
-//            List<String> videos = youtubeService.getVideosFromPlaylist(playlistId);
-//            model.addAttribute("getVideos", videos); // 비디오 목록만 모델에 담는거임
-//        } catch (IOException e) {
-//            model.addAttribute("error", "Failed to fetch videos from playlist - getvideos() method.");
-//            e.printStackTrace();
-//        }
-//        return "getVideos";
-//    }
-//    @PostMapping("/TestAddVideoToPlaylist") // remove soon - just for test
-//    public String TestAddVideoToPlaylist(@RequestParam String customerEmail, @RequestParam String playlistId, @RequestParam String videoId) {
-//
-//        Users users = userService.getUserByEmail(customerEmail);
-//        System.out.println("TestAddVideoToPlaylist");
-//        youtubeService.TestAddVideoToPlaylist(customerEmail, playlistId, videoId); // accesstoken -> customerEmail
-//
-//        return "redirect:/welcome";
-//    }
-//    @GetMapping("search") // 필요없음 이건 내부적으로 수행해야함
-//    public String searchVideo(@RequestParam String keyword, Model model) throws IOException {
-//        String result = youtubeService.searchVideo(keyword);
-//        model.addAttribute("result", result);
-//        return "search";
-//    }
-//
-//    @PostMapping("/addVideoToPlaylist") // 필요없음 이건 내부적으로 수행해야함
-//    public String addVideoToPlaylist(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient authorizedClient,
-//                                     @RequestParam String playlistId, @RequestParam String videoId) {
-//        String result =  youtubeService.addVideoToPlaylist(authorizedClient, playlistId, videoId);
-//        return "redirect:/welcome";
-//    }
-//
-//    @PostMapping("/deleteFromPlaylist") // 필요없음 이건 내부적으로 수행해야함
-//    public String deleteFromPlaylist(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient authorizedClient,
-//                                     @RequestParam String playlistId, @RequestParam String videoId) {
-//        String result = youtubeService.deleteFromPlaylist(authorizedClient, playlistId, videoId);
-//        return "redirect:/welcome";
-//    }

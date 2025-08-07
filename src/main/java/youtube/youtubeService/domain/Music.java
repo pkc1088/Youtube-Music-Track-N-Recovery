@@ -23,26 +23,10 @@ public class Music {
     private String videoDescription;
     @Column(length = 510)
     private String videoTags;
-    // private String playlistItemId;
 
-    @ManyToOne
-    @JoinColumn(name = "playlistId", nullable = false) // Playlists playlistId 를 FK 로 지정. name은 DB에 저장될 이름임
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "playlistId", nullable = false)
     private Playlists playlist;
 }
 
-//    public Music(String videoId, String videoTitle, Playlists playlist) {
-//        this.videoId = videoId;
-//        this.videoTitle = videoTitle;
-//        this.playlist = playlist;
-//    }
 
-//    public Music(String videoId, String videoTitle, String videoUploader, String videoDescription, String videoTags,
-//                 /*int videoPlaylistPosition,*/ Playlists playlist) {
-//        this.videoId = videoId;
-//        this.videoTitle = videoTitle;
-//        this.videoUploader = videoUploader;
-//        this.videoDescription = videoDescription;
-//        this.videoTags = videoTags;
-////        this.videoPlaylistPosition = videoPlaylistPosition;
-//        this.playlist = playlist;
-//    }

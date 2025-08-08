@@ -18,6 +18,7 @@ public class Users {
     private String userName;
     private String userChannelId;
     private String userEmail;
+    private String countryCode = "KR";
     private String refreshToken;
 }
 

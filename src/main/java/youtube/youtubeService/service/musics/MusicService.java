@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface MusicService {
 
-
     List<Music> findAllMusicByPlaylistId(String playlistId);
 
     void deleteById(Long pk);

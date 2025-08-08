@@ -33,37 +33,23 @@ import java.util.stream.IntStream;
 @Transactional
 public class YoutubeServiceV5 implements YoutubeService {
 
-    private final MusicRepository musicRepository;
-//    private final PlaylistRepository playlistRepository;
-    private final SearchPolicy searchPolicy; // Map<String, SearchPolicy> searchPolicyMap; 테스트 해보기
     private final ActionLogService actionLogService;
-    //private final ActionLogRepository actionLogRepository;
     private final YoutubeApiClient youtubeApiClient;
-//    private final OutboxRepository outboxRepository;
-//    private final OutboxEventPublisher outboxEventPublisher;
     private final PlaylistService playlistService;
     private final MusicService musicService;
     private final OutboxService outboxService;
 
-    public YoutubeServiceV5(/*PlaylistRepository playlistRepository,*/ MusicRepository musicRepository,
-                            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
-                            ActionLogService actionLogService, YoutubeApiClient youtubeApiClient,
-                            /*OutboxRepository outboxRepository, OutboxEventPublisher outboxEventPublisher,*/
+    public YoutubeServiceV5(ActionLogService actionLogService, YoutubeApiClient youtubeApiClient,
                             PlaylistService playlistService, MusicService musicService, OutboxService outboxService) {
-//        this.playlistRepository = playlistRepository;
-        this.musicRepository = musicRepository;
-        this.searchPolicy = searchPolicy;
         this.actionLogService = actionLogService;
         this.youtubeApiClient = youtubeApiClient;
-//        this.outboxRepository = outboxRepository;
-//        this.outboxEventPublisher = outboxEventPublisher;
         this.playlistService = playlistService;
         this.musicService = musicService;
         this.outboxService = outboxService;
     }
 
 
-    public Map<String, Integer> updatePlaylist(String userId, Playlists playlist) throws IOException {
+    public Map<String, Integer> updatePlaylist(String userId, String countryCode, Playlists playlist) throws IOException {
         String playlistId = playlist.getPlaylistId();
         log.info("[update playlist start: {}]", playlistId);
 
@@ -82,7 +68,7 @@ public class YoutubeServiceV5 implements YoutubeService {
         // 3. API 에서 video 상태 조회
         List<String> pureApiVideoIds = pureApiPlaylistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
 
-        VideoFilterResult videoFilterResult = youtubeApiClient.safeFetchVideos(pureApiVideoIds);
+        VideoFilterResult videoFilterResult = youtubeApiClient.safeFetchVideos(pureApiVideoIds, countryCode);
         // 4-1. 정상 비디오
         List<Video> legalVideos = videoFilterResult.getLegalVideos();
         List<String> legalVideoIds = legalVideos.stream().map(Video::getId).toList();
@@ -118,7 +104,7 @@ public class YoutubeServiceV5 implements YoutubeService {
 
             if (toDeleteCount > 0 && !unlistedCountryVideoIds.contains(videoId) && !privateDeletedVideoIds.contains(videoId)) { // 삭제할 개수만큼만 제한 후 Music 객체에서 ID만 추출 각 ID를 사용하여 삭제
                 pureDbMusicList.stream().filter(m -> m.getVideoId().equals(videoId)).limit(toDeleteCount)
-                        .map(Music::getId).forEach(/*musicRepository::deleteById*/musicService::deleteById);
+                        .map(Music::getId).forEach(musicService::deleteById);
             }
         }
 
@@ -136,14 +122,14 @@ public class YoutubeServiceV5 implements YoutubeService {
     }
 
     @Override
-    public void fileTrackAndRecover(String userId, Playlists playlist, String accessToken) throws IOException {
+    public void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken) throws IOException {
         // 1. 업데이트 및 비정상 음악 목록 가져오기
         Map<String, Integer> illegalVideoIdWithPositions;
         //Playlists playlist = playlistService.findByPlaylistId(playlistId);
         String playlistId = playlist.getPlaylistId();
 
         try {
-            illegalVideoIdWithPositions = updatePlaylist(userId, playlist);
+            illegalVideoIdWithPositions = updatePlaylist(userId, countryCode, playlist);
         } catch (IOException e) {
             log.info("[skip this playlist: {}]", playlistId);
             return;
@@ -186,15 +172,13 @@ public class YoutubeServiceV5 implements YoutubeService {
 
             actionLogService.actionLogSave(userId, playlistId, ActionLog.ActionType.RECOVER, backupMusic, replacementMusic);
 
-            // 복구 횟수만큼 추가 & 삭제 // for (int i = 0; i < backupMusicListFromDb.size(); i++) {
+            // 복구 횟수만큼 추가 & 삭제
             for (int i = 0; i < Math.min(backupMusicListFromDb.size(), apiDuplicatedCount); i++) { // 1:1 매칭 가능한 만큼 복구
                 long pk = backupMusicListFromDb.get(i).getId();
                 // DB 교체 처리
-                musicService.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);//musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
+                musicService.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
                 // 실제 플레이리스트 반영
-                //youtubeApiClient.addVideoToActualPlaylist(accessToken, playlistId, replacementMusic.getVideoId(), position);
                 outboxService.outboxInsert(Outbox.ActionType.ADD, accessToken, userId, playlistId, replacementMusic.getVideoId());
-                //youtubeApiClient.deleteFromActualPlaylist(accessToken, playlistId, videoIdToDelete);
                 outboxService.outboxInsert(Outbox.ActionType.DELETE, accessToken, userId, playlistId, videoIdToDelete);
 
                 log.info("Recovered [{}] -> [{}] at pos {}", videoIdToDelete, replacementMusic.getVideoId(), pk);
@@ -213,9 +197,7 @@ public class YoutubeServiceV5 implements YoutubeService {
             if(backupMusicListFromDb.size() < apiDuplicatedCount) { // 2(DB) < 4(API)
                 for (int i = backupMusicListFromDb.size(); i < apiDuplicatedCount; i++) { // 남은 횟수만큼 더 업데이트 해줘야한다.
                     musicService.addUpdatePlaylist(replacementMusic);//musicRepository.addUpdatePlaylist(replacementMusic);
-                    //youtubeApiClient.addVideoToActualPlaylist(accessToken, playlistId, replacementMusic.getVideoId(), position);
                     outboxService.outboxInsert(Outbox.ActionType.ADD, accessToken, userId, playlistId, replacementMusic.getVideoId());
-                    //youtubeApiClient.deleteFromActualPlaylist(accessToken, playlistId, videoIdToDelete);
                     outboxService.outboxInsert(Outbox.ActionType.DELETE, accessToken, userId, playlistId, videoIdToDelete);
 
                     log.info("Add extra duplicated video on DB : [{}]", replacementMusic.getVideoId());
@@ -226,66 +208,6 @@ public class YoutubeServiceV5 implements YoutubeService {
             // if(userId != null) throw new RuntimeException("Intentioned Runtime Exception"); // 고의적 예외 던짐
         }
     }
-
-//    public void outboxInsert(Outbox.ActionType actionType, String accessToken, String userId, String playlistId, String videoId) {
-////        Outbox outbox = new Outbox();
-////        outbox.setActionType(actionType);
-////        outbox.setAccessToken(accessToken);
-////        outbox.setUserId(userId);
-////        outbox.setPlaylistId(playlistId);
-////        outbox.setVideoId(videoId);
-////        outboxRepository.save(outbox);
-////        outboxEventPublisher.publish(outbox); // “방금 INSERT한 Outbox Row가 커밋되면 처리하라” 는 신호다.
-//        outboxService.outboxInsert(actionType, accessToken, userId, playlistId, videoId);
-//    }
-
-//    public void actionLogRecord(String userId, String playlistId, String actionType, Music trgVid, Music srcVid) {
-//        // 영상 제목 및 업로드자도 저장하는게 보기 좋을 듯
-//        ActionLog log = new ActionLog();
-//        log.setUserId(userId);
-//        log.setPlaylistId(playlistId);
-//        log.setActionType(actionType);
-//        log.setTargetVideoId(trgVid.getVideoId());
-//        log.setTargetVideoTitle(trgVid.getVideoTitle());
-//        log.setSourceVideoId(srcVid.getVideoId());
-//        log.setSourceVideoTitle(srcVid.getVideoTitle());
-//        actionLogRepository.save(log);
-//    }
-
-//    public void DBAddAction(Video video, Playlists playlist) {
-//        Music music = new Music();
-//        music.setVideoId(video.getId());
-//        music.setVideoTitle(video.getSnippet().getTitle());
-//        music.setVideoUploader(video.getSnippet().getChannelTitle());
-//        music.setVideoDescription(video.getSnippet().getDescription());
-//        List<String> tags = video.getSnippet().getTags();
-//        String joinedTags = (tags != null) ? String.join(",", tags) : null;
-//        music.setVideoTags(joinedTags);
-//        music.setPlaylist(playlist);
-//
-//        musicRepository.addUpdatePlaylist(music);
-//    }
-
-//    public Music searchVideoToReplace(Music musicToSearch, String playlistId) throws IOException {
-//        // Gemini Policy 사용
-//        String query = searchPolicy.search(musicToSearch); // String query = musicToSearch.getVideoTitle().concat("-").concat(musicToSearch.getVideoUploader());
-//        log.info("searched with : {}", query);
-//        SearchResult searchResult = youtubeApiClient.searchFromYoutube(query);
-//        /*
-//        검색이 안될때 예외처리 해주긴 해야함
-//         */
-//        Music music = new Music();
-//        music.setVideoId(searchResult.getId().getVideoId());
-//        music.setVideoTitle(searchResult.getSnippet().getTitle());
-//        music.setVideoUploader(searchResult.getSnippet().getChannelTitle());
-//        music.setVideoTags(musicToSearch.getVideoTags());
-//        music.setVideoDescription(searchResult.getSnippet().getDescription());
-//        // search 결과로는 tags 얻을 수 없음. 그렇다고 또 video Id로 검색하긴 귀찮음. 그냥 놔두자.
-//        music.setPlaylist(playlistRepository.findByPlaylistId(playlistId));
-//        log.info("Found a music to replace : {}, {}", music.getVideoTitle(), music.getVideoUploader());
-//
-//        return music;
-//    }
 
 }
 

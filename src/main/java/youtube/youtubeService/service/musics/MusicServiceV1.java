@@ -28,8 +28,8 @@ public class MusicServiceV1 implements MusicService {
     private final YoutubeApiClient youtubeApiClient;
 
 
-    public MusicServiceV1(MusicRepository musicRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
-                          YoutubeApiClient youtubeApiClient) {
+    public MusicServiceV1(MusicRepository musicRepository,
+                          @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, YoutubeApiClient youtubeApiClient) {
         this.musicRepository = musicRepository;
         this.searchPolicy = searchPolicy;
         this.youtubeApiClient = youtubeApiClient;
@@ -39,18 +39,22 @@ public class MusicServiceV1 implements MusicService {
     public List<Music> findAllMusicByPlaylistId(String playlistId) {
         return musicRepository.findAllMusicByPlaylistId(playlistId);
     }
+
     @Override
     public void deleteById(Long pk) {
         musicRepository.deleteById(pk);
     }
+
     @Override
     public List<Music> getMusicListFromDBThruMusicId(String videoIdToDelete, String playlistId) {
         return musicRepository.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId);
     }
+
     @Override
     public void dBTrackAndRecoverPosition(String videoIdToDelete, Music replacementMusic, long pk) {
         musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
     }
+
     @Override
     public void addUpdatePlaylist(Music music) {
         musicRepository.addUpdatePlaylist(music);
@@ -73,7 +77,7 @@ public class MusicServiceV1 implements MusicService {
 
     @Override
     public void saveAll(List<Video> legalVideos, Playlists playlist) {
-        //Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+
         List<Music> musicsToSave = new ArrayList<>();
 
         for (Video video : legalVideos) {
@@ -94,8 +98,8 @@ public class MusicServiceV1 implements MusicService {
 
     @Override
     public Music searchVideoToReplace(Music musicToSearch, Playlists playlist) {
-        // Gemini Policy 사용
-        String query = searchPolicy.search(musicToSearch);
+
+        String query = searchPolicy.search(musicToSearch); // Gemini Policy 사용
         log.info("searched with : {}", query);
         SearchResult searchResult;
         try {

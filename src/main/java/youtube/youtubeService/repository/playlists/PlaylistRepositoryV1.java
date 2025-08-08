@@ -11,7 +11,6 @@ import youtube.youtubeService.domain.Users;
 import java.util.List;
 
 @Repository
-//@Transactional
 @Slf4j
 @RequiredArgsConstructor
 public class PlaylistRepositoryV1 implements PlaylistRepository {
@@ -36,7 +35,6 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
 
     @Override
     public void deletePlaylistByPlaylistId(String playlistId) {
-//        log.info("deletePlaylistByPlaylistId txActive : {} : {}", TransactionSynchronizationManager.isActualTransactionActive(), TransactionSynchronizationManager.getCurrentTransactionName());
         repository.deleteById(playlistId);
     }
 }

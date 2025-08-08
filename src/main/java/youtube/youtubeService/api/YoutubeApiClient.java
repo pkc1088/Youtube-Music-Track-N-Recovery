@@ -86,7 +86,7 @@ public class YoutubeApiClient {
         return allPlaylists;
     }
 
-    public VideoFilterResult safeFetchVideos(List<String> videoIds) {
+    public VideoFilterResult safeFetchVideos(List<String> videoIds, String countryCode) {
         List<Video> legal = new ArrayList<>();
         List<Video> unlistedCountryVideos = new ArrayList<>();
         if (videoIds.isEmpty()) return null;
@@ -114,7 +114,7 @@ public class YoutubeApiClient {
 
                         if (video.getContentDetails().getRegionRestriction() != null
                                 && video.getContentDetails().getRegionRestriction().getAllowed() != null
-                                && !video.getContentDetails().getRegionRestriction().getAllowed().contains("KR")) {
+                                && !video.getContentDetails().getRegionRestriction().getAllowed().contains(countryCode)) { //.contains("KR")
                             log.info("Illegal Video Filtered (KR not allowed) : {} ({})", video.getSnippet().getTitle(), video.getId());
                             unlistedCountryVideos.add(video);
                             continue;
@@ -122,7 +122,7 @@ public class YoutubeApiClient {
 
                         if (video.getContentDetails().getRegionRestriction() != null
                                 && video.getContentDetails().getRegionRestriction().getBlocked() != null
-                                && video.getContentDetails().getRegionRestriction().getBlocked().contains("KR")) {
+                                && video.getContentDetails().getRegionRestriction().getBlocked().contains(countryCode)) {
                             log.info("Illegal Video Filtered (KR blocked) : {} ({})", video.getSnippet().getTitle(), video.getId());
                             unlistedCountryVideos.add(video);
                             continue;

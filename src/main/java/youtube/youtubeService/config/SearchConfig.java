@@ -11,6 +11,7 @@ import youtube.youtubeService.policy.simple.SimpleSearchPolicy;
 
 @Configuration
 public class SearchConfig {
+
     /** 이 방식 테스트 해보기
     @ Bean
     public Map< String, SearchPolicy> searchPolicyMap(
@@ -21,7 +22,8 @@ public class SearchConfig {
         policyMap.put("gemini", geminiSearchQuery);
         return policyMap;
     }
-     */
+    */
+
     @Bean
     @Qualifier("simpleSearchQuery")
     public SearchPolicy simpleSearchQuery() {
@@ -35,8 +37,7 @@ public class SearchConfig {
     }
 
     @Bean
-    public RestClient geminiRestClient(@Value("${gemini.baseurl}") String baseUrl,
-                                       @Value("${googleai.api.key}") String apiKey) {
+    public RestClient geminiRestClient(@Value("${gemini.baseurl}") String baseUrl, @Value("${googleai.api.key}") String apiKey) {
         return RestClient.builder()
                 .baseUrl(baseUrl)
                 .defaultHeader("x-goog-api-key", apiKey)

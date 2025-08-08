@@ -30,14 +30,13 @@ public class SecurityConfig {
                     .ignoringRequestMatchers("/api/scheduler/**") // CSRF 비활성화
             )
             .authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers("/js/**", "/images/**", "/css/**", /*"/login"*/ "/", "/api/scheduler/**",
-                            "/google9cce108361f8ecd7.html","/privacy-policy.html", "/terms-of-service.html", "/retry.html")
+                    .requestMatchers("/js/**", "/images/**", "/css/**", "/", "/api/scheduler/**", "/google9cce108361f8ecd7.html",
+                                    "/privacy-policy.html", "/terms-of-service.html", "/retry.html")
                     .permitAll()
                     .anyRequest().authenticated()   // 해당 경로 외 모든 요청은 인증 필요, 로그인되지 않은 사용자라면 / 으로 리다이렉트
             )
             .oauth2Login(oauth2 -> oauth2
-                    .loginPage("/")                                 // 커스텀 로그인 시작 페이지 (구글 로그인 버튼 있음), /login -> / 로 변경 0604
-//                    .defaultSuccessUrl("/welcome", true) // 전용 핸들러있으면 default 없어도 됨. 로그인 성공 시 루트 페이지로 리다이렉트  "/" 이였는데 "/welcome"으로 바꿔봄
+                    .loginPage("/")
                     .successHandler(oauth2LoginSuccessHandler)
                     .authorizationEndpoint(authorization -> authorization
                             .baseUri("/oauth2/authorization")
@@ -60,52 +59,5 @@ public class SecurityConfig {
     }
 }
 
-
-
-
-/*
-CustomAuthorizationRequestResolver 여기서 session으로 userId 받으면 null 떠서 에러나는 코드임
-
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-
-    private final OAuth2LoginSuccessHandler oauth2LoginSuccessHandler;
-    private final ClientRegistrationRepository clientRegistrationRepository;
-    private final UserService userService; // 사용자 DB 조회용
-
-    public SecurityConfig(OAuth2LoginSuccessHandler oauth2LoginSuccessHandler,
-                          ClientRegistrationRepository clientRegistrationRepository,
-                          UserService userService) {
-        this.oauth2LoginSuccessHandler = oauth2LoginSuccessHandler;
-        this.clientRegistrationRepository = clientRegistrationRepository;
-        this.userService = userService;
-    }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(form -> form
-                        .loginPage("/login").permitAll()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .successHandler(oauth2LoginSuccessHandler)
-                        .authorizationEndpoint(auth -> auth
-                                .authorizationRequestResolver(
-                                        new CustomAuthorizationRequestResolver(clientRegistrationRepository, userService)
-                                )
-                        )
-                );
-
-        return http.build();
-    }
-
-}
-*/
 
 

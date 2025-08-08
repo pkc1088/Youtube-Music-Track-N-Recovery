@@ -72,6 +72,7 @@ public class PlaylistServiceV1 implements PlaylistService {
 
     public void registerPlaylists(String userId, List<String> selectedPlaylistIds) {//throws IOException
         Users user = userService.findByUserId(userId); // userRepository.findByUserId(userId);
+        String countryCode = user.getCountryCode();
         // 1. 전체 플레이리스트 가져오기
         List<Playlist> allPlaylists;
         try {
@@ -93,12 +94,12 @@ public class PlaylistServiceV1 implements PlaylistService {
             log.info("playlist({}) is added to DB", getPlaylist.getSnippet().getTitle());
             playlistRepository.save(playlist);
             // 3.2 해당 플레이리스트에 딸린 모든 음악을 Music 도메인에 저장
-            initiallyAddVideoDetails(getPlaylist.getId());//   musicService.initiallyAddVideoDetails(getPlaylist.getId());
+            initiallyAddVideoDetails(getPlaylist.getId(), countryCode);//   musicService.initiallyAddVideoDetails(getPlaylist.getId());
         }
     }
 
-    @Override
-    public void initiallyAddVideoDetails(String playlistId) {
+//    @Override
+    public void initiallyAddVideoDetails(String playlistId, String countryCode) {
         List<PlaylistItem> playlistItems;
         try {
             // 1. 페이지네이션으로 플레이리스트 내용물 전체 확보 (비정상도 다 포함)
@@ -110,7 +111,7 @@ public class PlaylistServiceV1 implements PlaylistService {
         // 2. 검색할 비디오 ID 리스트 만들기
         List<String> videoIds = playlistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
         // 3. 페이지네이션으로 정상 음악만 세부사항 필터링 해오기
-        List<Video> legalVideos = youtubeApiClient.safeFetchVideos(videoIds).getLegalVideos();
+        List<Video> legalVideos = youtubeApiClient.safeFetchVideos(videoIds, countryCode).getLegalVideos();
         // 4. DB 에 최초 등록
 
         Playlists playlist = playlistRepository.findByPlaylistId(playlistId);

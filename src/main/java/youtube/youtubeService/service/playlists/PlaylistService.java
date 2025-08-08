@@ -7,10 +7,14 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PlaylistService {
-    List<Playlists> getPlaylistsByUserId(String userId);
-    List<Playlist> getAllPlaylists(String userId) throws IOException;
-    void registerPlaylists(String userId, List<String> selectedPlaylistIds);
-    void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds);
-    void initiallyAddVideoDetails(String playlistId) throws IOException;
 
+    List<Playlists> getPlaylistsByUserId(String userId);
+
+    List<Playlist> getAllPlaylists(String userId) throws IOException;
+
+    void registerPlaylists(String userId, List<String> selectedPlaylistIds);
+
+    void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds);
+
+    // void initiallyAddVideoDetails(String playlistId, String countryCode) throws IOException;
 }

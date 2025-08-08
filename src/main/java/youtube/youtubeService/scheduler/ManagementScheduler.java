@@ -89,6 +89,7 @@ public class ManagementScheduler {
 
         for (Users user : users) {
             String userId = user.getUserId(); // String userId  = "112735690496635663877";
+            String countryCode = user.getCountryCode();
             log.info("userId : {}", userId);
             // 1. 유저 아이디로 accessToken 발급
             String accessToken = userService.getNewAccessTokenByUserId(userId);
@@ -101,7 +102,7 @@ public class ManagementScheduler {
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
                 try {
-                    youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
+                    youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
                 } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
                     playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
                     log.info("removed the playlist({}) from DB", e.getMessage());
@@ -121,6 +122,7 @@ public class ManagementScheduler {
         log.info("auto scheduler activated");
         // 0. 전체 유저 목록에서 순차적으로 유저를 뽑아 오는 시나리오 있다 치고
         String userId  = "112735690496635663877";
+        String countryCode = "KR";
         // 1. 유저 아이디로 accessToken 발급
         String accessToken = userService.getNewAccessTokenByUserId(userId);
         if(accessToken.equals("")) {
@@ -132,7 +134,7 @@ public class ManagementScheduler {
         for (Playlists playlist : playListsSet) {
             log.info("{} start", playlist.getPlaylistTitle());
             try {
-                youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
+                youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
             } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
                 playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
                 log.info("remove the playlist({}) from DB", e.getMessage());

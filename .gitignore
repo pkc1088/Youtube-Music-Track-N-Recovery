@@ -28,6 +28,8 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 src/main/resources/static/google9cce108361f8ecd7.html
+src/main/resources/geo/*
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

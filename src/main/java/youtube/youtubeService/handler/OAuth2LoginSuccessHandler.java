@@ -1,16 +1,7 @@
 package youtube.youtubeService.handler;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.Channel;
-import com.google.api.services.youtube.model.ChannelListResponse;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -19,17 +10,12 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.service.GeoIpService;
 import youtube.youtubeService.service.users.UserService;
-
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Objects;
 import java.util.StringTokenizer;
 
 @Slf4j
@@ -37,18 +23,20 @@ import java.util.StringTokenizer;
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final UserService userService;
+    private final GeoIpService geoIpService;
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final YoutubeApiClient youtubeApiClient;
 
-    public OAuth2LoginSuccessHandler(UserService userService, OAuth2AuthorizedClientService authorizedClientService, YoutubeApiClient youtubeApiClient) {
+    public OAuth2LoginSuccessHandler(UserService userService, GeoIpService geoIpService,
+                                     OAuth2AuthorizedClientService authorizedClientService, YoutubeApiClient youtubeApiClient) {
         this.userService = userService;
+        this.geoIpService = geoIpService;
         this.authorizedClientService = authorizedClientService;
         this.youtubeApiClient = youtubeApiClient;
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
 
         log.info("onAuthentication Success");
         if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
@@ -79,6 +67,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             } else {
                 String fullName = ((OidcUser) oauthToken.getPrincipal()).getFullName(); // pkc1088, whistle_missile 등
                 String channelId;
+
                 try {
                     channelId = youtubeApiClient.getChannelIdByUserId(accessToken); // channelId = getChannelIdByUserId(accessToken);;
                 } catch (IOException | GeneralSecurityException e) {
@@ -87,26 +76,35 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                     response.sendRedirect("/denied");
                     return;
                 }
+
                 String email = ((OidcUser) oauthToken.getPrincipal()).getEmail();
+
                 if (isTemporaryEmail(email)) {
                     log.info("Temporary Email");
-                    email = getRealEmail(email, oauthToken);
+                    email = getRealEmail(email);
                 }
-                String refreshToken = authorizedClient.getRefreshToken() != null ? authorizedClient.getRefreshToken().getTokenValue() : null;
 
-                saveUsersToDatabase(userId, fullName, channelId, email, refreshToken); // new member
+                String refreshToken = authorizedClient.getRefreshToken() != null ? authorizedClient.getRefreshToken().getTokenValue() : null;
+                String countryCode = geoIpService.getClientCountryCode(request);
+                /*
+
+                "UNKNOWN 리턴 받았을 때 회원 반려시키는 로직 추가
+                if("UNKNOWN".equals(countryCode)) {
+
+                }
+
+                */
+
+                saveUsersToDatabase(userId, fullName, channelId, email, refreshToken, countryCode); // new member
             }
         }
 
         response.sendRedirect("/");// super.onAuthenticationSuccess(request, response, authentication);>simpleUrlAuthenticationSuccessHandler>AbstractAuthenticationTargetUrlRequestHandler 타고 들어가보면 기본 defaultTargetUrl = "/"; 이렇게 셋팅 되어서 에러 뜬거임.
     }
 
-//    @Transactional // 250721 주석함
     void saveUpdatedRefreshToken(Users user, String updatedRefreshToken) {
         user.setRefreshToken(updatedRefreshToken);
-        userService.saveUser(user); // 얘 추가해줘야 mysql 에 반영됨 (userService 에 트잭 있어서 영속성 컨텍스트 내 반영이 됨, 트잭 시작지점)
-        // Transactional : 어차피 외부 메서드(및 현재 클래스)에 트잭이 안걸려있었기에 프록시가 없어서, 외부 메서드가 호출해도 이게 안 먹혔던거임
-        // 애초에  User 가 영속 상태가 아님(이 클래스엔 트잭 없으니까), 그래서 save 명시적으로 해줘야함
+        userService.saveUser(user); // 이 클래스엔 트잭 없으니까 애초에  User 가 영속 상태가 아님, 그래서 save 명시적으로 해줘야함, 그래야 mysql 에 반영됨 (userService 에 트잭 있어서 영속성 컨텍스트 내 반영이 됨, 트잭 시작 지점)
     }
 
     private boolean alreadyMember(String userId) {
@@ -121,65 +119,27 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         return false;
     }
 
-    public void saveUsersToDatabase(String id, String fullName, String channelId, String email, String refreshToken) {
+    public void saveUsersToDatabase(String id, String fullName, String channelId, String email, String refreshToken, String countryCode) {
         log.info("new member Id: {}", id);
         log.info("new member Name: {}", fullName);
         log.info("new member Email: {}", email);
         log.info("new member ChannelId: {}", channelId);
+        log.info("new member Country Code: {}", countryCode);
         log.info("new member Refresh Token: {}", refreshToken);
-        userService.saveUser(new Users(id, fullName, channelId, email, refreshToken));
+        userService.saveUser(new Users(id, fullName, channelId, email, countryCode, refreshToken));
     }
 
     private boolean isTemporaryEmail(String email) {
         return email != null && email.endsWith("@pages.plusgoogle.com");        // 임시 이메일 주소인지 확인
     }
 
-    private String getRealEmail(String email, OAuth2AuthenticationToken oauthToken) {
+    private String getRealEmail(String email) {
         StringTokenizer st = new StringTokenizer(email, "-");
         return st.nextToken() + "@gmail.com";
     }
 
-    /*
-    public String getChannelIdByUserId(String accessToken) throws IOException, GeneralSecurityException {
-        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-        YouTube youtube = new YouTube.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-                .setApplicationName("youtube-channel-info").build();
-
-        ChannelListResponse response;
-        try {
-            response = youtube.channels().list(Collections.singletonList("snippet")).setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
-        } catch (GoogleJsonResponseException e) {
-            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
-            RestTemplate restTemplate = new RestTemplate();
-            restTemplate.postForEntity(revokeUrl, null, String.class);
-
-            throw new IOException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");// throw new RuntimeException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
-        }
-
-        Channel channel = response.getItems().get(0);
-        return channel.getId();
-    }
-    */
-
 }
-/*
-    public String getChannelIdByUserId(String accessToken) throws IOException, GeneralSecurityException {
-        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-        YouTube youtube = new YouTube.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-                .setApplicationName("youtube-channel-info").build();
 
-        ChannelListResponse response = youtube.channels().list(Collections.singletonList("snippet"))
-                                        .setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
-        if (response.getItems().isEmpty()) {
-            throw new RuntimeException("No channel found for the authenticated user.");
-        }
-        Channel channel = response.getItems().get(0);
-        return channel.getId();
-    }
-
- */
 /*@Bean
 public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
     return new DefaultOAuth2AuthorizationRequestResolver(
@@ -201,26 +161,4 @@ public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(Cli
         }
     };
 }
-
-//        if (authentication instanceof OAuth2AuthenticationToken) {
-//            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-//            // OAuth2 사용자 정보 추출
-//            if (oauthToken.getPrincipal() instanceof OidcUser) {
-//                OidcUser oidcUser = (OidcUser) oauthToken.getPrincipal();
-//                // Access Token 추출
-//                String accessToken = oidcUser.getIdToken().getTokenValue();
-//                // Refresh Token 추출 (Google의 경우 refresh_token은 별도로 요청해야 함)
-//                String refreshToken = null; // Google은 refresh_token을 기본적으로 제공하지 않음
-//                // 사용자 정보 추출 (예: 이메일)
-//                String email = oidcUser.getEmail();
-//                // 데이터베이스에 저장
-//                saveTokensToDatabase(email, accessToken, refreshToken);
-//            }
-//        }
-//        // 기본 리다이렉트 동작 수행
-//        super.onAuthenticationSuccess(request, response, authentication);
-
-
-
-
 */

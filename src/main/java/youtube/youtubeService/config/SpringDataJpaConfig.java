@@ -42,12 +42,12 @@ public class SpringDataJpaConfig {
     private final OutboxEventPublisher outboxEventPublisher;
     private final SearchPolicy searchPolicy;
 
-    @Autowired
+    //@Autowired
     public SpringDataJpaConfig(
             SdjUserRepository sdjUserRepository, SdjPlaylistRepository sdjPlaylistRepository, SdjMusicRepository sdjMusicRepository,
             ActionLogRepository actionLogRepository, OutboxRepository outboxRepository,
             YoutubeApiClient youtubeApiClient, OutboxEventPublisher outboxEventPublisher,
-            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy) {
+            @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy) { // Map<String, SearchPolicy> searchPolicyMap; 테스트 해보기
         this.sdjUserRepository = sdjUserRepository;
         this.sdjPlaylistRepository = sdjPlaylistRepository;
         this.sdjMusicRepository = sdjMusicRepository;
@@ -60,8 +60,7 @@ public class SpringDataJpaConfig {
 
     @Bean
     public YoutubeService youtubeService() {
-        return new YoutubeServiceV5(musicRepository(), searchPolicy, actionLogService(), youtubeApiClient,
-                playlistService(), musicService(), outboxService());
+        return new YoutubeServiceV5(actionLogService(), youtubeApiClient, playlistService(), musicService(), outboxService());
     }
 
     @Bean

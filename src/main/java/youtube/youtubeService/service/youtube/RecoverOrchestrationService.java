@@ -30,7 +30,9 @@ public class RecoverOrchestrationService {
 
         for (Users user : users) {
             String userId = user.getUserId(); // String userId  = "112735690496635663877";
+            String countryCode = user.getCountryCode();
             log.info("userId : {}", userId);
+
             // 1. 유저 아이디로 accessToken 발급
             String accessToken = userService.getNewAccessTokenByUserId(userId);
             if(accessToken.equals("")) {
@@ -43,7 +45,7 @@ public class RecoverOrchestrationService {
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
                 try {
-                    youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
+                    youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
                 } catch (Exception e) {// 예상 못한 런타임 에러 방어
                     log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
                 }
@@ -57,6 +59,8 @@ public class RecoverOrchestrationService {
 
         String userId  = "112735690496635663877";
         String accessToken = userService.getNewAccessTokenByUserId(userId);
+        String countryCode = "KR";
+
         if(accessToken.equals("")) {
             log.info("abort scheduling bc user left");
             return;
@@ -66,7 +70,7 @@ public class RecoverOrchestrationService {
         for (Playlists playlist : playListsSet) {
             log.info("{} start", playlist.getPlaylistTitle());
             try {
-                youtubeService.fileTrackAndRecover(userId, playlist, accessToken);
+                youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
             } catch (Exception e) {// 예상 못한 런타임 에러 방어
                 log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
             }

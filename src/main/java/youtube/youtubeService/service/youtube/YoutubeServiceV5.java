@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import youtube.youtubeService.api.YoutubeApiClient;
-import youtube.youtubeService.domain.ActionLog;
-import youtube.youtubeService.domain.Music;
-import youtube.youtubeService.domain.Outbox;
-import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.domain.*;
 import youtube.youtubeService.dto.VideoFilterResult;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.ActionLogRepository;
@@ -207,6 +204,25 @@ public class YoutubeServiceV5 implements YoutubeService {
 
             // if(userId != null) throw new RuntimeException("Intentioned Runtime Exception"); // 고의적 예외 던짐
         }
+    }
+
+    @Override
+    public void lazyTest(Playlists playlistParam) {
+
+        String userId = "101758050105729632425";
+        Playlists playlist = playlistService.getPlaylistsByUserId(userId).get(0);
+
+        log.info("[LAZY TEST START]");
+        log.info("1. playlist.getPlaylistTitle : {}", playlist.getPlaylistTitle());
+
+        Users user = playlist.getUser();
+        log.info("2. playlist.getUser : User");
+
+        log.info("3. playlist.getUser.user.getUserNmae : {}", user.getUserName()); // playlistParam 으로 하면 여기서 터짐
+
+        log.info("4. playlist.getUser.getUserName : {}", playlist.getUser().getUserName());
+        log.info("[LAZY TEST DONE]");
+
     }
 
 }

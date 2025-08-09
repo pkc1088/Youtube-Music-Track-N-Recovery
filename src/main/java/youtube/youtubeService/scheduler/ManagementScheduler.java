@@ -158,6 +158,18 @@ public class ManagementScheduler {
     }
 
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void LazyTest() {
+        String userId = "101758050105729632425";
+        Playlists playlistParam = playlistService.getPlaylistsByUserId(userId).get(0);
+
+        log.info("auto scheduler activated");
+
+        youtubeService.lazyTest(playlistParam);
+
+        log.info("auto scheduler done");
+    }
+
+    //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void queryTest() {
         log.info("auto scheduler activated");
 

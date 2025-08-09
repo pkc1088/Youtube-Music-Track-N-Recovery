@@ -8,5 +8,6 @@ public interface YoutubeService {
 
     void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken) throws IOException;
 
+    void lazyTest(Playlists playlistParam);
 }
 

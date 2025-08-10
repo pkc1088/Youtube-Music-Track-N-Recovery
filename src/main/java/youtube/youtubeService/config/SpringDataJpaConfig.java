@@ -29,7 +29,8 @@ import youtube.youtubeService.service.users.UserServiceV1;
 import youtube.youtubeService.service.youtube.YoutubeService;
 import youtube.youtubeService.service.youtube.YoutubeServiceV5;
 
-//@RequiredArgsConstructor
+
+/*
 @Configuration
 public class SpringDataJpaConfig {
 
@@ -103,3 +104,4 @@ public class SpringDataJpaConfig {
         return new MusicRepositoryV1(sdjMusicRepository);
     }
 }
+*/

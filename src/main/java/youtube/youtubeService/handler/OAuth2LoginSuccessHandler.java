@@ -88,9 +88,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 String countryCode = geoIpService.getClientCountryCode(request);
                 /*
 
-                "UNKNOWN 리턴 받았을 때 회원 반려시키는 로직 추가
+                "UNKNOWN 리턴 받았을 때 회원 반려시키는 로직 추가 (getClientCountryCode 가 RunTime EX 던지게 해서 터트리는게 나을 듯
                 if("UNKNOWN".equals(countryCode)) {
-
+                    throw new RuntimeException();
                 }
 
                 */

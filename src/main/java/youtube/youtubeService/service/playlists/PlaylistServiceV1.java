@@ -23,8 +23,6 @@ import youtube.youtubeService.repository.users.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.users.UserService;
-
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,6 +52,7 @@ public class PlaylistServiceV1 implements PlaylistService {
         return playlistRepository.findAllPlaylistsByUserId(userId);
     }
 
+    @Override
     public List<Playlist> getAllPlaylists(String userId) throws IOException {
         // 1. userId 로 oauth2 인증 거쳐 DB 에 저장됐을 channelId 얻기
         Users user = userService.findByUserId(userId); // userRepository.findByUserId(userId);
@@ -70,6 +69,7 @@ public class PlaylistServiceV1 implements PlaylistService {
         }
     }
 
+    @Override
     public void registerPlaylists(String userId, List<String> selectedPlaylistIds) {//throws IOException
         Users user = userService.findByUserId(userId); // userRepository.findByUserId(userId);
         String countryCode = user.getCountryCode();

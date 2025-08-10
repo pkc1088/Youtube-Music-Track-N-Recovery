@@ -29,7 +29,7 @@ public class UserServiceV1 implements UserService {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
     private final UserRepository userRepository;
-    private final ActionLogService actionLogService;
+    // private final ActionLogService actionLogService;
 
     public List<Users> findAllUsers() {
         return userRepository.findAllUsers();
@@ -60,7 +60,7 @@ public class UserServiceV1 implements UserService {
             try {
                 restTemplate.postForEntity(revokeUrl, null, String.class);
                 userRepository.deleteUser(user); // 유저 DB에서 삭제
-                actionLogService.deleteByUserId(user.getUserId());// ActionLog 도 삭제
+                // actionLogService.deleteByUserId(user.getUserId());// ActionLog 도 삭제
             } catch (Exception e) {
                 log.warn("Failed to revoke Google token for user: {}", user.getUserId(), e);
             }

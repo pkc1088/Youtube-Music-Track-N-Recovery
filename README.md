@@ -148,6 +148,16 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 ---
 
+## 4. Layered Architecture
+<p align="center">
+  <img width="800" height="550" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" />
+</p>
+
+## 5. Orchestration Service
+<p align="center">
+  <img width="800" height="450" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
+</p>
+
 ## 🧩 4. 트러블슈팅 & 기술 과제
 
 - **OAuth2**
@@ -197,5 +207,6 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 
 ---
+
 
 

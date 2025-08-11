@@ -139,11 +139,12 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 
 - 자동화된 복구로 사용자 개입 최소화
-
-<img width="700" height="400" alt="ui2" src="https://github.com/user-attachments/assets/4e0d8b21-2767-49e0-8f38-a6c2f0bb15de" />
-
-<img width="700" height="400" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" />
-
+<p align="center">
+  <img width="700" height="400" alt="ui2" src="https://github.com/user-attachments/assets/4e0d8b21-2767-49e0-8f38-a6c2f0bb15de" />
+</p>
+<p align="center">
+  <img width="700" height="400" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" />
+</p>
 
 
 ---
@@ -157,6 +158,19 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 <p align="center">
   <img width="800" height="450" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
 </p>
+
+## 6. 복구 시나리오 Sequence Diagram
+<img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
+
+
+## 7. Outbox Pattern
+
+
+## 8. ERD
+<p align="center">
+  <img width="1121" height="674" alt="ERD" src="https://github.com/user-attachments/assets/e75fc94e-1533-4fb6-967a-220be616da80" />
+</p>
+
 
 ## 🧩 4. 트러블슈팅 & 기술 과제
 
@@ -207,6 +221,7 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 
 ---
+
 
 
 

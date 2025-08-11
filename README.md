@@ -101,33 +101,27 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 
 - **개발 환경**
-  - Java + Spring Boot
-  - DB : Cloud SQL (배포), MySQL (로컬), H2 (테스트)
+  - Java + Spring Boot: 버전 명시
+
+  - DB : Cloud SQL(배포), MySQL(로컬), H2(테스트)
+
   - Infra : Google Cloud Run, Cloud Scheduler
 
-### 📁 디렉토리 구조
-``` 
- youtubeService
-    ├── config
-    ├── controller
-    ├── domain
-    ├── handler
-    ├── policy
-    │   ├── gemini
-    │   └── simple
-    ├── repository
-    │   ├── musics
-    │   ├── playlists
-    │   └── users
-    ├── scheduler
-    └── service
-        ├── musics
-        ├── playlists
-        ├── users
-        └── youtube
-```
+---
 
-## 🚀 3. 주요 기능
+## 📝 3. 심사 
+
+- Google **OAuth2 민감 범위 데이터** 심사 완료
+  - 'youtube.force-ssl' 허가
+
+- Youtube Data API V3 **할당량 증설** 완료
+  - 10,000 -> 100,000
+ 
+- Youtube **API Compilance** 심의 통과
+
+---
+
+## 🚀 4. 주요 기능
 
 - 비정상 영상 자동 탐지
  
@@ -149,15 +143,23 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 ---
 
+## 3. OAuth2 로그인 및 회원가입 Sequence Diagram
+<p align="center">
+  <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" />
+</p>
+
+
 ## 4. Layered Architecture
 <p align="center">
   <img width="800" height="550" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" />
 </p>
 
+
 ## 5. Orchestration Service
 <p align="center">
   <img width="800" height="450" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
 </p>
+
 
 ## 6. 복구 시나리오 Sequence Diagram
 <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
@@ -165,12 +167,16 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 
 ## 7. Outbox Pattern
 
+- DB와 API 간 동기화
+- 멱등성 보장
 
 ## 8. ERD
 <p align="center">
   <img width="1121" height="674" alt="ERD" src="https://github.com/user-attachments/assets/e75fc94e-1533-4fb6-967a-220be616da80" />
 </p>
 
+- ManyToOne
+- Lazy Loading
 
 ## 🧩 4. 트러블슈팅 & 기술 과제
 
@@ -221,6 +227,7 @@ Youtube 음원 재생목록의 비정상적인 삭제에 대한 **자동 추적 
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 
 ---
+
 
 
 

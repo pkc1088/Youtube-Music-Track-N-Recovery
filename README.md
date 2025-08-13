@@ -83,7 +83,7 @@
     - **Youtube Music은 유료 서비스**
     - **완전한 플레이리스트 커스텀화가 불가능**
 
-- 즉, **'유튜브 + FixMyPlaylist'** 조합만이 방대하고 다양한 유형의 음악을 무료로 자유롭고 안전하게 관리할 수 있습니다.
+- 즉, **'유튜브 + FixMyPlaylist'** 조합만이 다양한 유형의 음악을 무료로 자유롭고 안전하게 관리할 수 있습니다.
 <br><br>
 
 ## ⚙️ 4. 프로젝트 스펙
@@ -153,6 +153,7 @@
 - 설명 추가
 
 - 설명 추가
+<br><br>
 
 ### 2. 복구 시나리오
 <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
@@ -160,6 +161,14 @@
 - 설명 추가
 
 - 설명 추가
+<br><br>
+
+### 3. 할당량 소모량 & 최적화
+
+- 설명 추가
+
+- 설명 추가
+<br><br>
 
 ## 💡 8. 아키텍처
 
@@ -171,7 +180,8 @@
 - 설명 추가
 
 - 설명 추가
-  
+<br><br>
+
 ### 2. Orchestration Service
 <p align="center">
   <img width="800" height="400" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
@@ -191,11 +201,12 @@
 - 멱등성 보장
 
 - 테스트 케이스(Table)
+<br><br>
 
 ### 2. ERD & JPA
 
 <p align="center">
-  <img width="1121" height="674" alt="ERD" src="https://github.com/user-attachments/assets/e75fc94e-1533-4fb6-967a-220be616da80" />
+  <img width="800" height="500" alt="ERD" src="https://github.com/user-attachments/assets/e75fc94e-1533-4fb6-967a-220be616da80" />
 </p>
 
 - ManyToOne
@@ -203,8 +214,7 @@
 - Lazy Loading
 <br><br>
 
-
-## 🧩 4. 트러블슈팅 & 기술 과제
+## 🧩 9. 트러블슈팅 & 기술 과제
 
 - **심사 대응**
   - 구글 OAuth2 심사 대응 전략 수립
@@ -236,25 +246,25 @@
   - OAuth 로그인 캐시 이슈
 <br><br>
 
-## 📡 5. 기술 및 API
+## 📡 10. 기술 및 API
 
 - **Youtube Data API V3**
   - 할당량 관리
   - PlaylistItems, Videos, Search API 활용
 
-
 - **Gemini API**
   - 복구 시 유사 음원 추천에 활용
 
----
+- **MaxMind Geo-Lite**
+  - 최초 회원가입 시 국가코드 추출
+<br><br>
 
-## ✅ 6. 프로젝트 결론 및 리뷰
+## ✅ 11. 프로젝트 결론 및 리뷰
 
 - 유튜브 사용자의 음악 자산 보호에 실질적 도움을 주는 서비스
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
-
----
+<br><br>
 
 
 

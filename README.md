@@ -70,10 +70,10 @@
 - 하지만 정식으로 플레이리스트의 내부 목록들을 등록하고 **자동 추적 및 복구**를 서비스하는 곳은 **전무**합니다.
 
 ### ❓ 왜 Youtube Music이 아닌가?
-- *타 음악 플랫폼(Spotify, Apple Music 등)*
+- 타 음악 플랫폼(*Spotify, Apple Music* 등)
   - 정식 음원이 아닌 라이브, 콘서트 영상 등을 포함하지 못하며 앞도적으로 적은 수의 음악만 등록되어 있습니다.
 
-- *Youtube Music*
+- Youtube Music
   - 유튜브와 유튜브 뮤직은 기본적으로 호환됩니다.
   
   - 유튜브 뮤직도 유사한 기능 제공하지만, 다음과 같은 **제약**이 존재합니다.
@@ -83,7 +83,7 @@
     - **Youtube Music은 유료 서비스**
     - **완전한 플레이리스트 커스텀화가 불가능**
 
-- 즉, **'유튜브 + FixMyPlaylist'** 조합만이 방대하고 다양한 유형의 음악을 무료로 자유롭게 관리할 수 있습니다.
+- 즉, **'유튜브 + FixMyPlaylist'** 조합만이 방대하고 다양한 유형의 음악을 무료로 자유롭고 안전하게 관리할 수 있습니다.
 <br><br>
 
 ## ⚙️ 4. 프로젝트 스펙
@@ -117,7 +117,22 @@
     - **'개인정보처리방침'** 및 **'서비스 이용약관'** 명세
 <br><br>
 
-## 🚀 4. 주요 기능
+## 🚀 6. 주요 기능
+
+<table>
+  <tr>
+    <!-- 왼쪽: 세로로 늘린 afterLogin -->
+    <td>
+      <img width="500" height="1400" alt="afterLogin" src="https://github.com/user-attachments/assets/b5b6c988-9d78-4a24-afc7-832bf0425579" />
+    </td>
+    <!-- 오른쪽: ui2, ui3, 복구내역 -->
+    <td>
+      <img width="500" alt="ui2" src="https://github.com/user-attachments/assets/4e0d8b21-2767-49e0-8f38-a6c2f0bb15de" /><br/>
+      <img width="500" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" /><br/>
+      <img width="500" alt="복구내역" src="https://github.com/user-attachments/assets/574640cf-19bc-4d82-9670-1a285d3a7971" />
+    </td>
+  </tr>
+</table>
 
 - 비정상 영상 자동 탐지
  
@@ -126,52 +141,74 @@
 - 재생목록 상태 추적 및 기록
 
 - 자동화된 복구로 사용자 개입 최소화
-<p align="center">
-  <img width="700" height="400" alt="ui2" src="https://github.com/user-attachments/assets/4e0d8b21-2767-49e0-8f38-a6c2f0bb15de" />
-</p>
-<p align="center">
-  <img width="700" height="400" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" />
-</p>
+<br><br>
 
+## 📊 7. Sequence Diagram
 
----
-
-## 3. OAuth2 로그인 및 회원가입 Sequence Diagram
+### 1. OAuth2 로그인 및 회원가입
 <p align="center">
   <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" />
 </p>
 
+- 설명 추가
 
-## 4. Layered Architecture
-<p align="center">
-  <img width="800" height="550" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" />
-</p>
+- 설명 추가
 
-
-## 5. Orchestration Service
-<p align="center">
-  <img width="800" height="450" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
-</p>
-
-
-## 6. 복구 시나리오 Sequence Diagram
+### 2. 복구 시나리오
 <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
 
+- 설명 추가
 
-## 7. Outbox Pattern
+- 설명 추가
+
+## 💡 8. 아키텍처
+
+### 1. Layered Architecture
+<p align="center">
+  <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" />
+</p>
+
+- 설명 추가
+
+- 설명 추가
+  
+### 2. Orchestration Service
+<p align="center">
+  <img width="800" height="400" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
+</p>
+
+- 설명 추가
+
+- 설명 추가
+<br><br>
+
+## 🛠️ 9. 세부 기술
+
+### 1. Outbox Pattern
 
 - DB와 API 간 동기화
+
 - 멱등성 보장
 
-## 8. ERD
+- 테스트 케이스(Table)
+
+### 2. ERD & JPA
+
 <p align="center">
   <img width="1121" height="674" alt="ERD" src="https://github.com/user-attachments/assets/e75fc94e-1533-4fb6-967a-220be616da80" />
 </p>
 
 - ManyToOne
+
 - Lazy Loading
+<br><br>
+
 
 ## 🧩 4. 트러블슈팅 & 기술 과제
+
+- **심사 대응**
+  - 구글 OAuth2 심사 대응 전략 수립
+  - 동의 화면, 개인정보처리방침, 서비스명 일치 검토
 
 - **OAuth2**
   - `@RegisteredOAuth2AuthorizedClient` 사용
@@ -180,9 +217,8 @@
   - 고유 사용자 식별 및 DB 저장
 
 
-- **심사 대응**
-  - 구글 OAuth2 심사 대응 전략 수립
-  - 동의 화면, 개인정보처리방침, 서비스명 일치 검토
+- **Transaction 전파, REQURIES_NEW**
+  - 설명 추가
 
 
 - **Youtube 비정상 영상 분류**
@@ -198,8 +234,7 @@
 - **보안**
   - CSRF 토큰 관리
   - OAuth 로그인 캐시 이슈
-
----
+<br><br>
 
 ## 📡 5. 기술 및 API
 
@@ -220,6 +255,7 @@
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 
 ---
+
 
 
 

@@ -211,7 +211,7 @@
 ### 2. 복구 시나리오
 <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
 
-- `Cloud Scheduler`로 트리거: 엔드포인트 호출 시 헤더의 `API KEY`를 이용해 유효성 검사
+- `Cloud Scheduler` 트리거: 엔드포인트 호출 시 헤더의 `API KEY`를 이용해 유효성 검사
 
 - `Gemini` LLM 모델을 이용해 저장된 메타데이터를 기반으로 검색할 쿼리를 확보
 
@@ -260,8 +260,7 @@
 - 서비스 클래스들 간 상호 의존 문제를 방지하고 단방향 구조를 유지
 
 - Outbox 패턴과 결합해 재시도 보상 시퀀스 제공
-
-- Cloud Scheduler에 의해 트리거
+<br><br>
 
 ### 2. Outbox Pattern
 
@@ -269,14 +268,16 @@
   <img width="700" height="550" alt="image" src="https://github.com/user-attachments/assets/92dacb13-29c3-472b-98eb-e8b34dc3658b" />
 </p>
 
-- Outbox Pattern 도입 이유:
-  - DB 처리 작업과 API 추가/삭제 작업 미분리: 롤백 발생 시 데이터 정합성 문제 발생
-  - DB 처리 작업과 API 호출을 순차적으로 처리: 트랜잭션 시간이 불필요하게 길어짐
-  - Outbox로 관리 시: 정책에 따라 API 재시도 가능
+- **Outbox Pattern 도입 이유:**
+  - DB 작업과 API 추가/삭제 작업 분리
+    - 롤백 발생 시 데이터 정합성 유지
+    - 트랜잭션 시간이 불필요하게 길어지는 것 방지
+
+  - Outbox로 관리해 정책에 따라 API 추가/삭제 재시도 가능
 
 - Outbox 상태(`PENDING`, `FAILED`, `SUCCESS`, `DEAD`)를 업데이트해 멱등성 보장
 
-- Outbox의 상태 업데이트 시: 새로운 트랜잭션(`REQURIES_NEW`) 사용
+- Outbox의 상태 업데이트 시 새로운 트랜잭션(`REQURIES_NEW`) 사용
   - Outbox 이벤트 처리는 DB 최신화가 끝난 후 `AFTER_COMMIT`에 의해 실행
   - 스프링의 트랜잭션 컨텍스트와 DB 트랜잭션 간 생명주기를 고려해 새로운 트랜잭션을 수행
 <br><br>
@@ -361,6 +362,7 @@
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

@@ -10,6 +10,12 @@
   <br><br>
 </p>
 
+## ☑️ 0. 목차
+- [1. 프로젝트 개요](#-1-프로젝트-개요)
+- [2. 프로젝트 소개](#-2-프로젝트-소개)
+- [3. 현행 서비스 조사](#-3-현행-서비스-조사)
+- [4. 프로젝트 스펙](#-4-프로젝트-스펙)
+<br><br>
 
 ## 📌 1. 프로젝트 개요
 
@@ -69,9 +75,9 @@
 
 - 하지만 정식으로 플레이리스트의 내부 목록들을 등록하고 **자동 추적 및 복구**를 서비스하는 곳은 **전무**합니다.
 
-### ❓ 왜 Youtube Music이 아닌가?
-- 타 음악 플랫폼(*Spotify, Apple Music* 등)
-  - 정식 음원이 아닌 라이브, 콘서트 영상 등을 포함하지 못하며 앞도적으로 적은 수의 음악만 등록되어 있습니다.
+### ❓ 왜 Youtube 인가?
+- 타 음악 플랫폼(Spotify, Apple Music 등)
+  - 정식 음원이 아닌 라이브, 콘서트 영상 등을 포함하지 못하며 바교적으로 적은 수의 음악만 등록되어 있습니다.
 
 - Youtube Music
   - 유튜브와 유튜브 뮤직은 기본적으로 호환됩니다.
@@ -117,7 +123,7 @@
     - **'개인정보처리방침'** 및 **'서비스 이용약관'** 명세
 <br><br>
 
-## 🚀 6. 사용자 관점 주요 기능
+## 🚀 6. 주요 화면 구성
 
 <table>
   <tr>
@@ -144,75 +150,108 @@
 
 - 'Delete Account' 버튼을 통해 모든 사용자 관련 데이터 제거
 
-- 복구 내역을 확인
+- 복구 내역 확인
 <br><br>
 
-## 📊 7. Sequence Diagram
+## ✔️ 7. 내부 정책 수립 & 할당량 최적화 
+
+### 1. 중복 영상 처리 및 복구 정책
+
+- 영상 케이스별 복구 정책<br><br>
+  | 케이스 | API(개수) | DB(개수) | Action(개수) |
+  |:---:|:---:|:---:|:---:|
+  | A | 정상(1) | 정상(1) | 유지 |
+  | B | 정상(1) | 정상(2) | DB 삭제(1) |
+  | C | 정상(2) | 정상(1) | DB 추가(1) |
+  | D | 비정상(1) | 정상(1) | 복구(1) |
+  | E | 비정상(2) | 정상(1) | 복구(2), DB 추가(1) |
+  | F | 비정상(1) | 정상(2) | 복구(1), DB 삭제(1) |
+  | G | 비정상(n) | 없음(0) | API 삭졔(n) 호출 |
+<br>
+
+- 재생목록 커스텀화의 극대화를 위해 중복 영상 저장 허용 
+<br><br>
+
+### 2. API 할당량 소모 최적화
+
+- 페이지네이션(Pagination) 적용
+  - YouTube Data API로 한 번에 가져올 수 있는 최대 **재생목록/재생목록 아이템/비디오** 수: **50개**
+  - 페이지 수 = 전체 대상 개수 ÷ 50  
+    
+- 케이스 별 API 사용량 공식
+  - 예시: 전체 100개의 재생목록(**P**) 보유, 100개의 재생목록(재생목록 아이템: **I**) 등록, 각 재생목록은 100곡(**V**) 포함, 비정상 영상 1개 복구<br>
+  
+    | 케이스 | 요청 단계 | 계산식 | 소모 Quota |
+    |:--------|:----------|:--------|------------:|
+    | 등록   | 전체 재생목록 조회<br>각 재생목록 아이템 조회<br>각 비디오 디테일 조회 | **P(1 + I + V) / 50** | 402 |
+    | 추적   | 각 재생목록 아이템 조회<br>각 비디오 디테일 조회 | **P(I + V) / 50** | 400 |
+    | 복구   | 대체 영상 검색<br>대체 영상 추가<br>비정상 영상 삭제 | **200 + (I/50)** | 202 |
+<br>
+
+## 📊 8. Sequence Diagram
 
 ### 1. OAuth2 로그인 및 회원가입
 <p align="center">
   <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" />
 </p>
 
-- 설명 추가
+- 로그인 성공 핸들러를 구축해 회원가입과 로그인을 통합
 
-- '로그인 성공 핸들러'를 구축해 회원가입과 로그인을 통합
+- 계정 내 브랜드 계정 선택 가능
 
-- 계정 선택 가능, `refresh token` 발급으로 고객 부재에도 `access token`을 발급해 자동 복구가 가능.
+- `refresh token` 발급으로 고객 부재에도 `access token`을 발급해 자동 복구 가능
 
-- `GeoIP`를 이용해 IP 기반 고객의 국가코드를 확보: '국가 차단' 비정상 영상의 판단 기준.
+- `GeoIP`를 이용해 IP 기반 고객의 국가코드를 확보: 특정 국가가 차단된 영상의 판단 기준
 
-- `youtube.force-ssl` 미허용 시 세션 무효화, 토큰 무효화 후 리다이렉트.
+- 재생목록 접근 권한(`youtube.force-ssl`) 미허용 시 세션, 쿠키 및 토큰 무효화 후 리다이렉트
 <br><br>
 
 ### 2. 복구 시나리오
 <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
 
-- 설명 추가
+- `Cloud Scheduler`로 트리거: 엔드포인트 호출 시 헤더의 `API KEY`를 이용해 유효성 검사
 
-- `Gemini` LLM 모델을 이용해 저장된 메타데이터를 기반으로 검색할 쿼리를 확보.
+- `Gemini` LLM 모델을 이용해 저장된 메타데이터를 기반으로 검색할 쿼리를 확보
 
-- API 할당량 소모를 최소화 하기 위해, 대체할 Video Id에 대해 당일 로그 기록을 확인하며 불필요한 `Youtube Search` 사용을 피함.
+- API 할당량 소모를 최소화 하기 위해, 당일 로그 기록을 확인하며 불필요한 대체 영상 검색을 방지
 
-- 예외 케이스 대비
-  - 유저 예외: 'Delete Account' 버튼이 아닌, '구글 보안 페이지'에서 계정 삭제.
-  - 재생목록 예외: 재생목록을 해제하지 않고, 유튜브에서 재생목록을 제거한 경우.
-  - 음악 예외: 추적 및 복구의 대상.
+- ⚠ 예외 케이스 대비
+
+  | 구분 | 상황 | 식별 | 대처 |
+  |------|------|------|------|
+  | **유저 예외** | 서비스의 'Delete Account' 버튼을 사용하지 않고<br>Google 보안 페이지에서 직접 탈퇴 | AccessToken 발급 불가 | 유저 삭제 |
+  | **재생목록 예외** | 서비스에서 재생목록을 해제하기 전<br>유튜브 내에서 재생목록을 삭제 | 재생목록 API 조회 불가 | 재생목록 삭제 |
+  | **음악 예외** | API 조회 시 비정상적인 속성 검출 | 속성 검사로 필터링 | 복구 |
+
 <br><br>
 
-### 3. 할당량 소모량 & 최적화
+## 💡 9. 아키텍처
 
-- 케이스 별 사용량
-  - 조건: 100개의 재생목록 등록, 각 재생목록은 100곡, 비정상 영상 1개 탐지
-  - 등록:
-  - 추적:
-  - 복구:
+### 1. System Architecture
 
-- **Pagenation** 적용
+- Cloud Run + Cloud SQL + Cloud Scheduler + Youtube + SpringBoot + (Redis) 
 
-- 당일 복구 내역에서 대체 영상 조회
+- 그림 추가
 <br><br>
 
-## 💡 8. 아키텍처
-
-### 1. Layered Architecture
+### 2. Layered Architecture
 <p align="center">
   <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" />
 </p>
 
-- 설명 추가
+- '`Controller`→`Service`→`Repository`'의 계층적 단방향 구조
 
-- 'Controller→Service→Repository→Infra'의 단방향 구조
+- 횡단 관심사인 Security 설정으로 인증 상태를 전역적으로 판단
 
-- 횡단 관심사 'Security 셋팅'를 이용해 인증된 유저를 판단 
+- Orchestration Service 패턴 적용
 <br><br>
 
-### 2. Orchestration Service
+## 🛠️ 10. 세부 기술
+
+### 1. Orchestration Service
 <p align="center">
   <img width="800" height="400" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
 </p>
-
-- 설명 추가
 
 - 트랜잭션 내의 서비스단 코드들을 총 관장
 
@@ -222,89 +261,86 @@
 
 - Cloud Scheduler에 의해 트리거
 
- 
-<br><br>
-
-## 🛠️ 9. 세부 기술
-
-### 1. Outbox Pattern
+### 2. Outbox Pattern
 
 <p align="center">
   <img width="700" height="550" alt="image" src="https://github.com/user-attachments/assets/92dacb13-29c3-472b-98eb-e8b34dc3658b" />
 </p>
 
+- Outbox Pattern 도입 이유:
+  - DB 처리 작업과 API 추가/삭제 작업 미분리: 롤백 발생 시 데이터 정합성 문제 발생
+  - DB 처리 작업과 API 호출을 순차적으로 처리: 트랜잭션 시간이 불필요하게 길어짐
+  - Outbox로 관리 시: 정책에 따라 API 재시도 가능
 
-- Outbox Pattern을 도입한 이유:
-  - DB 처리 작업과 API 추가/삭제 작업을 분리하지 않으면 롤백 발생 시 데이터 정합성 문제가 발생합니다.
-  - DB 처리 작업과 API 호출을 순차적으로 처리할 시 트랜잭션 시간이 불필요하게 길어집니다.
-  - Outbox로 관리할 시 정책에 따라 API 재시도가 가능합니다.
+- Outbox 상태(`PENDING`, `FAILED`, `SUCCESS`, `DEAD`)를 업데이트해 멱등성 보장
 
-- Outbox 상태(PENDING, FAILED, SUCCESS, DEAD)를 업데이트해 멱등성을 보장했습니다.
-
-- Outbox의 상태 업데이트 시: 새로운 트랜잭션(REQURIES_NEW) 사용
-  - Outbox 이벤트 처리는 DB 최신화가 끝난 후 AFTER_COMMIT에 의해 실행됩니다.
-  - 스프링의 트랜잭션 컨텍스트와 DB 트랜잭션 간 생명주기를 고려해 새로운 트랜잭션을 수행합니다.
-
-- 비디오 처리 케이스 및 중복 영상 처리 정책
-  | 케이스 | API(개수) | DB(개수) | Action(개수) |
-  |:---:|:---:|:---:|:---:|
-  | A | 정상(1) | 정상(1) | 유지 |
-  | B | 정상(1) | 정상(2) | DB에서 삭제(1) |
-  | C | 정상(2) | 정상(1) | DB에서 추가(1) |
-  | D | 비정상(1) | 정상(1) | 복구(1) |
-  | E | 비정상(2) | 정상(1) | 복구(2), DB 추가(1) |
-  | F | 비정상(1) | 정상(2) | 복구(1), DB 삭제(1) |
-  | G | 비정상(n) | 없음(0) | API 삭졔(n) 호출 |
-
+- Outbox의 상태 업데이트 시: 새로운 트랜잭션(`REQURIES_NEW`) 사용
+  - Outbox 이벤트 처리는 DB 최신화가 끝난 후 `AFTER_COMMIT`에 의해 실행
+  - 스프링의 트랜잭션 컨텍스트와 DB 트랜잭션 간 생명주기를 고려해 새로운 트랜잭션을 수행
 <br><br>
 
-### 2. ERD & JPA
+### 3. ERD
 
 <p align="center">
   <img width="800" height="500" alt="ERD" src="https://github.com/user-attachments/assets/e75fc94e-1533-4fb6-967a-220be616da80" />
 </p>
 
-- ManyToOne
+- **`Music` 테이블 설계 의도**
+  - PK는 `videoId`가 아닌 별도의 `Id` 필드 사용
+    - 단일 재생목록 내 동일한 `videoId`를 가진 영상 중복 추가 가능
 
-- Lazy Loading
+  - `Playlist`와 N:M 관계를 두지 않음
+    - 복구 시나리오상 `User → Playlist → Music` 순 조회 필요
+      - N:M 매핑 후 복구 시, 토큰 발급 시점이 모호함
 
-- DB FK Cascade 적용
+    - 유튜브에는 동일한 곡이라도 수천 개의 서로 다른 영상(`videoId`)이 존재
+      - 모든 유저가 특정 음악에 대해 동일한 `videoId`를 가진 영상만을 재생목록에 담는 것은 아님
 
+- **`@ManyToOne` 단방향 구조**
+  - 서비스 로직상 한쪽 방향의 탐색만 필요하기 때문에 단방향 구조로 단순화
+
+- **Lazy Loading 적용**
+  - EAGER 방식 대신 지연 로딩으로 불필요한 쿼리 호출 최소화
+  - DB 접근 최소화로 성능 최적화
+
+- **DB FK Cascade 적용**
+  - 부모 데이터 삭제 시 연관된 자식 데이터의 자동 정리로 데이터 정합성 유지
+  - DB 엔진 레벨에서 즉시 처리: 대량 삭제/추가 작업 시 JPA Cascade 보다 성능 우위
+
+- **독립적인 `ActionLog`, `Outbox` 테이블**
+  - 장애 복구를 위한 표준적인 안정성 패턴 적용
+  - 다른 엔티티들과 직접적인 연관관계를 맺지 않아 사이드 이펙트 방지
+  - 독립적인 관리 및 트러블슈팅 용이
 <br><br>
 
-## 🧩 9. 트러블슈팅 & 기술 과제
+## 🧩 10. 트러블슈팅 & 기술 과제
 
 - **심사 대응**
   - 구글 OAuth2 심사 대응 전략 수립
   - 동의 화면, 개인정보처리방침, 서비스명 일치 검토
 
 - **OAuth2**
-  - `@RegisteredOAuth2AuthorizedClient` 사용
   - access/refresh token 처리
   - `access_type`, `prompt`, `scope` 설정 이슈
   - 고유 사용자 식별 및 DB 저장
 
-
 - **Transaction 전파, REQURIES_NEW**
   - 설명 추가
 
-
 - **Youtube 비정상 영상 분류**
   - 삭제/비공개 영상 vs "unavailable video"
-
 
 - **Persistence & 동기화**
   - JPA 영속성 문제
   - DB cascade vs JPA cascade
   - 플레이리스트 수정 반영 로직
 
-
 - **보안**
   - CSRF 토큰 관리
   - OAuth 로그인 캐시 이슈
 <br><br>
 
-## 📡 10. 기술 및 API
+## 📡 11. 기술 및 API
 
 - **Youtube Data API V3**
   - 할당량 관리
@@ -317,12 +353,13 @@
   - 최초 회원가입 시 국가코드 추출
 <br><br>
 
-## ✅ 11. 프로젝트 결론 및 리뷰
+## ✅ 12. 프로젝트 결론 및 리뷰
 
 - 유튜브 사용자의 음악 자산 보호에 실질적 도움을 주는 서비스
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

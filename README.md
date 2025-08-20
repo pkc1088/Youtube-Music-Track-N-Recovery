@@ -324,32 +324,80 @@
 
 ## 🧩 11. 트러블슈팅 & 기술 과제
 
-- **심사 대응**
-  - 구글 OAuth2 심사 대응 전략 수립
-  - 동의 화면, 개인정보처리방침, 서비스명 일치 검토
+<details>
+<summary><strong>[BUG] 심사 대응</strong></summary>
 
-- **OAuth2**
-  - access/refresh token 처리
-  - `access_type`, `prompt`, `scope` 설정 이슈
-  - 고유 사용자 식별 및 DB 저장
+---
+  
+구글 OAuth2 심사 대응 전략 수립
+- 구글 OAuth2 심사 대응 전략 수립
+- 동의 화면, 개인정보처리방침, 서비스명 일치 검토
 
-- **Transaction 전파, REQURIES_NEW**
-  - 설명 추가
+---
+</details>
 
-- **Youtube 비정상 영상 분류**
-  - 삭제/비공개 영상 vs "unavailable video"
+<details>
+<summary><strong>[BUG] OAuth2</strong></summary>
 
-- **Persistence & 동기화**
-  - JPA 영속성 문제
-  - DB cascade vs JPA cascade
-  - 플레이리스트 수정 반영 로직
+---
 
-- **보안**
-  - CSRF 토큰 관리
-  - OAuth 로그인 캐시 이슈
-<br><br>
+**OAuth2**
+- access/refresh token 처리
+- `access_type`, `prompt`, `scope` 설정 이슈
+- 고유 사용자 식별 및 DB 저장
 
-## 📡 12. 기술 및 API
+---
+</details>
+
+<details>
+<summary><strong>[BUG] Transaction 전파, REQURIES_NEW</strong></summary>
+
+---
+
+**Transaction 전파, REQURIES_NEW**
+- 설명 추가
+
+---
+</details>
+
+<details>
+<summary><strong>[BUG] Youtube 비정상 영상 분류</strong></summary>
+
+---
+
+**Youtube 비정상 영상 분류**
+- 삭제/비공개 영상 vs "unavailable video"
+
+---
+</details>
+
+<details>
+<summary><strong>[BUG] Persistence & 동기화</strong></summary>
+
+---
+
+**Persistence & 동기화**
+- JPA 영속성 문제
+- DB cascade vs JPA cascade
+- 플레이리스트 수정 반영 로직
+
+---
+</details>
+
+<details>
+<summary><strong>[BUG] 보안</strong></summary>
+
+---
+
+**보안**
+- CSRF 토큰 관리
+- OAuth 로그인 캐시 이슈
+
+---
+</details>
+
+
+## 📡 12. APIs
 
 - **Youtube Data API V3**
   - 할당량 관리
@@ -368,6 +416,7 @@
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

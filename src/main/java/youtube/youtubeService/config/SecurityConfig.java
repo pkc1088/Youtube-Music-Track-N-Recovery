@@ -10,10 +10,12 @@ import org.springframework.security.oauth2.client.web.HttpSessionOAuth2Authoriza
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableRedisHttpSession // 추가
 public class SecurityConfig {
 
     private final AuthenticationSuccessHandler oauth2LoginSuccessHandler;

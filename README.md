@@ -235,11 +235,12 @@
 
 ## 💡 9. 아키텍처
 
-### 1. System Architecture
+### 1. Infra Architecture
+<p align="center">
+  <img width="2202" height="1280" alt="InfraArchitecture" src="https://github.com/user-attachments/assets/d79f147e-617c-42ab-8237-17891771d242" />
+</p>
 
-- Cloud Run + Cloud SQL + Cloud Scheduler + Youtube + SpringBoot + (Redis) 
-
-- 그림 추가
+- Cloud Run + Cloud SQL + Cloud Scheduler + Serverless VPC Access + Memorystore for Redis
 <br><br>
 
 ### 2. Layered Architecture
@@ -416,6 +417,7 @@
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

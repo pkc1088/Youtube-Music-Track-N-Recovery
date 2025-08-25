@@ -2,13 +2,21 @@ package youtube.youtubeService.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Users;
@@ -16,6 +24,9 @@ import youtube.youtubeService.service.GeoIpService;
 import youtube.youtubeService.service.users.UserService;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 @Slf4j
@@ -52,6 +63,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 // added 25.03.25 ~ 이거 며칠 지나서 로그인하니까 에러페이지 뜸 (디비에 pkc1088 리프레쉬 토큰은 있었음) : .getTokenValue() 여기서 접근하면 에러나는거임 null 일 떄
                 Users user = userService.getUserByUserId(userId);
 
+                // 보안에서 제거 후 재가입 시, 배포와 로컬 간 일관성 유지 시, 브라우저 캐시 삭제 후 시도 시
                 if(authorizedClient.getRefreshToken() != null) {
                     String updatedRefreshToken = authorizedClient.getRefreshToken().getTokenValue();
                     log.info("발급된 리프레시 토큰이 null은 아니고 : {}", updatedRefreshToken);
@@ -87,16 +99,36 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 String refreshToken = authorizedClient.getRefreshToken() != null ? authorizedClient.getRefreshToken().getTokenValue() : null;
                 String countryCode = geoIpService.getClientCountryCode(request);
                 /*
-
                 "UNKNOWN 리턴 받았을 때 회원 반려시키는 로직 추가 (getClientCountryCode 가 RunTime EX 던지게 해서 터트리는게 나을 듯
                 if("UNKNOWN".equals(countryCode)) {
                     throw new RuntimeException();
                 }
-
                 */
 
                 saveUsersToDatabase(userId, fullName, channelId, email, refreshToken, countryCode); // new member
             }
+
+
+//
+//            Users user = userService.getUserByUserId(userId);
+//            // 1) Authorities 생성
+//            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+//            // 2) principal 을 권한 포함 객체로 재구성 (DefaultOAuth2User 사용)
+//            DefaultOAuth2User principalWithAuthorities = new DefaultOAuth2User(
+//                    authorities, oauthToken.getPrincipal().getAttributes(), "sub" // oauth2User.getAttributes() ?
+//            );
+//            // 3) 새로운 Authentication 생성
+//            OAuth2AuthenticationToken newAuth = new OAuth2AuthenticationToken(
+//                    principalWithAuthorities, authorities, oauthToken.getAuthorizedClientRegistrationId()
+//            );
+//            // 4) SecurityContext 에 저장
+//            SecurityContextHolder.getContext().setAuthentication(newAuth);
+//            // 5) (권장) 세션에 SecurityContext 강제 저장 — 서버가 세션 재생성/fixation 처리해도 안전하게
+//            HttpSession session = request.getSession();
+//            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+//
+
+
         }
 
         response.sendRedirect("/");// super.onAuthenticationSuccess(request, response, authentication);>simpleUrlAuthenticationSuccessHandler>AbstractAuthenticationTargetUrlRequestHandler 타고 들어가보면 기본 defaultTargetUrl = "/"; 이렇게 셋팅 되어서 에러 뜬거임.

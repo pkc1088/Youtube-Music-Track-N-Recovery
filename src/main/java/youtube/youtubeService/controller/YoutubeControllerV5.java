@@ -29,6 +29,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -118,7 +119,11 @@ public class YoutubeControllerV5 {
     public String deleteAccount(@AuthenticationPrincipal OAuth2User principal,
                                 HttpServletRequest request, HttpServletResponse response) {
         String userId = principal.getName();
-        Users user = userService.getUserByUserId(userId);
+        // Users user = userService.getUserByUserId(userId);
+        Optional<Users> OptUser = userService.getUserByUserId(userId);
+        Users user = null;
+        if(OptUser.isPresent()) user = OptUser.get();
+
         userService.deleteUser(user); // 토큰 revoke + DB 삭제
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();
@@ -185,3 +190,20 @@ public class YoutubeControllerV5 {
 
 }
 
+/*
+ @PostMapping("/delete")
+    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal,
+                                HttpServletRequest request, HttpServletResponse response) {
+        String userId = principal.getName();
+        Users user = userService.getUserByUserId(userId);
+        userService.deleteUser(user); // 토큰 revoke + DB 삭제
+        SecurityContextHolder.clearContext();
+        request.getSession().invalidate();
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
+        cookie.setMaxAge(0); // 즉시 만료
+        response.addCookie(cookie);
+
+        return "redirect:/";//        return "redirect:/logout";
+    }
+ */

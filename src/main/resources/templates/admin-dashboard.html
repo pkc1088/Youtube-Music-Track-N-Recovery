@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container my-5">
+    <h2 class="mb-4">관리자 세션 관리</h2>
+
+    <!-- 세션 목록 -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header fw-bold">전체 세션 목록</div>
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">User ID</th>
+                    <th scope="col">Session ID</th>
+                    <th scope="col" style="width: 180px;">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="sessionsTable">
+                <!-- JS에서 채움 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 세션 상세 조회 -->
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold">세션 상세 조회</div>
+        <div class="card-body">
+            <div class="input-group mb-3">
+                <input type="text" id="sessionIdInput" class="form-control" placeholder="세션 ID 입력">
+                <button class="btn btn-success" onclick="loadSessionDetail()">조회</button>
+            </div>
+            <pre id="sessionDetail" class="bg-dark text-white p-3 rounded small">여기에 세션 상세 정보가 표시됩니다.</pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function loadSessions() {
+        const res = await fetch('/admin/sessions/all');
+        const sessions = await res.json();
+        const tbody = document.getElementById('sessionsTable');
+        tbody.innerHTML = '';
+
+        sessions.forEach(s => {
+            const [userId, rawSession] = s.split(" : ");
+            const sessionId = rawSession.replace("spring:session:sessions:", "");
+
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>${userId}</td>
+                <td class="text-monospace">${sessionId}</td>
+                <td class="d-flex">
+                    <button class="btn btn-sm btn-primary me-1" onclick="loadSessionDetail('${sessionId}')">상세 조회</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSession('${sessionId}')">강제 종료</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    async function loadSessionDetail(sessionId) {
+        if (!sessionId) {
+            sessionId = document.getElementById('sessionIdInput').value.trim();
+        }
+        if (!sessionId) {
+            alert("세션 ID를 입력하세요");
+            return;
+        }
+        const res = await fetch(`/admin/sessions/${sessionId}`);
+        const data = await res.json();
+        document.getElementById('sessionDetail').textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function deleteSession(sessionId) {
+        if (!confirm("정말 이 세션을 강제 종료할까요?")) return;
+        const res = await fetch(`/admin/sessions/delete/${sessionId}`);
+        const data = await res.json();
+        alert(data.status);
+        loadSessions();
+    }
+
+    window.onload = loadSessions;
+</script>
+</body>
+</html>
+
+

@@ -33,17 +33,17 @@ public class GeoIpService {
             log.info("[country code: {}]", countryCode);
             return countryCode; // 예: "KR"
         } catch (Exception e) {
-            log.info("[country code: UNKNOWN]");
-            return "UNKNOWN";
+            log.info("[country code: UNKNOWN -> KR]");
+            return "KR";
         }
     }
 
     private String extractClientIp(HttpServletRequest request) {
         String xfHeader = request.getHeader("X-Forwarded-For");
-        log.info("[xfHeader: {}]", xfHeader);
+        //log.info("[xfHeader: {}]", xfHeader);
         if (xfHeader == null) {
             String remoteAddr = request.getRemoteAddr();
-            log.info("[xfHeader Remote: {}]", remoteAddr);
+            //log.info("[xfHeader Remote: {}]", remoteAddr);
             return remoteAddr;
         }
         return xfHeader.split(",")[0];

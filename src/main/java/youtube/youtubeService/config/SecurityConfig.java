@@ -3,6 +3,7 @@ package youtube.youtubeService.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
@@ -17,6 +18,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @Configuration
 @EnableWebSecurity
 @EnableRedisIndexedHttpSession //@EnableRedisHttpSession // 추가
+@EnableMethodSecurity(prePostEnabled = true) // 추가
 public class SecurityConfig {
 
     private final AuthenticationSuccessHandler oauth2LoginSuccessHandler;

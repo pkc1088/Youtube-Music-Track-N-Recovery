@@ -17,6 +17,7 @@ import youtube.youtubeService.service.ActionLogService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -39,11 +40,15 @@ public class UserServiceV1 implements UserService {
         return userRepository.findByUserId(userId);
     }
 
-    @Override
+    /*@Override
     public Users getUserByUserId(String userId) {
         Users user = userRepository.findByUserId(userId);
         if (user != null) return user;
         else throw new RuntimeException("User not found - getUserByUserId"); // db 작업 하는거 아니니 runtime 던져도 될 듯
+    }*/
+    @Override
+    public Optional<Users> getUserByUserId(String userId) {
+        return Optional.ofNullable(userRepository.findByUserId(userId));
     }
 
     @Override

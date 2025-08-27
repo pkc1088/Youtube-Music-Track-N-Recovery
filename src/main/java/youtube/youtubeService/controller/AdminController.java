@@ -1,53 +1,58 @@
 package youtube.youtubeService.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
-@RestController
+@Controller
 @RequestMapping("/admin")
-//@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final StringRedisTemplate redisTemplate;
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
-    @Autowired
     public AdminController(StringRedisTemplate  redisTemplate, FindByIndexNameSessionRepository<? extends Session> sessionRepository) {
         this.redisTemplate = redisTemplate;
         this.sessionRepository = sessionRepository;
     }
 
+    @GetMapping("/dashboard")
+    public String dashboard() {
+        return "admin-dashboard"; // src/main/resources/templates/admin-dashboard.html
+    }
+
+    @ResponseBody
     @GetMapping("/sessions")
     public List<String> listSessions() {
         Set<String> keys = redisTemplate.keys("spring:session:sessions:*");
         return new ArrayList<>(keys);
     }
 
+    @ResponseBody
     @GetMapping("/sessions/all")
     public Set<String> getAllUserIds() {
         Set<String> userIds = new HashSet<>();
 
         RedisConnection connection = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection();
-        Cursor<byte[]> cursor = connection.scan(
-                ScanOptions.scanOptions()
-                        .match("spring:session:sessions:*")
-                        .count(1000) // 한번에 1000개씩 가져오기 힌트
-                        .build()
-        );
+        // 한번에 1000개씩 가져오기 힌트
+        Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match("spring:session:sessions:*").count(1000).build());
 
         while (cursor.hasNext()) {
             String key = new String(cursor.next(), StandardCharsets.UTF_8);
@@ -63,7 +68,7 @@ public class AdminController {
                 if (auth instanceof OAuth2AuthenticationToken oauthToken) {
                     Object principal = oauthToken.getPrincipal();
                     if (principal instanceof OidcUser oidcUser) {
-                        userIds.add(oidcUser.getName()); // 바로 userId
+                        userIds.add(oidcUser.getName() + " : " + key); // 바로 userId
                     }
                 }
             }
@@ -72,6 +77,7 @@ public class AdminController {
         return userIds;
     }
 
+    @ResponseBody
     @GetMapping("/sessions/{sessionId}")
     public Map<String, Object> getSession(@PathVariable String sessionId) {
         Session session = sessionRepository.findById(sessionId);
@@ -97,9 +103,7 @@ public class AdminController {
                 if (principal instanceof OidcUser oidcUser) {
                     Map<String, Object> attributes = new HashMap<>(oidcUser.getAttributes());
                     result.put("attributes", attributes);
-                    result.put("email", oidcUser.getEmail());
-                    result.put("fullName", oidcUser.getFullName());
-                    result.put("userId", oidcUser.getName());
+                    result.put("roles", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
                 }
             }
         } catch (Exception e) {
@@ -109,7 +113,7 @@ public class AdminController {
         return result;
     }
 
-
+    @ResponseBody
     @GetMapping("/sessions/delete/{sessionId}")
     public Map<String, Object> deleteSession(@PathVariable String sessionId) {
         sessionRepository.deleteById(sessionId);

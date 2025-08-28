@@ -53,7 +53,7 @@
 <h1 th:text="'사용자 ' + ${userId} + '의 복구 내역'">복구 내역</h1>
 
 <div class="log-container">
-    <div class="log-card" th:each="log : ${logs}">
+    <div class="log-card" th:each="log : ${dto.logs}">
         <h3 th:text="${log.createdAt}">날짜</h3>
         <div class="log-detail">
             <div><span>대상 영상 ID:</span> <span th:text="${log.targetVideoId}"></span></div>

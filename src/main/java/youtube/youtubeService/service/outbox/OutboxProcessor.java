@@ -9,7 +9,6 @@ import youtube.youtubeService.domain.Outbox;
 
 // 실 API 호출
 @Slf4j
-//@Component
 @Service
 @RequiredArgsConstructor
 public class OutboxProcessor {

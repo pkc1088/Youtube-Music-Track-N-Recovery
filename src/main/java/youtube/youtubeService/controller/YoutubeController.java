@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.dto.ActionLogDto;
+import youtube.youtubeService.dto.PlaylistRegisterRequestDto;
+import youtube.youtubeService.dto.UserRegisterPlaylistsResponseDto;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
@@ -24,6 +27,77 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class YoutubeController {
+
+    private final UserService userService;
+    private final PlaylistService playlistService;
+    private final ActionLogService actionLogService;
+
+    @GetMapping("/denied")
+    public String permissionDenied() {
+        return "retry"; // session 끊는 행위 필요함
+    }
+
+    @GetMapping("/")
+    public String index(Principal principal) {
+        return principal != null ? "afterLogin" : "login";
+    }
+
+    @GetMapping("/welcome")
+    public String welcomePage() {
+        return "welcome";
+    }
+
+    @GetMapping("/playlist")
+    public String redirectToUserPlaylist(@AuthenticationPrincipal OAuth2User principal) {
+        return "redirect:/playlist/" + principal.getName();
+    }
+
+    @GetMapping("/playlist/{userId}")
+    public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
+        UserRegisterPlaylistsResponseDto dto = playlistService.userRegisterPlaylists(userId);
+        model.addAttribute("dto", dto);
+        return "playlist_selection";
+    }
+
+    @PostMapping("/playlist/register")
+    public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request) {
+        playlistService.registerPlaylists(request);
+        return "redirect:/welcome";
+    }
+
+    @GetMapping("/recovery")
+    public String redirectToRecoveryHistory(@AuthenticationPrincipal OAuth2User principal) {
+        return "redirect:/recovery/" + principal.getName();
+    }
+
+    @GetMapping("/recovery/{userId}")
+    public String searchRecoveryHistory(@PathVariable String userId, Model model) {
+        ActionLogDto dto = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
+        model.addAttribute("dto", dto);
+        return "recovery_history";
+    }
+
+    @PostMapping("/delete")
+    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
+        userService.deleteUserAccount(principal.getName());
+
+        SecurityContextHolder.clearContext();
+        request.getSession().invalidate();
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
+        cookie.setMaxAge(0); // 즉시 만료
+        response.addCookie(cookie);
+
+        return "redirect:/";
+    }
+
+}
+
+/*
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -117,78 +191,6 @@ public class YoutubeController {
         Users user = null;
         if(OptUser.isPresent()) user = OptUser.get();
 
-        userService.deleteUser(user); // 토큰 revoke + DB 삭제
-        SecurityContextHolder.clearContext();
-        request.getSession().invalidate();
-        Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
-        cookie.setMaxAge(0); // 즉시 만료
-        response.addCookie(cookie);
-
-        return "redirect:/";//        return "redirect:/logout";
-    }
-
-    /*@ResponseBody
-    @GetMapping("/server-info")
-    public String serverInfo(HttpSession session) {
-        String serverIp;
-        String serverHostName;
-        String containerId;
-        try {
-            InetAddress serverHost = InetAddress.getLocalHost();
-            serverIp = serverHost.getHostAddress();
-            serverHostName = serverHost.getHostName();
-            containerId = System.getenv("HOSTNAME"); // Cloud Run 컨테이너 ID
-        } catch (UnknownHostException e) {
-            serverIp = "Error getting IP";
-            serverHostName = "Error getting Hostname";
-            containerId = "Error getting ContainerId";
-        }
-
-        return "세션 ID: " + session.getId() + "<br>" +
-                "서버 IP: " + serverIp + "<br>" +
-                "서버 호스트명: " + serverHostName + "<br>" +
-                "컨테이너명: " + containerId;
-    }
-
-    @ResponseBody
-    @GetMapping("/instance-info")
-    public String instanceInfo(HttpSession session) {
-        String instanceId = null;
-        instanceId = fetchInstanceId();
-
-        return "세션 ID: " + session.getId() + "<br>" +
-                "<b>요청 처리 인스턴스 ID: " + instanceId + "</b>";
-    }
-
-    private String fetchInstanceId() {
-        String metadataUrl = "http://metadata.google.internal/computeMetadata/v1/instance/id";
-        try {
-            URL url = new URL(metadataUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Metadata-Flavor", "Google");
-            conn.setRequestMethod("GET");
-
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                    return in.readLine();
-                }
-            } else {
-                return "메타데이터 서버 응답 실패: " + conn.getResponseCode();
-            }
-        } catch (Exception e) {
-            return "인스턴스 ID 조회 실패: " + e.getMessage();
-        }
-    }*/
-
-}
-
-/*
- @PostMapping("/delete")
-    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal,
-                                HttpServletRequest request, HttpServletResponse response) {
-        String userId = principal.getName();
-        Users user = userService.getUserByUserId(userId);
         userService.deleteUser(user); // 토큰 revoke + DB 삭제
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Music;
+import youtube.youtubeService.dto.ActionLogDto;
 import youtube.youtubeService.repository.ActionLogRepository;
 
 import java.time.LocalDate;
@@ -21,12 +22,8 @@ public class ActionLogService {
 
     private final ActionLogRepository actionLogRepository;
 
-    public List<ActionLog> findByUserIdOrderByCreatedAtDesc(String userId) {
-        return actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
-
-    public void deleteByUserId(String userId) {
-        actionLogRepository.deleteByUserId(userId);
+    public ActionLogDto findByUserIdOrderByCreatedAtDesc(String userId) {
+        return new ActionLogDto(userId, actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId));
     }
 
     public void actionLogSave(String userId, String playlistId, ActionLog.ActionType actionType, Music trgVid, Music srcVid) {
@@ -47,3 +44,9 @@ public class ActionLogService {
         return actionLogRepository.findTodayRecoverLog(actionType, targetVideoId, todayStart);
     }
 }
+
+/*
+public List<ActionLog> findByUserIdOrderByCreatedAtDesc(String userId) {
+        return actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+ */

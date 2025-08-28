@@ -14,9 +14,12 @@ public interface UserService {
 
     String getNewAccessTokenByUserId(String userId);
 
-    void deleteUser(Users user);
-
     List<Users> findAllUsers();
 
     Users findByUserId(String userId);
+
+    void deleteUserAccount(String userId);
+
+//    void deleteUser(Users user);
+
 }

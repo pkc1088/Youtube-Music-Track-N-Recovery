@@ -2,6 +2,8 @@ package youtube.youtubeService.service.playlists;
 
 import com.google.api.services.youtube.model.Playlist;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.dto.PlaylistRegisterRequestDto;
+import youtube.youtubeService.dto.UserRegisterPlaylistsResponseDto;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,9 +14,9 @@ public interface PlaylistService {
 
     List<Playlist> getAllPlaylists(String userId) throws IOException;
 
-    void registerPlaylists(String userId, List<String> selectedPlaylistIds);
-
     void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds);
 
-    // void initiallyAddVideoDetails(String playlistId, String countryCode) throws IOException;
+    void registerPlaylists(PlaylistRegisterRequestDto request);
+
+    UserRegisterPlaylistsResponseDto userRegisterPlaylists(String userId) throws IOException;
 }

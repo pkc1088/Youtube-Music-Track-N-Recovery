@@ -23,7 +23,8 @@ public interface MusicService {
 
     void saveAll(List<Video> legalVideos, Playlists playlist);
 
-    Music searchVideoToReplace(Music musicToSearch, Playlists playlist);
+//    Music searchVideoToReplace(Music musicToSearch, Playlists playlist);
+    Video searchVideoToReplace(Music musicToSearch, Playlists playlist);
 
     Music makeVideoToMusic(Video replacementVideo, Playlists playlist);
 }

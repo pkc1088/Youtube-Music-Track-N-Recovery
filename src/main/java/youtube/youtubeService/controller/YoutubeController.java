@@ -4,7 +4,6 @@ import com.google.api.services.youtube.model.Playlist;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,13 +19,7 @@ import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +27,7 @@ import java.util.Optional;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-public class YoutubeControllerV5 {
+public class YoutubeController {
 
     private final UserService userService;
     private final PlaylistService playlistService;
@@ -135,7 +128,7 @@ public class YoutubeControllerV5 {
         return "redirect:/";//        return "redirect:/logout";
     }
 
-    @ResponseBody
+    /*@ResponseBody
     @GetMapping("/server-info")
     public String serverInfo(HttpSession session) {
         String serverIp;
@@ -186,7 +179,7 @@ public class YoutubeControllerV5 {
         } catch (Exception e) {
             return "인스턴스 ID 조회 실패: " + e.getMessage();
         }
-    }
+    }*/
 
 }
 

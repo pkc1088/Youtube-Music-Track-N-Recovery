@@ -158,14 +158,15 @@ public class YoutubeServiceV5 implements YoutubeService {
 
             Optional<ActionLog> recentLogOpt = actionLogService.findTodayRecoverLog(ActionLog.ActionType.RECOVER, backupMusic.getVideoId());
             Music replacementMusic;
+            Video replacementVideo;
 
             if (recentLogOpt.isPresent()) {
-                log.info("Today’s RECOVER log found, reuse replacement videoId: {}", recentLogOpt.get().getSourceVideoId());
-                Video replacementVideo = youtubeApiClient.getSingleVideo(recentLogOpt.get().getSourceVideoId());
-                replacementMusic = musicService.makeVideoToMusic(replacementVideo, playlist);
+                log.info("[Reuse Replacement Video]: {}", recentLogOpt.get().getSourceVideoId());
+                replacementVideo = youtubeApiClient.getSingleVideo(recentLogOpt.get().getSourceVideoId());
             } else {
-                replacementMusic = musicService.searchVideoToReplace(backupMusic, playlist); // searchVideoToReplace(backupMusic, playlistId); // 복구할 대체 영상은 1번만 찾음
+                replacementVideo = musicService.searchVideoToReplace(backupMusic, playlist);
             }
+            replacementMusic = musicService.makeVideoToMusic(replacementVideo, playlist);
 
             actionLogService.actionLogSave(userId, playlistId, ActionLog.ActionType.RECOVER, backupMusic, replacementMusic);
 

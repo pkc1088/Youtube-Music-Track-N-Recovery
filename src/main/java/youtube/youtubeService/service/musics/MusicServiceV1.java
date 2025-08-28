@@ -96,7 +96,7 @@ public class MusicServiceV1 implements MusicService {
         musicRepository.saveAll(musicsToSave);
     }
 
-    @Override
+    /*@Override
     public Music searchVideoToReplace(Music musicToSearch, Playlists playlist) {
 
         String query = searchPolicy.search(musicToSearch); // Gemini Policy 사용
@@ -119,6 +119,31 @@ public class MusicServiceV1 implements MusicService {
         log.info("Found a music to replace : {}, {}", music.getVideoTitle(), music.getVideoUploader());
 
         return music;
+    }*/
+
+    @Override
+    public Video searchVideoToReplace(Music musicToSearch, Playlists playlist) {
+
+        String query = searchPolicy.search(musicToSearch); // Gemini Policy 사용
+        log.info("[searched with]: {}", query);
+        SearchResult searchResult;
+        Video video;
+        try {
+            searchResult = youtubeApiClient.searchFromYoutube(query);
+            video = youtubeApiClient.getSingleVideo(searchResult.getId().getVideoId());
+        } catch (IOException e) {
+            return null;
+        }
+//        Music music = new Music();
+//        music.setVideoId(searchResult.getId().getVideoId());
+//        music.setVideoTitle(searchResult.getSnippet().getTitle());
+//        music.setVideoUploader(searchResult.getSnippet().getChannelTitle());
+//        music.setVideoTags(musicToSearch.getVideoTags());
+//        music.setVideoDescription(searchResult.getSnippet().getDescription());
+//        // search 결과로는 tags 얻을 수 없음. 그렇다고 또 video Id로 검색하긴 귀찮음. 그냥 놔두자.
+//        music.setPlaylist(playlist);
+        log.info("[Found a music to replace]: {}, {}", video.getSnippet().getTitle(), video.getSnippet().getChannelTitle());
+        return video;
     }
 
     @Override

@@ -80,7 +80,7 @@ public class ManagementScheduler {
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
-//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void allPlaylistsRecoveryOfAllUsersTest() {
         log.info("auto scheduler activated");
 

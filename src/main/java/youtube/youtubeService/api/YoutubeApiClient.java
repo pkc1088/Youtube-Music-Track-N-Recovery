@@ -39,7 +39,7 @@ public class YoutubeApiClient {
             request.setKey(apiKey);
             request.setId(Collections.singletonList(videoId));
             video = request.execute().getItems().get(0);
-            log.info("Found the video with 'Single Video Search'");
+            //log.info("Found the video with 'Single Video Search'");
         } catch (IOException e) {
             log.info("Cannot find Single(Duplicated) video with this VideoId({})", videoId);
         }

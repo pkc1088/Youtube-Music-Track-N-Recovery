@@ -35,7 +35,7 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard() {
-        return "admin-dashboard"; // src/main/resources/templates/admin-dashboard.html
+        return "admin-dashboard";
     }
 
     @ResponseBody

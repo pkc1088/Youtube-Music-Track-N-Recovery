@@ -6,8 +6,7 @@ import java.io.IOException;
 
 public interface YoutubeService {
 
-    void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken) throws IOException;
+    void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken);
 
-    void lazyTest(Playlists playlistParam);
 }
 

@@ -1,11 +1,11 @@
-package youtube.youtubeService.controller;
+package youtube.youtubeService.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -13,40 +13,23 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Controller
-@RequestMapping("/admin")
-@PreAuthorize("hasRole('ADMIN')")
-public class AdminController {
+@Service
+@RequiredArgsConstructor
+public class SessionService {
 
     private final StringRedisTemplate redisTemplate;
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
-    public AdminController(StringRedisTemplate  redisTemplate, FindByIndexNameSessionRepository<? extends Session> sessionRepository) {
-        this.redisTemplate = redisTemplate;
-        this.sessionRepository = sessionRepository;
-    }
-
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "admin-dashboard";
-    }
-
-    @ResponseBody
-    @GetMapping("/sessions")
     public List<String> listSessions() {
-        Set<String> keys = redisTemplate.keys("spring:session:sessions:*");
-        return new ArrayList<>(keys);
+        return new ArrayList<>(redisTemplate.keys("spring:session:sessions:*"));
     }
 
-    @ResponseBody
-    @GetMapping("/sessions/all")
     public Set<String> getAllUserIds() {
         Set<String> userIds = new HashSet<>();
 
@@ -77,9 +60,7 @@ public class AdminController {
         return userIds;
     }
 
-    @ResponseBody
-    @GetMapping("/sessions/{sessionId}")
-    public Map<String, Object> getSession(@PathVariable String sessionId) {
+    public Map<String, Object> getSession(String sessionId) {
         Session session = sessionRepository.findById(sessionId);
         if (session == null) {
             return Map.of("error", "세션 없음");
@@ -113,9 +94,7 @@ public class AdminController {
         return result;
     }
 
-    @ResponseBody
-    @GetMapping("/sessions/delete/{sessionId}")
-    public Map<String, Object> deleteSession(@PathVariable String sessionId) {
+    public Map<String, Object> deleteSession(String sessionId) {
         sessionRepository.deleteById(sessionId);
         return Map.of("status", "세션 강제 종료됨", "sessionId", sessionId);
     }

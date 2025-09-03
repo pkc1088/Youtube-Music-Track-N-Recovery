@@ -3,15 +3,13 @@ package youtube.youtubeService.service.youtube;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
-import youtube.youtubeService.repository.users.UserRepository;
+import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import java.io.IOException;
-import java.util.Collections;
+
 import java.util.List;
 
 @Slf4j
@@ -41,16 +39,19 @@ public class RecoverOrchestrationService {
             }// 예외 터지면 getNewAccessToken 에서 고객은 제거 했을꺼고, 다음 고객으로 넘기는 시나리오
 
             // 2. 유저 아이디로 조회한 모든 플레이리스트 & 음악을 디비에서 뽑아서 복구 시스템 가동
-            List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
+            List<Playlists> playListsSet = playlistService.findAllPlaylistsByUserId(userId);
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
                 try {
                     youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
+                } catch (QuotaExceededException ex) {
+                    log.warn("[Quota Exceed EX at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), ex.getMessage());
                 } catch (Exception e) {// 예상 못한 런타임 에러 방어
-                    log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
+                    log.warn("[Unexpected Error at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), e.getMessage());
                 }
             }
-            outboxEventHandler.retryFailedOutboxEvents();
+
+            outboxEventHandler.retryFailedOutboxEvents(userId);
         }
 
     }
@@ -66,16 +67,18 @@ public class RecoverOrchestrationService {
             return;
         }
 
-        List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
+        List<Playlists> playListsSet = playlistService.findAllPlaylistsByUserId(userId);
         for (Playlists playlist : playListsSet) {
             log.info("{} start", playlist.getPlaylistTitle());
             try {
                 youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
+            } catch (QuotaExceededException ex) {
+                log.warn("[Quota Exceed EX at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), ex.getMessage());
             } catch (Exception e) {// 예상 못한 런타임 에러 방어
-                log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
+                log.warn("[Unexpected Error at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), e.getMessage());
             }
         }
         // 고객별 마지막에 FAIL 난 얘들 한번 싹 재시도
-        outboxEventHandler.retryFailedOutboxEvents();
+        outboxEventHandler.retryFailedOutboxEvents(userId);
     }
 }

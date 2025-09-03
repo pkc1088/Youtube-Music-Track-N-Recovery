@@ -12,11 +12,13 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.dto.ActionLogDto;
 import youtube.youtubeService.dto.PlaylistRegisterRequestDto;
+import youtube.youtubeService.dto.PlaylistRegistrationResultDto;
 import youtube.youtubeService.dto.UserRegisterPlaylistsResponseDto;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistService;
@@ -39,6 +41,11 @@ public class YoutubeController {
     @GetMapping("/denied")
     public String permissionDenied() {
         return "retry"; // session 끊는 행위 필요함
+    }
+
+    @GetMapping("/bad-user")
+    public String quotaExceeded() { // revoke 는 핸들러에서 이미 처리함. 단순 페이지 제공임
+        return "quota-exceeded";
     }
 
     @GetMapping("/")
@@ -64,8 +71,9 @@ public class YoutubeController {
     }
 
     @PostMapping("/playlist/register")
-    public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request) {
-        playlistService.registerPlaylists(request);
+    public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, RedirectAttributes redirectAttributes) {
+        PlaylistRegistrationResultDto dto = playlistService.registerPlaylists(request);
+        redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute에 담아서 리다이렉트 시 전달
         return "redirect:/welcome";
     }
 
@@ -97,108 +105,75 @@ public class YoutubeController {
 
 }
 
-/*
-@Slf4j
-@Controller
-@RequiredArgsConstructor
-public class YoutubeController {
+/** OGCODE BEFORE 0903
+ @Slf4j
+ @Controller
+ @RequiredArgsConstructor
+ public class YoutubeController {
 
-    private final UserService userService;
-    private final PlaylistService playlistService;
-    private final ActionLogService actionLogService;
+ private final UserService userService;
+ private final PlaylistService playlistService;
+ private final ActionLogService actionLogService;
 
-    @GetMapping("/denied")
-    public String permissionDenied() { // Principal principal
-        return "retry"; // session 끊는 행위 필요함
-    }
+ @GetMapping("/denied")
+ public String permissionDenied() {
+ return "retry"; // session 끊는 행위 필요함
+ }
 
-    @GetMapping("/")
-    public String index(Principal principal) {
-        if (principal != null) {
-            return "afterLogin"; // 로그인 사용자 전용 화면
-        }
-        return "login"; // 로그인 안한 사용자 화면
-    }
+ @GetMapping("/")
+ public String index(Principal principal) {
+ return principal != null ? "afterLogin" : "login";
+ }
 
-    @GetMapping("/welcome")
-    public String welcomePage() {
-        return "welcome";
-    }
+ @GetMapping("/welcome")
+ public String welcomePage() {
+ return "welcome";
+ }
 
-    @GetMapping("/playlist")
-    public String redirectToUserPlaylist(@AuthenticationPrincipal OAuth2User principal) {
-        return "redirect:/playlist/" + principal.getName();
-    }
+ @GetMapping("/playlist")
+ public String redirectToUserPlaylist(@AuthenticationPrincipal OAuth2User principal) {
+ return "redirect:/playlist/" + principal.getName();
+ }
 
-    @GetMapping("/playlist/{userId}")
-    public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
-        // 1. API로 사용자의 모든 플레이리스트를 가져옴
-        List<Playlist> playlists = playlistService.getAllPlaylists(userId);
-        // 2. DB에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
-        List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
-        List<String> registeredPlaylistIds = registeredPlaylistIdFromDB.stream().map(Playlists::getPlaylistId).toList();
+ @GetMapping("/playlist/{userId}")
+ public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
+ UserRegisterPlaylistsResponseDto dto = playlistService.userRegisterPlaylists(userId);
+ model.addAttribute("dto", dto);
+ return "playlist_selection";
+ }
 
-        model.addAttribute("userId", userId);
-        model.addAttribute("playlists", playlists);
-        model.addAttribute("registeredPlaylistIds", registeredPlaylistIds);
-        log.info("userRegisterPlaylists {}", userId);
-        return "playlist_selection";
-    }
+ @PostMapping("/playlist/register")
+ public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request) {
+ playlistService.registerPlaylists(request);
+ return "redirect:/welcome";
+ }
 
-    @PostMapping("/playlist/register")
-    public String registerSelectedPlaylists(@RequestParam String userId,
-                                            @RequestParam(name = "selectedPlaylistIds", required = false) List<String> selectedPlaylistIds,
-                                            @RequestParam(name = "deselectedPlaylistIds", required = false) List<String> deselectedPlaylistIds) {
+ @GetMapping("/recovery")
+ public String redirectToRecoveryHistory(@AuthenticationPrincipal OAuth2User principal) {
+ return "redirect:/recovery/" + principal.getName();
+ }
 
-        // 1. DB 에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
-        List<Playlists> registeredPlaylistIdFromDB = playlistService.getPlaylistsByUserId(userId);
-        List<String> registeredPlaylistIds = registeredPlaylistIdFromDB.stream().map(Playlists::getPlaylistId).toList();
-        // 2. 중복된 플레이리스트는 제외하고 등록
-        List<String> newlySelectedPlaylistIds = selectedPlaylistIds.stream().filter(playlistId -> !registeredPlaylistIds.contains(playlistId)).toList();
+ @GetMapping("/recovery/{userId}")
+ public String searchRecoveryHistory(@PathVariable String userId, Model model) {
+ ActionLogDto dto = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
+ model.addAttribute("dto", dto);
+ return "recovery_history";
+ }
 
-        if (!newlySelectedPlaylistIds.isEmpty()) {
-            playlistService.registerPlaylists(userId, newlySelectedPlaylistIds);  // 중복되지 않는 플레이리스트만 등록
-        }
+ @PostMapping("/delete")
+ public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
+ userService.deleteUserAccount(principal.getName());
 
-        if (deselectedPlaylistIds != null && !deselectedPlaylistIds.isEmpty()) {
-            playlistService.removePlaylistsFromDB(userId, deselectedPlaylistIds); // 체크 해제된 플레이리스트 DB에서 삭제
-        }
+ SecurityContextHolder.clearContext();
+ request.getSession().invalidate();
+ Cookie cookie = new Cookie("JSESSIONID", null);
+ cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
+ cookie.setMaxAge(0); // 즉시 만료
+ response.addCookie(cookie);
 
-        log.info("재생목록 등록 완료");
-        return "redirect:/welcome";
-    }
+ return "redirect:/";
+ }
 
-    @GetMapping("/recovery")
-    public String redirectToRecoveryHistory(@AuthenticationPrincipal OAuth2User principal) {
-        return "redirect:/recovery/" + principal.getName();
-    }
+ }
 
-    @GetMapping("/recovery/{userId}")
-    public String searchRecoveryHistory(@PathVariable String userId, Model model) {
-        // 1. userId로 ActionLogRepository 에서 내역 조회
-        List<ActionLog> logs = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
-        model.addAttribute("logs", logs);
-        model.addAttribute("userId", userId);
-        return "recovery_history";
-    }
-
-    @PostMapping("/delete")
-    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal,
-                                HttpServletRequest request, HttpServletResponse response) {
-        String userId = principal.getName();
-        // Users user = userService.getUserByUserId(userId);
-        Optional<Users> OptUser = userService.getUserByUserId(userId);
-        Users user = null;
-        if(OptUser.isPresent()) user = OptUser.get();
-
-        userService.deleteUser(user); // 토큰 revoke + DB 삭제
-        SecurityContextHolder.clearContext();
-        request.getSession().invalidate();
-        Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
-        cookie.setMaxAge(0); // 즉시 만료
-        response.addCookie(cookie);
-
-        return "redirect:/";//        return "redirect:/logout";
-    }
  */

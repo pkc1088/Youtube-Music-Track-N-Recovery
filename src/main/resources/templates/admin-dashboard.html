@@ -7,11 +7,13 @@
 </head>
 <body class="bg-light">
 <div class="container my-5">
-    <h2 class="mb-4">관리자 세션 관리</h2>
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">📊 Session Control Dashboard</h1>
+        <p class="text-muted">Control Users' Session</p>
+    </div>
 
-    <!-- 세션 목록 -->
     <div class="card shadow-sm mb-4">
-        <div class="card-header fw-bold">전체 세션 목록</div>
+        <div class="card-header fw-bold">Current Session List</div>
         <div class="card-body">
             <table class="table table-hover align-middle">
                 <thead class="table-light">
@@ -30,13 +32,13 @@
 
     <!-- 세션 상세 조회 -->
     <div class="card shadow-sm">
-        <div class="card-header fw-bold">세션 상세 조회</div>
+        <div class="card-header fw-bold">Fetch Session Details</div>
         <div class="card-body">
             <div class="input-group mb-3">
-                <input type="text" id="sessionIdInput" class="form-control" placeholder="세션 ID 입력">
-                <button class="btn btn-success" onclick="loadSessionDetail()">조회</button>
+                <input type="text" id="sessionIdInput" class="form-control" placeholder="Input Session Id...">
+                <button class="btn btn-success" onclick="loadSessionDetail()">Fetch</button>
             </div>
-            <pre id="sessionDetail" class="bg-dark text-white p-3 rounded small">여기에 세션 상세 정보가 표시됩니다.</pre>
+            <pre id="sessionDetail" class="bg-dark text-white p-3 rounded small">Display Session Details Here...</pre>
         </div>
     </div>
 </div>
@@ -58,8 +60,8 @@
                 <td>${userId}</td>
                 <td class="text-monospace">${sessionId}</td>
                 <td class="d-flex">
-                    <button class="btn btn-sm btn-primary me-1" onclick="loadSessionDetail('${sessionId}')">상세 조회</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteSession('${sessionId}')">강제 종료</button>
+                    <button class="btn btn-sm btn-primary me-1" onclick="loadSessionDetail('${sessionId}')">Fetch</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteSession('${sessionId}')">Abort</button>
                 </td>
             `;
 

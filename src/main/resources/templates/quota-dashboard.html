@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Quota Dashboard</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+</head>
+<body class="bg-light">
+<div class="container my-5">
+
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">📊 Quota Control Dashboard</h1>
+        <p class="text-muted">Control Users' API Usages & Global Limits</p>
+    </div>
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-header bg-primary text-white fw-bold">
+            🌐 Control Global Quota Limits
+        </div>
+        <div class="card-body d-flex justify-content-center align-items-center gap-5 flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold">Current Global Quota Limit:</span>
+                <span id="currentGlobalLimit" class="fw-bold fs-4 text-primary border rounded px-3 py-1 bg-light shadow-sm"></span>
+            </div>
+
+            <div class="input-group w-auto">
+                <input type="number" id="globalLimitInput" class="form-control form-control-lg" placeholder="Global Quota limit...">
+                <button class="btn btn-success btn-lg" onclick="updateGlobalLimit()">Change</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 사용자별 Quota 테이블 -->
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-dark text-white fw-bold">
+            👤 Current Quota Usage
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col">User ID</th>
+                    <th scope="col">Usage</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="quotaTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    async function loadQuotas() {
+        const res = await fetch('/quota/all');
+        const data = await res.json();
+
+        // 전역 limit 반영
+        document.getElementById('currentGlobalLimit').textContent = data.globalLimit;
+        document.getElementById('globalLimitInput').value = data.globalLimit;
+
+        const tbody = document.getElementById('quotaTable');
+        tbody.innerHTML = '';
+
+        data.usages.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${item.userId}</td>
+                <td>${item.usage}</td>
+                <td class="d-flex justify-content-center gap-1">
+                    <button class="btn btn-sm btn-warning me-1" onclick="adjustQuota('${item.userId}', 'set')">SET</button>
+                    <button class="btn btn-sm btn-success me-1" onclick="adjustQuota('${item.userId}', 'incr')">+1</button>
+                    <button class="btn btn-sm btn-danger" onclick="adjustQuota('${item.userId}', 'decr')">-1</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function updateGlobalLimit() {
+        const newLimit = document.getElementById('globalLimitInput').value;
+        const token = document.querySelector('meta[name="_csrf"]').content;
+        const header = document.querySelector('meta[name="_csrf_header"]').content;
+        await fetch(`/quota/limit?newLimit=${newLimit}`, {
+            method: 'POST',
+            headers: {
+                [header]: token
+            }
+        });
+        loadQuotas();
+    }
+
+    async function adjustQuota(userId, action) {
+        let value = 0;
+        const token = document.querySelector('meta[name="_csrf"]').content;
+        const header = document.querySelector('meta[name="_csrf_header"]').content;
+        if (action === 'set') {
+            value = prompt("새로운 quota 사용량을 입력하세요", "0");
+            if (value === null) return;
+            await fetch(`/quota/${userId}/set?newUsage=${value}`, { method: 'POST', headers: {[header]: token} });
+        } else if (action === 'incr') {
+            await fetch(`/quota/${userId}/incr?delta=1`, { method: 'POST', headers: {[header]: token} });
+        } else if (action === 'decr') {
+            await fetch(`/quota/${userId}/decr?delta=1`, { method: 'POST', headers: {[header]: token} });
+        }
+        loadQuotas();
+    }
+
+    window.onload = loadQuotas;
+</script>
+</body>
+</html>

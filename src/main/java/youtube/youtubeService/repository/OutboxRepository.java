@@ -16,6 +16,6 @@ public interface OutboxRepository extends JpaRepository<Outbox, Long> {
             @Param("videoId") String videoId, @Param("statuses") List<Outbox.Status> statuses
     );
 
-    List<Outbox> findByStatus(Outbox.Status status);
-
+    // List<Outbox> findByStatus(Outbox.Status status);
+    List<Outbox> findByUserIdAndStatus(String userId, Outbox.Status status);
 }

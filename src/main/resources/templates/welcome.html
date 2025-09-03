@@ -97,11 +97,17 @@
             </button>
         </form>
 
+        <!-- 추가: 플레이리스트 등록 결과 표시 -->
+        <div th:if="${playlistResult}" style="margin-top: 2rem; font-size: 0.85rem; color: #555;">
+            <p th:text="'총 ' + ${playlistResult.selectedPlaylistsCount} + '개 중 ' +
+                      ${playlistResult.succeedPlaylistCount} + '개 등록 완료, ' +
+                      (${playlistResult.selectedPlaylistsCount} - ${playlistResult.succeedPlaylistCount}) + '개 실패'">
+            </p>
+        </div>
     </div>
 </div>
 </body>
 </html>
-
 <!--<!DOCTYPE html>-->
 <!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
 <!--<head>-->
@@ -156,9 +162,25 @@
 <!--            border-color: #dc3545; /* 빨간색 테두리 */-->
 <!--            background-color: transparent;-->
 <!--        }-->
-
 <!--        .withdraw-btn:hover {-->
 <!--            background-color: #dc3545; /* 호버 시 빨간색 배경 */-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        /* 좌측 하단 버튼 스타일 */-->
+<!--        .after-login-btn {-->
+<!--            position: absolute;-->
+<!--            bottom: 2rem;-->
+<!--            left: 2rem;-->
+<!--            padding: 5px 12px;-->
+<!--            font-size: 0.85rem;-->
+<!--            border-radius: 6px;-->
+<!--            color: #0d6efd;-->
+<!--            border-color: #0d6efd;-->
+<!--            background-color: transparent;-->
+<!--        }-->
+<!--        .after-login-btn:hover {-->
+<!--            background-color: #0d6efd;-->
 <!--            color: white;-->
 <!--        }-->
 <!--    </style>-->
@@ -175,13 +197,19 @@
 <!--        <h5>2. Recovery History</h5>-->
 <!--        <a th:href="@{/recovery}" class="btn btn-success btn-custom">복구 내역 조회하기</a>-->
 
-<!--        &lt;!&ndash; 탈퇴 버튼 위치 및 스타일 변경 &ndash;&gt;-->
+<!--        &lt;!&ndash; 좌측 하단 버튼 &ndash;&gt;-->
+<!--        <a th:href="@{/}" class="btn after-login-btn">Main Page</a>-->
+
+<!--        &lt;!&ndash; 탈퇴 버튼 (확인창 포함) &ndash;&gt;-->
 <!--        <form th:action="@{/delete}" method="post" class="withdraw-form">-->
-<!--            <button type="submit" class="btn withdraw-btn">-->
+<!--            <button type="submit" class="btn withdraw-btn" onclick="return confirm('정말로 탈퇴하시겠습니까?')">-->
 <!--                Delete Account-->
 <!--            </button>-->
 <!--        </form>-->
+
 <!--    </div>-->
 <!--</div>-->
 <!--</body>-->
 <!--</html>-->
+
+

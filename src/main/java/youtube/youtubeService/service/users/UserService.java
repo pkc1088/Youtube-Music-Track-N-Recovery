@@ -7,7 +7,6 @@ import java.util.Optional;
 
 public interface UserService {
 
-    //Users getUserByUserId(String userId);
     Optional<Users> getUserByUserId(String userId);
 
     void saveUser(Users user);
@@ -16,10 +15,10 @@ public interface UserService {
 
     List<Users> findAllUsers();
 
-    Users findByUserId(String userId);
-
     void deleteUserAccount(String userId);
 
+    void revokeUser(String refreshToken);
+//    Users findByUserId(String userId);
 //    void deleteUser(Users user);
 
 }

@@ -11,7 +11,6 @@ import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
-import youtube.youtubeService.repository.playlists.PlaylistRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,12 +55,12 @@ public class MusicServiceV1 implements MusicService {
     }
 
     @Override
-    public void addUpdatePlaylist(Music music) {
-        musicRepository.addUpdatePlaylist(music);
+    public void upsertMusic(Music music) {
+        musicRepository.upsertMusic(music);
     }
 
     @Override
-    public void DBAddAction(Video video, Playlists playlist) {
+    public void saveSingleVideo(Video video, Playlists playlist) {
         Music music = new Music();
         music.setVideoId(video.getId());
         music.setVideoTitle(video.getSnippet().getTitle());
@@ -72,11 +71,11 @@ public class MusicServiceV1 implements MusicService {
         music.setVideoTags(joinedTags);
         music.setPlaylist(playlist);
 
-        musicRepository.addUpdatePlaylist(music);
+        musicRepository.upsertMusic(music);
     }
 
     @Override
-    public void saveAll(List<Video> legalVideos, Playlists playlist) {
+    public void saveAllVideos(List<Video> legalVideos, Playlists playlist) {
 
         List<Music> musicsToSave = new ArrayList<>();
 
@@ -96,31 +95,6 @@ public class MusicServiceV1 implements MusicService {
         musicRepository.saveAll(musicsToSave);
     }
 
-    /*@Override
-    public Music searchVideoToReplace(Music musicToSearch, Playlists playlist) {
-
-        String query = searchPolicy.search(musicToSearch); // Gemini Policy 사용
-        log.info("searched with : {}", query);
-        SearchResult searchResult;
-        try {
-            searchResult = youtubeApiClient.searchFromYoutube(query);
-        } catch (IOException e) {
-            return null;
-        }
-
-        Music music = new Music();
-        music.setVideoId(searchResult.getId().getVideoId());
-        music.setVideoTitle(searchResult.getSnippet().getTitle());
-        music.setVideoUploader(searchResult.getSnippet().getChannelTitle());
-        music.setVideoTags(musicToSearch.getVideoTags());
-        music.setVideoDescription(searchResult.getSnippet().getDescription());
-        // search 결과로는 tags 얻을 수 없음. 그렇다고 또 video Id로 검색하긴 귀찮음. 그냥 놔두자.
-        music.setPlaylist(playlist);
-        log.info("Found a music to replace : {}, {}", music.getVideoTitle(), music.getVideoUploader());
-
-        return music;
-    }*/
-
     @Override
     public Video searchVideoToReplace(Music musicToSearch, Playlists playlist) {
 
@@ -129,19 +103,15 @@ public class MusicServiceV1 implements MusicService {
         SearchResult searchResult;
         Video video;
         try {
+            /**
+             * 이미 할당량 체크는 YoutubeService 에서 100 + 1 로 체크해줬음
+             */
             searchResult = youtubeApiClient.searchFromYoutube(query);
-            video = youtubeApiClient.getSingleVideo(searchResult.getId().getVideoId());
+            video = youtubeApiClient.fetchSingleVideo(searchResult.getId().getVideoId());
         } catch (IOException e) {
             return null;
         }
-//        Music music = new Music();
-//        music.setVideoId(searchResult.getId().getVideoId());
-//        music.setVideoTitle(searchResult.getSnippet().getTitle());
-//        music.setVideoUploader(searchResult.getSnippet().getChannelTitle());
-//        music.setVideoTags(musicToSearch.getVideoTags());
-//        music.setVideoDescription(searchResult.getSnippet().getDescription());
-//        // search 결과로는 tags 얻을 수 없음. 그렇다고 또 video Id로 검색하긴 귀찮음. 그냥 놔두자.
-//        music.setPlaylist(playlist);
+
         log.info("[Found a music to replace]: {}, {}", video.getSnippet().getTitle(), video.getSnippet().getChannelTitle());
         return video;
     }

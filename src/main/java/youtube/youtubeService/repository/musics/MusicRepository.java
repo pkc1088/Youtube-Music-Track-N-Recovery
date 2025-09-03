@@ -3,13 +3,12 @@ package youtube.youtubeService.repository.musics;
 import youtube.youtubeService.domain.Music;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MusicRepository {
 
     List<Music> findAllMusicByPlaylistId(String playlistId);
 
-    void addUpdatePlaylist(Music music);
+    void upsertMusic(Music music);
 
     void deleteById(Long pk);
 

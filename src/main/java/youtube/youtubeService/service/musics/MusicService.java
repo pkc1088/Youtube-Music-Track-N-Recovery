@@ -4,7 +4,6 @@ import com.google.api.services.youtube.model.Video;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface MusicService {
@@ -17,11 +16,11 @@ public interface MusicService {
 
     void dBTrackAndRecoverPosition(String videoIdToDelete, Music replacementMusic, long pk);
 
-    void addUpdatePlaylist(Music music);
+    void upsertMusic(Music music);
 
-    void DBAddAction(Video video, Playlists playlist);
+    void saveSingleVideo(Video video, Playlists playlist);
 
-    void saveAll(List<Video> legalVideos, Playlists playlist);
+    void saveAllVideos(List<Video> legalVideos, Playlists playlist);
 
 //    Music searchVideoToReplace(Music musicToSearch, Playlists playlist);
     Video searchVideoToReplace(Music musicToSearch, Playlists playlist);

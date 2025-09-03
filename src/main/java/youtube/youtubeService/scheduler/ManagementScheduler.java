@@ -5,8 +5,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
-import com.google.api.services.youtube.model.Video;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -81,73 +79,6 @@ public class ManagementScheduler {
     }
 
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
-    public void allPlaylistsRecoveryOfAllUsersTest() {
-        log.info("auto scheduler activated");
-
-        // 0. 전체 유저 목록에서 순차적으로 유저를 뽑기
-        List<Users> users = userRepository.findAllUsers();
-
-        for (Users user : users) {
-            String userId = user.getUserId(); // String userId  = "112735690496635663877";
-            String countryCode = user.getCountryCode();
-            log.info("userId : {}", userId);
-            // 1. 유저 아이디로 accessToken 발급
-            String accessToken = userService.getNewAccessTokenByUserId(userId);
-            if(accessToken.equals("")) {
-                log.info("abort scheduling bc user left");
-                continue;
-            }
-            // 2. 유저 아이디로 조회한 모든 플레이리스트 & 음악을 디비에서 뽑아서 복구 시스템 가동
-            List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
-            for (Playlists playlist : playListsSet) {
-                log.info("{} start", playlist.getPlaylistTitle());
-                try {
-                    youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
-                } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
-                    playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
-                    log.info("removed the playlist({}) from DB", e.getMessage());
-                    log.info("scheduler caught and then move to next playlist");
-                } catch (Exception e) {// 예상 못한 런타임 에러 방어
-                    log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-
-        }
-        log.info("auto scheduler done");
-    }
-
-//    @Scheduled(fixedRate = 5000000, initialDelayString = "1000")
-    public void allPlaylistsRecoveryOfOneParticularUserTest() {
-        log.info("auto scheduler activated");
-        // 0. 전체 유저 목록에서 순차적으로 유저를 뽑아 오는 시나리오 있다 치고
-        String userId  = "112735690496635663877";
-        String countryCode = "KR";
-        // 1. 유저 아이디로 accessToken 발급
-        String accessToken = userService.getNewAccessTokenByUserId(userId);
-        if(accessToken.equals("")) {
-            log.info("abort scheduling bc user left");
-            return;
-        }
-        // 2. 유저 아이디로 조회한 모든 플레이리스트 & 음악을 디비에서 뽑아서 복구 시스템 가동
-        List<Playlists> playListsSet = playlistService.getPlaylistsByUserId(userId);
-        for (Playlists playlist : playListsSet) {
-            log.info("{} start", playlist.getPlaylistTitle());
-            try {
-                youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
-            } catch (IOException e) {// playlist 자체가 제거된 경우 예외처리 필요
-                playlistService.removePlaylistsFromDB(userId, Collections.singletonList(e.getMessage()));
-                log.info("remove the playlist({}) from DB", e.getMessage());
-                log.info("scheduler caught and then move to next playlist");
-            } catch (Exception e) {// 예상 못한 런타임 에러 방어
-                log.warn("unexpected error for playlist {}, skip to next. {}", playlist.getPlaylistId(), e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        log.info("auto scheduler done");
-    }
-
-//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
         log.info("auto scheduler activated");
 
@@ -160,11 +91,11 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void LazyTest() {
         String userId = "101758050105729632425";
-        Playlists playlistParam = playlistService.getPlaylistsByUserId(userId).get(0);
+        Playlists playlistParam = playlistService.findAllPlaylistsByUserId(userId).get(0);
 
         log.info("auto scheduler activated");
 
-        youtubeService.lazyTest(playlistParam);
+        //youtubeService.lazyTest(playlistParam);
 
         log.info("auto scheduler done");
     }
@@ -199,7 +130,7 @@ public class ManagementScheduler {
 //        log.info("[START] findByUserId");
 
         log.info("[START] playlistService.getPlaylistsByUserId(userId);");
-        List<Playlists> playlists = playlistService.getPlaylistsByUserId(userId); // findByUser_UserId (query : 2회)
+        List<Playlists> playlists = playlistService.findAllPlaylistsByUserId(userId); // findByUser_UserId (query : 2회)
         for (Playlists p : playlists) {
             log.info(p.getPlaylistTitle());
             Users user = p.getUser();
@@ -278,26 +209,26 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 5000000, initialDelayString = "1000")
     public void multiVideoDetailsTest() throws IOException {
 
-        // 4개 곡 모두 다 videoId 확보 가능. 세부사항은 Video 로 확보할 것
-        String playlistId = "PLNj4bt23Rjfsm0Km4iNM6RSBwXXOEym74";//"PLNj4bt23Rjfs_0BztPAFHeyirxrHzGu5L";//
-        List<PlaylistItem> playlistItems = youtubeApiClient.getPlaylistItemListResponse(playlistId, 50L);
-        // playlist 예외 처리는 YOutubeService에선 알아서 해주고, PlaylistService는 필요하긴 함
-        List<String> videoIds = playlistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
-
-        log.info("-------------------{}-----------------------", videoIds.size());
-        playlistItems.forEach(item -> {
-            log.info("{}", item.getSnippet().getTitle());
-        });
-        log.info("----------------------------------------------------------");
-
-        List<Video> legalVideos = null; //safeFetchVideos(videoIds);
-
-        log.info("=== 결과({}) ===", legalVideos.size());
-        // legalVideos 널 체크 (DBAddAction 하기 전에)
-        for (Video video : legalVideos) {
-            log.info("정상 영상: {}, {}, {}", video.getSnippet().getTitle(), video.getId(), video.getStatus().getUploadStatus());
-        }
-        log.info("=== 완료 ===");
+//        // 4개 곡 모두 다 videoId 확보 가능. 세부사항은 Video 로 확보할 것
+//        String playlistId = "PLNj4bt23Rjfsm0Km4iNM6RSBwXXOEym74";//"PLNj4bt23Rjfs_0BztPAFHeyirxrHzGu5L";//
+//        List<PlaylistItem> playlistItems = youtubeApiClient.getPlaylistItemListResponse(playlistId, 100L);
+//        // playlist 예외 처리는 YOutubeService에선 알아서 해주고, PlaylistService는 필요하긴 함
+//        List<String> videoIds = playlistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
+//
+//        log.info("-------------------{}-----------------------", videoIds.size());
+//        playlistItems.forEach(item -> {
+//            log.info("{}", item.getSnippet().getTitle());
+//        });
+//        log.info("----------------------------------------------------------");
+//
+//        List<Video> legalVideos = null; //safeFetchVideos(videoIds);
+//
+//        log.info("=== 결과({}) ===", legalVideos.size());
+//        // legalVideos 널 체크 (DBAddAction 하기 전에)
+//        for (Video video : legalVideos) {
+//            log.info("정상 영상: {}, {}, {}", video.getSnippet().getTitle(), video.getId(), video.getStatus().getUploadStatus());
+//        }
+//        log.info("=== 완료 ===");
         /*System.out.println("----------------------------------------------------------");
         for (PlaylistItem video : response2) {
             System.out.println(video.getSnippet().getTitle() + " : " + video.getStatus().getPrivacyStatus());

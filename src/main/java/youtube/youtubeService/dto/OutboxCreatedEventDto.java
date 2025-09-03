@@ -1,10 +1,10 @@
 package youtube.youtubeService.dto;
 
 // 	발행-구독 메시지 DTO
-public class OutboxCreatedEvent {
+public class OutboxCreatedEventDto {
     private final Long outboxId;
 
-    public OutboxCreatedEvent(Long outboxId) {
+    public OutboxCreatedEventDto(Long outboxId) {
         this.outboxId = outboxId;
     }
 

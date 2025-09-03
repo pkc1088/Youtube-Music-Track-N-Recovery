@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quota Exceeded</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .message-title {
+            font-size: 28px;
+            color: #ff9800; /* 경고성 오렌지색 */
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .message-text {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .btn-action {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-action:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="message-title">Quota Exceeded</h1>
+    <p class="message-text" th:text="${errorMessage}">
+        오늘의 할당량을 모두 소진했습니다. 내일 다시 시도해주세요.
+    </p>
+    <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="btn-action">Back to Home</button>
+    </form>
+</div>
+</body>
+</html>

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class VideoFilterResult {
+public class VideoFilterResultPageDto {
     private final List<Video> legalVideos;
     private final List<Video> unlistedCountryVideos;
 }

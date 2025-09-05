@@ -131,15 +131,41 @@
 
 ## 🚀 6. 주요 화면 구성
 
+### **[관리자 전용 화면]**
+<br>
+
+**1. 세션 관리 화면**
+<p align="center">
+  <img width="900" height="800" alt="관리자세션화면" src="https://github.com/user-attachments/assets/626d8fc0-a1d4-4326-ad05-13bc718076f6" />
+</p>
+
+- `Role` 기반 관리자 페이지와 고객 페이지 구분
+
+- Redis 기반 세션 관리
+
+- 특정 유저 세션 상세 조회 및 즉시 무효화 기능
+<br><br>
+
+**2. 할당량 관리 화면**
+<p align="center">
+  <img width="900" height="400" alt="관리자할당량화면" src="https://github.com/user-attachments/assets/c40f5841-f6ac-4c25-bd0b-8faffba4c1a7" />
+</p>
+
+- Redis를 이용해 고객별 할당량을 조회 및 동적 조정
+ 
+- 전역 할당량 제한키 동적 조절 
+<br><br>
+
+### [고객 전용 화면]
+<br>
+
 <table>
   <tr>
-    <!-- 왼쪽: 세로로 늘린 afterLogin -->
     <td>
-      <img width="500" height="1400" alt="afterLogin" src="https://github.com/user-attachments/assets/b5b6c988-9d78-4a24-afc7-832bf0425579" />
+      <img width="500" height="1400" alt="메인화면(유저)" src="https://github.com/user-attachments/assets/8ad7f54f-d344-4823-af3a-81de54650757" />
     </td>
-    <!-- 오른쪽: ui2, ui3, 복구내역 -->
     <td>
-      <img width="500" alt="ui2" src="https://github.com/user-attachments/assets/4e0d8b21-2767-49e0-8f38-a6c2f0bb15de" /><br/>
+      <img width="500" alt="플리등록화면(결과)" src="https://github.com/user-attachments/assets/1c20c6a7-32be-4db3-a869-8039886391ba" /><br/>
       <img width="500" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" /><br/>
       <img width="500" alt="복구내역" src="https://github.com/user-attachments/assets/574640cf-19bc-4d82-9670-1a285d3a7971" />
     </td>
@@ -417,6 +443,7 @@
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

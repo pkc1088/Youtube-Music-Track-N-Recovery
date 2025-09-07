@@ -37,6 +37,9 @@ public class OutboxEventHandler {
         List<Outbox> failedOutboxes = outboxRepository.findByUserIdAndStatus(userId, Outbox.Status.FAILED);
         int failedOutboxesSize = failedOutboxes.size();
         log.info("[retryFailedOutboxEvents failedOutboxes Size] : {}", failedOutboxesSize);
+
+        if(failedOutboxesSize == 0) return;
+
         boolean affordToRetryAllAtOnce = quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_DELETE.getCost() * failedOutboxesSize);
 
         /**

@@ -6,7 +6,8 @@
   <br><br>    
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/64686b55-75b2-4581-aa0b-5b9e229b5d1b" alt="FixMyPlaylist UI" width="80%">
+  <img width="1037" height="1307" alt="MainUI1" src="https://github.com/user-attachments/assets/f52cb05e-f225-4326-a2f2-f584eb3bc398" />
+<!--   <img src="https://github.com/user-attachments/assets/64686b55-75b2-4581-aa0b-5b9e229b5d1b" alt="FixMyPlaylist UI" width="80%"> -->
   <br><br>
 </p>
 
@@ -162,12 +163,15 @@
 <table>
   <tr>
     <td>
-      <img width="500" height="1400" alt="메인화면(유저)" src="https://github.com/user-attachments/assets/8ad7f54f-d344-4823-af3a-81de54650757" />
+      <img width="800" height="700" alt="welcomeUI" src="https://github.com/user-attachments/assets/a0256abf-b628-4325-a4ae-ab256230fbdb" /><br/>
+      <img width="800" height="700" alt="RecoveryHistoryUI" src="https://github.com/user-attachments/assets/c186a13f-aa40-4992-af34-fdb86bc5b1f4" />
+<!--       <img width="500" height="1400" alt="메인화면(유저)" src="https://github.com/user-attachments/assets/8ad7f54f-d344-4823-af3a-81de54650757" /> -->
     </td>
     <td>
-      <img width="500" alt="플리등록화면(결과)" src="https://github.com/user-attachments/assets/1c20c6a7-32be-4db3-a869-8039886391ba" /><br/>
-      <img width="500" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" /><br/>
-      <img width="500" alt="복구내역" src="https://github.com/user-attachments/assets/574640cf-19bc-4d82-9670-1a285d3a7971" />
+<!--       <img width="500" alt="플리등록화면(결과)" src="https://github.com/user-attachments/assets/1c20c6a7-32be-4db3-a869-8039886391ba" /><br/>
+      <img width="500" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" /><br/> -->
+      <img width="800" height="2400" alt="playlistSelectionUI" src="https://github.com/user-attachments/assets/9bfc2c06-c0d6-4ba0-b398-cacc464a867a" />
+<!--       <img width="500" alt="복구내역" src="https://github.com/user-attachments/assets/574640cf-19bc-4d82-9670-1a285d3a7971" /> -->
     </td>
   </tr>
 </table>
@@ -443,6 +447,7 @@
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

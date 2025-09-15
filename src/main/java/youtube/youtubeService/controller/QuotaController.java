@@ -61,4 +61,9 @@ public class QuotaController {
         quotaService.decrementUserQuota(userId, delta);
     }
 
+    @GetMapping("/getAllLegitKeys")
+    @ResponseBody
+    public String getAllLegitQuotas() {
+        return quotaService.getAllLegitQuotas().toString();
+    }
 }

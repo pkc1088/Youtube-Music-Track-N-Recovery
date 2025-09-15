@@ -145,6 +145,27 @@ public class QuotaService {
         return result != null && result == 1L;
     }
 
+
+
+
+
+
+    public List<String> getAllLegitQuotas () {
+        List<String> keys = new ArrayList<>();
+
+        redisTemplate.execute((RedisConnection connection) -> {
+            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().count(100).build())) {
+                while (cursor.hasNext()) {
+                    byte[] keyBytes = cursor.next();
+                    String key = new String(keyBytes, StandardCharsets.UTF_8);
+                    keys.add(key + "\n");
+                }
+            }
+            return null;
+        });
+
+        return keys;
+    }
 }
 
 /*

@@ -1,6 +1,5 @@
 package youtube.youtubeService.controller;
 
-import com.google.api.services.youtube.model.Playlist;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,9 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import youtube.youtubeService.domain.ActionLog;
-import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.dto.ActionLogDto;
 import youtube.youtubeService.dto.PlaylistRegisterRequestDto;
 import youtube.youtubeService.dto.PlaylistRegistrationResultDto;
@@ -26,8 +22,6 @@ import youtube.youtubeService.service.users.UserService;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Controller
@@ -50,7 +44,7 @@ public class YoutubeController {
 
     @GetMapping("/")
     public String index(Principal principal) {
-        return principal != null ? "afterLogin" : "login";
+        return principal != null ? "afterLoginIndex" : "beforeLoginIndex";
     }
 
     @GetMapping("/welcome")

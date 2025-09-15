@@ -1,100 +1,605 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FixMyPlaylist</title>
+    <link rel="icon" type="image/x-icon" href="/images/FixMyPlaylist_120.png" />
+    <link href="/css/styles.css" rel="stylesheet" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet" />
+<!--    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <style>
+        :root {
+            --primary-color: #1DB954; /* Spotify Green */
+            --background-color: #f8f7f7; /* Dark Background */
+            --card-background: rgba(11, 11, 11, 0.68);
+            --text-color: #FFFFFF;
+            --text-secondary-color: #B3B3B3;
+            --border-color: #404040;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            margin: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        .log-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .log-card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            padding: 20px;
-            width: 300px;
-        }
-
-        .log-card h3 {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             margin: 0;
-            font-size: 18px;
-            color: #007bff;
+            padding-top: 100px; /* 상단바와의 간격 추가 */
+            padding-bottom: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 0 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: var(--text-secondary-color);
+        }
+
+        /* Timeline Container */
+        .timeline {
+            position: relative;
+            max-width: 800px; /* 중앙 정렬을 위한 최대 너비 */
+            margin: 0 auto;
+        }
+
+        /* Log Card Container */
+        .log-container {
+            padding: 10px 0;
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* The actual log card */
+        .log-card {
+            padding: 20px 25px;
+            background-color: var(--card-background);
+            position: relative;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease-in-out;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 700px;
+        }
+
+        .log-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .log-card-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .log-card-header i {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+
+        .log-card-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            color: var(--text-color);
         }
 
         .log-detail {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #555;
+            font-size: 0.9em;
+            color: var(--text-secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .log-detail span {
-            font-weight: bold;
-            color: #333;
+        .log-detail .video-section {
+            flex: 1;
+        }
+
+        .log-detail strong {
+            color: var(--primary-color); /* Broken, Replaced 강조 */
+            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.05em;
+        }
+
+        .log-detail a {
+            color: var(--text-secondary-color); /* 실제 내용은 덜 강조 */
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .log-detail a:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        .log-detail .arrow {
+            padding: 0 20px;
+            font-size: 1.5em;
+            color: var(--primary-color);
+        }
+
+        .playlist-link {
+            margin-top: 5px;
+        }
+
+        .label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .playlist-id {
+            color: var(--text-secondary-color);
+            text-decoration: none;
+            font-weight: 400; /* 덜 진하게 */
+            transition: color 0.2s;
+        }
+
+        .playlist-id:hover {
+            color: var(--primary-color);
+            text-decoration: underline;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .empty-state i {
+            font-size: 3em;
+            color: var(--primary-color);
+        }
+        .empty-state p {
+            font-size: 1.2em;
+            color: var(--text-secondary-color);
+            margin-top: 20px;
+        }
+        /* Responsive adjustments */
+        @media screen and (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+
+            .log-detail {
+                flex-direction: column;
+            }
+
+            .log-detail .arrow {
+                padding: 10px 0;
+                transform: rotate(90deg); /* 모바일에서는 다시 아래로 */
+            }
+
+            .log-detail .video-section {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
         }
     </style>
 </head>
-<body>
-<h1 th:text="'사용자 ' + ${userId} + '의 복구 내역'">복구 내역</h1>
 
-<div class="log-container">
-    <div class="log-card" th:each="log : ${dto.logs}">
-        <h3 th:text="${log.createdAt}">날짜</h3>
-        <div class="log-detail">
-            <div><span>대상 영상 ID:</span> <span th:text="${log.targetVideoId}"></span></div>
-            <div><span>대상 영상 제목:</span> <span th:text="${log.targetVideoTitle}"></span></div>
-            <div><span>출처 영상 ID:</span> <span th:text="${log.sourceVideoId}"></span></div>
-            <div><span>출처 영상 제목:</span> <span th:text="${log.sourceVideoTitle}"></span></div>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
+    <div class="container px-5">
+        <a class="navbar-brand fw-bold" href="#page-top">FixMyPlaylist</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            Menu
+            <i class="bi-list"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link me-lg-3" th:href="@{/}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link me-lg-3" th:href="@{/welcome}">Prev</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="header">
+    <h1>Recovery History</h1>
+    <p th:text="'Playlist Recovery History for ' + ${userId}"></p>
+</div>
+
+<div class="timeline" th:if="${!#lists.isEmpty(dto.logs)}">
+    <div th:each="log : ${dto.logs}" class="log-container">
+        <div class="log-card">
+            <div class="log-card-header">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div>
+                    <h3 th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}">0000-00-00 00:00:00</h3>
+                    <div class="playlist-link">
+                        <span class="label">Playlist ID: </span>
+                        <a th:href="'https://www.youtube.com/playlist?list=' + ${log.playlistId}" target="_blank"
+                           th:text="${log.playlistId}" class="playlist-id">xxxxxxx</a>
+                    </div>
+                </div>
+            </div>
+            <div class="log-detail">
+                <div class="video-section">
+                    <strong>Broken Video</strong>
+                    <div class="video-link">
+                        <i class="fa-solid fa-film"></i>
+                        <a th:href="'https://www.youtube.com/watch?v=' + ${log.targetVideoId}" target="_blank" th:text="${log.targetVideoTitle}">원본 영상 제목</a>
+                    </div>
+                </div>
+
+                <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                <div class="video-section">
+                    <strong>Replaced Video</strong>
+                    <div class="video-link">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <a th:href="'https://www.youtube.com/watch?v=' + ${log.sourceVideoId}" target="_blank" th:text="${log.sourceVideoTitle}">대체 영상 제목</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<div class="empty-state" th:unless="${!#lists.isEmpty(dto.logs)}">
+    <i class="fa-solid fa-folder-open"></i>
+    <p>No recovery history</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
 <!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
 <!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <title>복구 내역</title>-->
-<!--</head>-->
-<!--<body>-->
-<!--<h1 th:text="'사용자 ' + ${userId} + '의 복구 내역'">복구 내역</h1>-->
+<!--    <meta charset="utf-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1" />-->
+<!--    <title>FixMyPlaylist</title>-->
+<!--    <link rel="icon" type="image/x-icon" href="/images/FixMyPlaylist_120.png" />-->
+<!--    <link href="/css/styles.css" rel="stylesheet" />-->
 
-<!--<table border="1">-->
-<!--    <thead>-->
-<!--    <tr>-->
-<!--        <th>날짜</th>-->
-<!--        <th>대상 영상 ID</th>-->
-<!--        <th>대상 영상 제목</th>-->
-<!--        <th>출처 영상 ID</th>-->
-<!--        <th>출처 영상 제목</th>-->
-<!--    </tr>-->
-<!--    </thead>-->
-<!--    <tbody>-->
-<!--    <tr th:each="log : ${logs}">-->
-<!--        <td th:text="${log.createdAt}"></td>-->
-<!--        <td th:text="${log.targetVideoId}"></td>-->
-<!--        <td th:text="${log.targetVideoTitle}"></td>-->
-<!--        <td th:text="${log.sourceVideoId}"></td>-->
-<!--        <td th:text="${log.sourceVideoTitle}"></td>-->
-<!--    </tr>-->
-<!--    </tbody>-->
-<!--</table>-->
+<!--    <link rel="preconnect" href="https://fonts.googleapis.com">-->
+<!--    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">-->
+
+<!--    <style>-->
+<!--        :root {-->
+<!--            &#45;&#45;primary-color: #1DB954; /* Spotify Green */-->
+<!--            &#45;&#45;background-color: #f8f7f7; /* Dark Background */-->
+<!--            &#45;&#45;card-background: #282828;-->
+<!--            &#45;&#45;text-color: #FFFFFF;-->
+<!--            &#45;&#45;text-secondary-color: #B3B3B3;-->
+<!--            &#45;&#45;border-color: #404040;-->
+<!--        }-->
+
+<!--        body {-->
+<!--            font-family: 'Noto Sans KR', sans-serif;-->
+<!--            background-color: var(&#45;&#45;background-color);-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--            margin: 0;-->
+<!--            padding-top: 100px; /* 상단바와의 간격 추가 */-->
+<!--            padding-bottom: 40px;-->
+<!--        }-->
+
+<!--        .header {-->
+<!--            text-align: center;-->
+<!--            margin-bottom: 50px;-->
+<!--            padding: 0 20px;-->
+<!--        }-->
+
+<!--        .header h1 {-->
+<!--            font-size: 2.5em;-->
+<!--            margin: 0;-->
+<!--            color: var(&#45;&#45;primary-color);-->
+<!--        }-->
+
+<!--        .header p {-->
+<!--            font-size: 1.1em;-->
+<!--            color: var(&#45;&#45;text-secondary-color);-->
+<!--        }-->
+<!--        .header-text {-->
+<!--            margin-left: 10px;-->
+<!--        }-->
+<!--        /* Timeline Container */-->
+<!--        .timeline {-->
+<!--            position: relative;-->
+<!--            max-width: 800px; /* 중앙 정렬을 위한 최대 너비 */-->
+<!--            margin: 0 auto;-->
+<!--        }-->
+
+<!--        /* Log Card Container */-->
+<!--        .log-container {-->
+<!--            padding: 10px 0;-->
+<!--            position: relative;-->
+<!--            width: 100%;-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--        }-->
+
+<!--        /* The circle on the timeline */-->
+<!--        .log-container::after {-->
+<!--            display: none; /* 원형 마커 제거 */-->
+<!--        }-->
+
+<!--        /* The actual log card */-->
+<!--        .log-card {-->
+<!--            padding: 20px 25px;-->
+<!--            background-color: var(&#45;&#45;card-background);-->
+<!--            position: relative;-->
+<!--            border-radius: 8px;-->
+<!--            box-shadow: 0 4px 15px rgba(0,0,0,0.2);-->
+<!--            transition: transform 0.2s ease-in-out;-->
+<!--            border: 1px solid var(&#45;&#45;border-color);-->
+<!--            width: 100%;-->
+<!--            max-width: 700px;-->
+<!--        }-->
+
+<!--        .log-card:hover {-->
+<!--            transform: translateY(-5px);-->
+<!--        }-->
+
+<!--        /*.log-card-header {*/-->
+<!--        /*    display: flex;*/-->
+<!--        /*    align-items: center;*/-->
+<!--        /*    border-bottom: 1px solid var(&#45;&#45;border-color);*/-->
+<!--        /*    padding-bottom: 10px;*/-->
+<!--        /*    margin-bottom: 15px;*/-->
+<!--        /*}*/-->
+<!--        .log-card-header {-->
+<!--            display: flex;-->
+<!--            align-items: flex-start;-->
+<!--        }-->
+<!--        .timestamp {-->
+<!--            font-size: 1em;-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--            font-weight: 600;-->
+<!--        }-->
+<!--        .log-card-header i {-->
+<!--            color: var(&#45;&#45;primary-color);-->
+<!--            font-size: 1.2em;-->
+<!--            margin-right: 10px;-->
+<!--        }-->
+
+<!--        .log-card-header h3 {-->
+<!--            margin: 0;-->
+<!--            font-size: 1.1em;-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--        }-->
+
+<!--        .log-detail {-->
+<!--            font-size: 0.9em;-->
+<!--            color: var(&#45;&#45;text-secondary-color);-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: space-between;-->
+<!--        }-->
+
+<!--        .log-detail .video-section {-->
+<!--            flex: 1;-->
+<!--        }-->
+
+<!--        .log-detail strong {-->
+<!--            color: var(&#45;&#45;text-color);-->
+<!--            font-weight: 700;-->
+<!--            display: block;-->
+<!--            margin-bottom: 5px;-->
+<!--        }-->
+
+<!--        .log-detail a {-->
+<!--            color: var(&#45;&#45;text-secondary-color);-->
+<!--            text-decoration: none;-->
+<!--            transition: color 0.2s;-->
+<!--        }-->
+
+<!--        .log-detail a:hover {-->
+<!--            color: var(&#45;&#45;primary-color);-->
+<!--            text-decoration: underline;-->
+<!--        }-->
+
+<!--        .log-detail .arrow {-->
+<!--            padding: 0 20px;-->
+<!--            font-size: 1.5em;-->
+<!--            color: var(&#45;&#45;primary-color);-->
+<!--        }-->
+
+<!--        .log-detail .arrow i {-->
+<!--            transform: rotate(0deg); /* 좌→우 화살표 */-->
+<!--        }-->
+
+<!--        /* Empty State */-->
+<!--        .empty-state {-->
+<!--            text-align: center;-->
+<!--            padding: 50px;-->
+<!--            background-color: var(&#45;&#45;card-background);-->
+<!--            border-radius: 8px;-->
+<!--            max-width: 600px;-->
+<!--            margin: 0 auto;-->
+<!--        }-->
+<!--        .empty-state i {-->
+<!--            font-size: 3em;-->
+<!--            color: var(&#45;&#45;primary-color);-->
+<!--        }-->
+<!--        .empty-state p {-->
+<!--            font-size: 1.2em;-->
+<!--            color: var(&#45;&#45;text-secondary-color);-->
+<!--            margin-top: 20px;-->
+<!--        }-->
+<!--        .playlist-link {-->
+<!--            margin-top: 5px;-->
+<!--        }-->
+<!--        .label {-->
+<!--            font-size: 0.9em;-->
+<!--            color: var(&#45;&#45;text-secondary-color);-->
+<!--            font-weight: 400;-->
+<!--        }-->
+<!--        /* Delete Account 버튼 스타일 수정 */-->
+<!--        .btn-link.nav-link {-->
+<!--            background: none;-->
+<!--            border: none;-->
+<!--            cursor: pointer;-->
+<!--            padding: 0.5rem 1rem;-->
+<!--            text-decoration: none;-->
+<!--            display: inline-block;-->
+<!--            font-weight: 400;-->
+<!--            color: rgba(0, 0, 0, 0.9) !important;-->
+<!--        }-->
+
+<!--        .btn-link.nav-link:hover {-->
+<!--            color: rgba(0, 0, 0, 0.7) !important;-->
+<!--        }-->
+<!--        .highlight {-->
+<!--            color: var(&#45;&#45;text-color) !important;-->
+<!--            font-weight: 600;-->
+<!--            text-decoration: none;-->
+<!--        }-->
+
+<!--        .highlight:hover {-->
+<!--            color: var(&#45;&#45;primary-color) !important;-->
+<!--            text-decoration: underline;-->
+<!--        }-->
+
+<!--        .video-section {-->
+<!--            display: flex;-->
+<!--            flex-direction: column;-->
+<!--        }-->
+
+<!--        .video-link {-->
+<!--            margin-top: 5px;-->
+<!--        }-->
+<!--        /* Responsive adjustments */-->
+<!--        @media screen and (max-width: 768px) {-->
+<!--            body {-->
+<!--                padding-top: 120px;-->
+<!--            }-->
+
+<!--            .log-detail {-->
+<!--                flex-direction: column;-->
+<!--            }-->
+
+<!--            .log-detail .arrow {-->
+<!--                padding: 10px 0;-->
+<!--                transform: rotate(90deg); /* 모바일에서는 다시 아래로 */-->
+<!--            }-->
+
+<!--            .log-detail .video-section {-->
+<!--                width: 100%;-->
+<!--                margin-bottom: 15px;-->
+<!--            }-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+
+<!--<body>-->
+<!--<nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">-->
+<!--    <div class="container px-5">-->
+<!--        <a class="navbar-brand fw-bold" href="#page-top">FixMyPlaylist</a>-->
+<!--        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"-->
+<!--                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--            Menu-->
+<!--            <i class="bi-list"></i>-->
+<!--        </button>-->
+<!--        <div class="collapse navbar-collapse" id="navbarResponsive">-->
+<!--            <ul class="navbar-nav ms-auto me-4 my-3 my-lg-0">-->
+<!--                <li class="nav-item">-->
+<!--                    <a class="nav-link me-lg-3" th:href="@{/}">Home</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item">-->
+<!--                    <form th:action="@{/delete}" method="post" style="display:inline;">-->
+<!--                        <button type="submit" class="btn btn-link nav-link me-lg-3"-->
+<!--                                style="text-decoration:none; color:inherit;"-->
+<!--                                onclick="return confirm('정말로 탈퇴하시겠습니까?')">-->
+<!--                            Delete Account-->
+<!--                        </button>-->
+<!--                    </form>-->
+<!--                </li>-->
+<!--            </ul>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</nav>-->
+
+<!--<div class="header">-->
+<!--    <h1>Recovery History</h1>-->
+<!--    <p th:text="'Playlist recovery history of ' + ${userId}"></p>-->
+<!--</div>-->
+
+<!--<div class="timeline" th:if="${!#lists.isEmpty(dto.logs)}">-->
+<!--    <div th:each="log : ${dto.logs}" class="log-container">-->
+<!--        <div class="log-card">-->
+<!--            <div class="log-card-header">-->
+<!--                <i class="fa-solid fa-calendar-check"></i>-->
+<!--                <div class="header-text">-->
+<!--                    <div class="timestamp" th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-09-11 16:54:00</div>-->
+<!--                    <div class="playlist-link">-->
+<!--                        <span class="label">Playlist ID: </span>-->
+<!--                        <a th:href="'https://www.youtube.com/playlist?list=' + ${log.playlistId}" target="_blank" th:text="${log.playlistId}"-->
+<!--                           class="highlight">xxxxx</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="log-detail">-->
+<!--                <div class="video-section">-->
+<!--                    <span class="label">Broken Video</span>-->
+<!--                    <div class="video-link">-->
+<!--                        <i class="fa-solid fa-film"></i>-->
+<!--                        <a th:href="'https://www.youtube.com/watch?v=' + ${log.targetVideoId}" target="_blank" th:text="${log.targetVideoTitle}"-->
+<!--                           class="highlight">원본 영상 제목</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="arrow"><i class="fa-solid fa-arrow-right"></i></div>-->
+
+<!--                <div class="video-section">-->
+<!--                    <span class="label">Replaced Video</span>-->
+<!--                    <div class="video-link">-->
+<!--                        <i class="fa-solid fa-wand-magic-sparkles"></i>-->
+<!--                        <a th:href="'https://www.youtube.com/watch?v=' + ${log.sourceVideoId}" target="_blank" th:text="${log.sourceVideoTitle}"-->
+<!--                           class="highlight">대체 영상 제목</a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div class="empty-state" th:unless="${!#lists.isEmpty(dto.logs)}">-->
+<!--    <i class="fa-solid fa-folder-open"></i>-->
+<!--    <p>No recovery history</p>-->
+<!--</div>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
 <!--</body>-->
 <!--</html>-->
+
+
+
+

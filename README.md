@@ -11,15 +11,16 @@
   <br><br>
 </p>
 
+
 ## ☑️ 0. Index
-- [1. Project Overview](#-1-project-overview)
-- [2. Existing Service Analysis](#-2-existing-service-analysis)
-- [3. Google Approval Process](#-3-google-approval-process)
-- [4. Internal Policy & Quota Optimization](#-4-internal-policy--quota-optimization)
-- [5. Architecture](#-5-architecture)
-- [6. Technical Strategy](#-6-technical-strategy)
-- [7. OAuth2 & Recovery Flow](#-7-oauth2--recovery-flow)
-- [8. UI](#-8-ui)
+- [1. Project Overview](-1-project-overview)
+- [2. Existing Service Analysis](-2-existing-service-analysis)
+- [3. Google Approval Process](-3-google-approval-process)
+- [4. Internal Policy & Quota Optimization](-4-internal-policy-quota-optimization)
+- [5. Architecture](-5-architecture)
+- [6. Technical Strategy](-6-technical-strategy)
+- [7. OAuth2 & Recovery Flow](-7-oauth2--recovery-flow)
+- [8. UI](-8-ui)
 
 <br>
 
@@ -195,7 +196,6 @@
 
 ### 2. Layered Architecture
 <p align="center">
-
   <img width="800" height="500" alt="LayeredArchitecutre" src="https://github.com/user-attachments/assets/82d1ccc5-f58c-4e65-85d0-b280dd0ceb65" />
   <!-- <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" /> -->
 </p>
@@ -494,6 +494,7 @@
 
 
 -->
+
 
 
 

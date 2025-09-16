@@ -18,7 +18,7 @@
 - [4. Internal Policy & Qouta Optimization](#-4-Internal-Policy-&-Qouta-Optimization)
 - [5. Architecture](#-5-Architecture)
 - [6. Technical Strategy](#-6-Technical-Strategy)
-- [7. Authorization & Recovery Sequence](#-7-Authorization-&-Recovery-Sequence)
+- [7. OAuth2 & Recovery Sequence](#-7-OAuth2-&-Recovery-Sequence)
 - [8. UI](#-8-UI)
 
 <br>
@@ -287,7 +287,7 @@
 
 
 
-## 📊 7. Authorization & Recovery Sequence
+## 📊 7. OAuth2 & Recovery Sequence
 
 ### 1. OAuth2 Authentication & Authorization Sequence
 <p align="center">
@@ -494,6 +494,7 @@
 
 
 -->
+
 
 
 

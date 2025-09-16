@@ -11,24 +11,29 @@
   <br><br>
 </p>
 
-## ☑️ 0. 목차
-- [1. 프로젝트 개요](#-1-프로젝트-개요)
-- [2. 현행 서비스 조사](#-2-현행-서비스-조사)
-- [3. 심사](#-3-심사)
-- [4. 주요 화면 구성](#-4-주요-화면-구성)
-- [5. 내부 정책 수립 및 할당량 최적화](#-5-내부-정책-수립-및-할당량-최적화)
-- [6. Sequence Diagram](#-6-Sequence-Diagram)
-- [7. 아키텍처](#-7-아키텍처)
-- [8. 세부 기술](#-8-세부-기술)
-<br><br>
+## ☑️ 0. Index
+- [1. Project Overview](#-1-Project-Overview)
+- [2. Existing Service Analysis](#-2-Existing-Service-Analysis)
+- [3. Google Approval Process](#-3-Google-Approval-Process)
+- [4. Internal Policy & Qouta Optimization](#-4-Internal-Policy-&-Qouta-Optimization)
+- [5. Architecture](#-5-Architecture)
+- [6. Implementation Strategy](#-6-Implementation-Strategy)
+- [7. Business Logic](#-7-Business-Logic)
+- [8. UI](#-8-UI)
 
-## 📌 1. 프로젝트 개요
+<br>
+
+## 📌 1. Project Overview
 
 ### 🔹 프로젝트 명
 - **FixMyPlaylist**
 
 ### 🔹 서비스 주소
 - [FixMyPlaylist 바로가기](https://youtube-track-recovery-71386729441.us-central1.run.app)
+
+  - https://youtube-track-recovery-71386729441.us-central1.run.app
+
+  - Cold Starting(최소 인스턴스 0)에 의해 15초 정도의 최초 지연이 발생할 수 있습니다.
 
 ### 🔹 시연 영상
 - [OAuth 구글 심사 시연 영상](https://www.youtube.com/watch?v=dqOrLUjCFic&t=64s)
@@ -88,7 +93,7 @@
   - **APIs**: Youtube Data API V3, Gemini 2.5 Flash-Lite, MAXMIND GeoIP 
 <br><br>
 
-## 🌐 2. 현행 서비스 조사
+## 🌐 2. Existing Service Analysis
 
 ### ❌ 유사 서비스(2025.08.13 기준) 
 
@@ -114,161 +119,77 @@
 <br><br>
 
 
-## 📝 3. 심사 
+## 📝 3. Google Approval Process
 
-1. **Google OAuth2 민감 범위 데이터 심사 완료**
-    - 'youtube.force-ssl' 정식 승인
+1. **Google OAuth2 민감 범위 데이터 심사 완료** *(2025.06.09)*
+    - **youtube.force-ssl** 정식 승인
 
-2. **Youtube Data API V3 할당량 증설 완료**
+2. **Youtube Data API V3 할당량 증설 완료** *(2025.07.31)*
     - 10,000 → **100,000** 상향(per day)
  
-3. **Youtube API Compilance 심의 통과**
+3. **Youtube API Compilance 심의 통과** *(2025.07.31)*
     - **'개인정보처리방침'** 및 **'서비스 이용약관'** 명세
 <br><br>
 
-## 🚀 4. 주요 화면 구성
 
-### **[관리자 전용 화면]**
-<br>
-
-**1. 세션 관리 화면**
-<p align="center">
-  <img width="900" height="800" alt="관리자세션화면" src="https://github.com/user-attachments/assets/626d8fc0-a1d4-4326-ad05-13bc718076f6" />
-</p>
-
-- `Role` 기반 관리자 페이지와 고객 페이지 구분
-
-- Redis 기반 세션 관리
-
-- 특정 유저 세션 상세 조회 및 즉시 무효화 기능
-<br><br>
-
-**2. 할당량 관리 화면**
-<p align="center">
-  <img width="900" height="400" alt="관리자할당량화면" src="https://github.com/user-attachments/assets/c40f5841-f6ac-4c25-bd0b-8faffba4c1a7" />
-</p>
-
-- Redis를 이용해 고객별 할당량을 조회 및 동적 조정
- 
-- 전역 할당량 제한키 동적 조절 
-<br><br>
-
-### [고객 전용 화면]
-<br>
-
-<table>
-  <tr>
-    <td>
-      <img width="800" height="700" alt="welcomeUI" src="https://github.com/user-attachments/assets/a0256abf-b628-4325-a4ae-ab256230fbdb" /><br/>
-      <img width="800" height="700" alt="RecoveryHistoryUI" src="https://github.com/user-attachments/assets/c186a13f-aa40-4992-af34-fdb86bc5b1f4" />
-<!--       <img width="500" height="1400" alt="메인화면(유저)" src="https://github.com/user-attachments/assets/8ad7f54f-d344-4823-af3a-81de54650757" /> -->
-    </td>
-    <td>
-<!--       <img width="500" alt="플리등록화면(결과)" src="https://github.com/user-attachments/assets/1c20c6a7-32be-4db3-a869-8039886391ba" /><br/>
-      <img width="500" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" /><br/> -->
-      <img width="800" height="2400" alt="playlistSelectionUI" src="https://github.com/user-attachments/assets/9bfc2c06-c0d6-4ba0-b398-cacc464a867a" />
-<!--       <img width="500" alt="복구내역" src="https://github.com/user-attachments/assets/574640cf-19bc-4d82-9670-1a285d3a7971" /> -->
-    </td>
-  </tr>
-</table>
-
-- 구글 로그인 연동
-
-- '개인정보처리방침' 및 '서비스 이용약관' 확인 가능
- 
-- 로그인 후 고객의 플레이리스트 목록을 제공
-
-- 관리 대상이 될 플레이리스트를 등록/제거
-
-- 'Delete Account' 버튼을 통해 모든 사용자 관련 데이터 제거
-
-- 복구 내역 확인
-<br><br>
-
-## ✔️ 5. 내부 정책 수립 및 할당량 최적화 
+## ✔️ 4. Internal Policy & Qouta Optimization
 
 ### 1. 중복 영상 처리 및 복구 정책
 
 - 영상 케이스별 복구 정책<br><br>
   | 케이스 | API(개수) | DB(개수) | Action(개수) |
   |:---:|:---:|:---:|:---:|
-  | A | 정상(1) | 정상(1) | 유지 |
-  | B | 정상(1) | 정상(2) | DB 삭제(1) |
-  | C | 정상(2) | 정상(1) | DB 추가(1) |
-  | D | 비정상(1) | 정상(1) | 복구(1) |
-  | E | 비정상(2) | 정상(1) | 복구(2), DB 추가(1) |
-  | F | 비정상(1) | 정상(2) | 복구(1), DB 삭제(1) |
-  | G | 비정상(n) | 없음(0) | API 삭졔(n) 호출 |
+  | A | 정상(1) | 보유(1) | 유지 |
+  | B | 정상(1) | 보유(2) | DB 삭제(1) |
+  | C | 정상(2) | 보유(1) | DB 추가(1) |
+  | D | 비정상(1) | 보유(1) | 복구(1) |
+  | E | 비정상(2) | 보유(1) | 복구(2), DB 추가(1) |
+  | F | 비정상(1) | 보유(2) | 복구(1), DB 삭제(1) |
+  | G | 비정상(n) | 보유(0) | API 삭졔(n) 호출 |
 <br>
 
 - 재생목록 커스텀화의 극대화를 위해 중복 영상 저장 허용
 
-- 고객 임의의 재생목록내 음악 추가/삭제는 최신화 작업을 통해 매일 반영
+- 고객 임의의 재생목록내 음악 추가/삭제는 최신화 작업을 통해 매일 DB와 동기화
 <br><br>
 
 ### 2. API 할당량 소모 최적화
 
 - 페이지네이션(Pagination) 적용
   - YouTube Data API로 한 번에 가져올 수 있는 최대 **재생목록/재생목록 아이템/비디오** 수: **50개**
-  - 페이지 수 = 전체 대상 개수 ÷ 50  
+
+  - 페이지 수 = ⌈전체 대상 개수 ÷ 50⌉
     
-- 케이스 별 API 사용량 공식
-  - 예시: 전체 100개의 재생목록(**P**) 보유, 100개의 재생목록(재생목록 아이템: **I**) 등록, 각 재생목록은 100곡(**V**) 포함, 비정상 영상 1개 복구<br>
+- 케이스 별 API 사용량 공식(예시)
+  - 채널 전체 100개의 재생목록(**C**) 보유
+  - 50개의 재생목록 등록(**P**)
+  - 각 재생목록은 100곡(**V**, 재생목록 아이템: **I**) 포함
+  - 비정상 영상 1개 복구<br>
   
-    | 케이스 | 요청 단계 | 계산식                   | 소모 Quota |
+    | 케이스 | 요청 단계 | 수식                   | 소모량 |
     |:--------|:----------------------|:--------|------------:|
-    | 등록   | 전체 재생목록 조회<br>각 재생목록 아이템 조회<br>각 비디오 디테일 조회 | **P(I + V) / 50** | 400 |
-    | 추적   | 각 재생목록 아이템 조회<br>각 비디오 디테일 조회 | **P(I + V) / 50**     | 400 |
-    | 복구   | 대체 영상 검색<br>대체 영상 추가<br>비정상 영상 삭제 | **201 + (I/50)**      | 202 |
+    | 등록   | 채널 전체 재생목록 조회<br>일부 재생목록 등록<br>각 재생목록 아이템 조회<br>각 비디오 디테일 조회 | **⌈(C + P(I + V)) / 50⌉** | 202 |
+    | 추적   | 각 재생목록 아이템 조회<br>각 비디오 디테일 조회 | **⌈P(I + V) / 50⌉**     | 200 |
+    | 복구   | 대체 영상 검색<br>대체 영상 추가<br>비정상 영상 삭제 | **⌈201 + (I / 50)⌉**      | 203 |
 <br>
 
-## 📊 6. Sequence Diagram
 
-### 1. OAuth2 로그인 및 회원가입
-<p align="center">
-  <img width="1166" height="1180" alt="OAuth2Diagram" src="https://github.com/user-attachments/assets/40b1a7e2-be54-4ec9-b827-339d3d30f2a2" />
-<!--   <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" /> -->
-</p>
-
-- 로그인 성공 핸들러를 구축해 회원가입과 로그인을 통합
-
-- 계정 내 브랜드 계정 선택 가능
-
-- `refresh token` 발급으로 고객 부재에도 `access token`을 발급해 자동 복구 가능
-
-- `GeoIP`를 이용해 IP 기반 고객의 국가코드를 확보: 특정 국가가 차단된 영상의 판단 기준
-
-- 재생목록 접근 권한(`youtube.force-ssl`) 미허용 시 세션, 쿠키 및 토큰 무효화 후 리다이렉트
-<br><br>
-
-### 2. 복구 시나리오
-<img width="1106" height="1176" alt="RecoverDiagram" src="https://github.com/user-attachments/assets/154152a8-9c0a-409b-9a58-5fcbb93fb06f" />
-<!-- <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" /> -->
-
-- `Cloud Scheduler` 트리거: 엔드포인트 호출 시 헤더의 `API KEY`를 이용해 유효성 검사
-
-- `Gemini` LLM 모델을 이용해 저장된 메타데이터를 기반으로 검색할 쿼리를 확보
-
-- API 할당량 소모를 최소화 하기 위해, 당일 로그 기록을 확인하며 불필요한 대체 영상 검색을 방지
-
-- ⚠ 예외 케이스 대비
-
-  | 구분 | 상황 | 식별 | 대처 |
-  |------|------|------|------|
-  | **유저 예외** | 서비스의 'Delete Account' 버튼을 사용하지 않고<br>Google 보안 페이지에서 직접 탈퇴 | AccessToken 발급 불가 | 유저 삭제 |
-  | **재생목록 예외** | 서비스에서 재생목록을 해제하기 전<br>유튜브 내에서 재생목록을 삭제 | 재생목록 API 조회 불가 | 재생목록 삭제 |
-  | **음악 예외** | API 조회 시 비정상적인 속성 검출 | 속성 검사로 필터링 | 복구 |
-
-<br><br>
-
-## 💡 7. 아키텍처
+## 💡 5. Architecture
 
 ### 1. Infra Architecture
 <p align="center">
   <img width="2202" height="1280" alt="InfraArchitecture" src="https://github.com/user-attachments/assets/d79f147e-617c-42ab-8237-17891771d242" />
 </p>
 
-- Cloud Run + Cloud SQL + Cloud Scheduler + Serverless VPC Access + Memorystore for Redis
+- **Cloud Run**: 컨테이너 기반 서버리스 배포 → 트래픽 급증에도 자동 확장, 무부하 시 비용 최소화
+
+- **Cloud SQL**: SocketFactory + Proxy 기반 통신
+
+- **Memorystore for Redis**: 세션 및 TTL 할당량 관리 저장소로 사용
+
+- **Serverless VPC Access**: VPC 네트워킹을 통한 서비스 간 보안 강화
+
+- Cloud Scheduler를 통한 복구 작업 자동화
 <br><br>
 
 ### 2. Layered Architecture
@@ -278,14 +199,17 @@
   <!-- <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" /> -->
 </p>
 
-- '`Controller`→`Service`→`Repository`'의 계층적 단방향 구조
+- 'Controller → Service → Repository'의 계층적 단방향 구조
+
+- Controller와 Service 간 DTO 경유 데이터 전달
 
 - 횡단 관심사인 Security 설정으로 인증 상태를 전역적으로 판단
 
 - Orchestration Service 패턴 적용
 <br><br>
 
-## 🛠️ 8. 세부 기술
+
+## 🛠️ 6. Implementation Strategy
 
 ### 1. Orchestration Service
 <p align="center">
@@ -355,9 +279,118 @@
   - 독립적인 관리 및 트러블슈팅 용이
 <br><br>
 
+
+
+## 📊 7. Business Logic
+
+### 1. OAuth2 로그인 및 회원가입
+<p align="center">
+  <img width="1166" height="1180" alt="OAuth2Diagram" src="https://github.com/user-attachments/assets/40b1a7e2-be54-4ec9-b827-339d3d30f2a2" />
+<!--   <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" /> -->
+</p>
+
+- OAuth2 인증 플로우 구축해 Google OAuth2 연동
+
+- 로그인 핸들러를 통한 신규 회원과 기존 회원 분기 처리로, 회원가입과 로그인을 통합
+
+- Redis를 세션 저장소로 사용하여 멀티 인스턴스 아키텍쳐에서도 확장성과 세션 일관성 보장
+
+- 재가입을 반복해 할당량을 악의적으로 낭비하는 에외 사전 차단
+
+- `Refresh Token` 통해 고객 부재에도 `Access Token`을 발급해 복구의 자동화 실현
+
+- `GeoIP`를 이용해 IP 기반 고객의 국가코드 확보: 특정 국가가 차단된 영상의 판단 기준
+
+- 사용자 ROLE을 동적으로 부여(ADMIN/USER), 인증 이후에도 권한 일관성 유지
+
+- 재생목록 접근 권한(`youtube.force-ssl`) 미허용 시 세션, 쿠키 및 토큰 무효화 후 리다이렉트
+<br><br>
+
+### 2. 복구 시나리오
+<img width="1106" height="1176" alt="RecoverDiagram" src="https://github.com/user-attachments/assets/154152a8-9c0a-409b-9a58-5fcbb93fb06f" />
+<!-- <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" /> -->
+
+- `Cloud Scheduler` 트리거: 엔드포인트 호출 시 헤더의 `API KEY`를 이용해 유효성 검사
+
+- `Gemini` LLM 모델을 이용해 저장된 메타데이터를 기반으로 검색할 쿼리를 확보
+
+- API 할당량 소모를 최소화 하기 위해, 당일 로그 기록을 확인하며 불필요한 대체 영상 검색을 방지
+
+- ⚠ 예외 케이스 대비
+
+  | 구분 | 상황 | 식별 | 대처 |
+  |------|------|------|------|
+  | **유저 예외** | 서비스의 'Delete Account' 버튼을 사용하지 않고<br>Google 보안 페이지에서 직접 탈퇴 | AccessToken 발급 불가 | 유저 삭제 |
+  | **재생목록 예외** | 서비스에서 재생목록을 해제하기 전<br>유튜브 내에서 재생목록을 삭제 | 재생목록 API 조회 불가 | 재생목록 삭제 |
+  | **음악 예외** | API 조회 시 비정상적인 속성 검출 | 속성 검사로 필터링 | 복구 |
+
+<br><br>
+
+
+## 🚀 8. UI
+
+### **[관리자 전용 화면]**
+<br>
+
+**1. 세션 관리 화면**
+<p align="center">
+  <img width="900" height="800" alt="관리자세션화면" src="https://github.com/user-attachments/assets/626d8fc0-a1d4-4326-ad05-13bc718076f6" />
+</p>
+
+- `Role` 기반 관리자 페이지와 고객 페이지 구분
+
+- Redis 기반 세션 관리
+
+- 특정 유저 세션 상세 조회 및 즉시 무효화 기능
+<br><br>
+
+**2. 할당량 관리 화면**
+<p align="center">
+  <img width="900" height="400" alt="관리자할당량화면" src="https://github.com/user-attachments/assets/c40f5841-f6ac-4c25-bd0b-8faffba4c1a7" />
+</p>
+
+- Redis를 이용해 고객별 할당량을 조회 및 동적 조정
+ 
+- 전역 할당량 제한키 동적 조절 
+<br><br>
+
+### [고객 전용 화면]
+<br>
+
+<table>
+  <tr>
+    <td>
+      <img width="800" height="700" alt="welcomeUI" src="https://github.com/user-attachments/assets/a0256abf-b628-4325-a4ae-ab256230fbdb" /><br/>
+      <img width="800" height="700" alt="RecoveryHistoryUI" src="https://github.com/user-attachments/assets/c186a13f-aa40-4992-af34-fdb86bc5b1f4" />
+<!--       <img width="500" height="1400" alt="메인화면(유저)" src="https://github.com/user-attachments/assets/8ad7f54f-d344-4823-af3a-81de54650757" /> -->
+    </td>
+    <td>
+<!--       <img width="500" alt="플리등록화면(결과)" src="https://github.com/user-attachments/assets/1c20c6a7-32be-4db3-a869-8039886391ba" /><br/>
+      <img width="500" alt="ui3" src="https://github.com/user-attachments/assets/15aadbdf-be4a-4a77-a960-70429dec25f3" /><br/> -->
+      <img width="800" height="2400" alt="playlistSelectionUI" src="https://github.com/user-attachments/assets/9bfc2c06-c0d6-4ba0-b398-cacc464a867a" />
+<!--       <img width="500" alt="복구내역" src="https://github.com/user-attachments/assets/574640cf-19bc-4d82-9670-1a285d3a7971" /> -->
+    </td>
+  </tr>
+</table>
+
+- 구글 로그인 연동
+
+- '개인정보처리방침' 및 '서비스 이용약관' 확인 가능
+ 
+- 로그인 후 고객의 플레이리스트 목록을 제공
+
+- 관리 대상이 될 플레이리스트를 등록/제거
+
+- 'Delete Account' 버튼을 통해 사용자 관련 데이터 모두 제거
+
+- 복구 내역 확인
+<br><br>
+
+
+
+
+
 <!-- 
-
-
 ## 🧩 11. 트러블슈팅 & 기술 과제
 
 <details>
@@ -455,6 +488,7 @@
 
 
 -->
+
 
 
 

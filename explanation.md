@@ -28,6 +28,55 @@
     H -- 실패 --> I["status=DEAD"]
     ```
 
+- 복구시나리오 간략화: Sequence Diagram
+  ```
+  sequenceDiagram
+    actor Scheduler as Cloud Scheduler
+    participant Controller as ScheduledTaskController
+    participant Orchestra as RecoverOrchestrationService
+    participant YoutubeService as YoutubeService
+    participant Outbox as OutboxEventHandler
+    actor Gemini as Gemini API
+    actor YouTube as YouTube API
+    
+    Scheduler ->> Controller: POST /track-recovery
+    Controller ->> Controller: API-Key 검증
+    Controller ->> Orchestra: 복구 오케스트레이션 시작
+
+    loop For each User
+        Orchestra ->> Orchestra: Access Token 발급
+        alt 토큰 발급 실패: 유저 탈퇴
+            Orchestra ->> Orchestra: 유저(DB) 제거 후 스킵
+        else 토큰 발급 성공
+            loop For each Playlist
+                Orchestra ->> YoutubeService: DB 최신화 및 복구 지점 진입
+                YoutubeService ->> YouTube: Playlist(API) 조회
+                alt Playlist(API) 조회 실패: 고객의 삭제
+                    YoutubeService ->> Orchestra: Playlist(DB) 제거 후 스킵
+                else Playlist(API) 조회 성공
+                    YoutubeService ->> YouTube: Video(API) 상태 조회
+                    alt 정상 Video
+                        YoutubeService ->> YoutubeService: DB 최신화 후 종료
+                    else 비정상 Video
+                        YoutubeService ->> Gemini: 대체 영상 검색
+                        YoutubeService ->> YoutubeService: 대체 영상으로 DB 최신화
+                        YoutubeService ->> Outbox: Outbox(Add/Delete) 예약
+                    end
+                end
+                YoutubeService ->> Outbox: @AFTER_COMMIT
+                Outbox ->> YouTube: 대체 영상 추가(API)
+                Outbox ->> YouTube: 비정상 영상 제거(API)
+            end
+            Orchestra ->> Outbox: 실패 Outbox 재시도
+            Outbox ->> YouTube: 재시도(API)
+        end
+    end
+
+   Orchestra -->> Controller: 완료
+   Controller -->> Scheduler: 200 OK
+  ```
+
+
 - 복구시나리오: Sequence Diagram
     ```
     sequenceDiagram
@@ -81,6 +130,52 @@
         Controller -->> Scheduler: 200 OK
     ```
 
+- OAUTH2: 최신버전
+  ```
+  sequenceDiagram
+    actor User as 사용자
+    participant Frontend as Frontend
+    participant Backend as Backend
+    participant Google as Google OAuth2
+    participant Geo as GeoIPService
+    participant Redis as Redis
+    participant DB as Repository
+
+    User ->> Frontend: 로그인 버튼 클릭
+    Frontend ->> Backend: /oauth2/authorization/google
+    Backend ->> Google: OAuth2 인증 요청 (select_account, offline)
+    Google ->> User: 로그인 & 동의 화면
+    User ->> Google: 동의
+    Google ->> Backend: Authorization Code 전달
+    Backend ->> Google: Token 요청
+    Google ->> Backend: Access/Refresh Token 반환
+    Backend ->> Google: 사용자 정보 요청
+    Google ->> Backend: 사용자 정보 반환
+    Backend ->> DB: 사용자 조회
+
+    alt 기존 회원
+        Backend ->> DB: Refresh Token 동기화 여부 확인
+        Backend ->> Backend: ROLE 부여 (USER/ADMIN)
+        Backend ->> Redis: SecurityContext 저장
+        Backend ->> Frontend: 로그인 성공 응답
+    else 신규 회원
+        Backend ->> Redis: 할당량 체크
+        alt 비정상 사용자: 고의적 할당량 소비
+            Backend ->> Google: 사용자 철회
+            Backend ->> Frontend: /bad-user redirect
+        else 정상 사용자
+            Backend ->> Geo: 국가코드 조회
+            Backend ->> DB: 신규 회원 저장 
+            Backend ->> Backend: ROLE 부여 (USER/ADMIN)
+            Backend ->> Redis: SecurityContext 저장
+            Backend ->> Frontend: 회원가입 성공 응답
+        end
+    end
+    Frontend -->> User: /welcome
+  ```
+
+
+
 - OAUTH2: Sequence Diagram
     ```
     sequenceDiagram
@@ -122,6 +217,7 @@
         direction LR
         USERS {
             varchar user_id PK ""
+            varchar user_role ""          
             varchar user_name ""
             varchar user_channel_id ""
             varchar user_email ""

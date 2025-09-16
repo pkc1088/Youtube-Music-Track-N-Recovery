@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.domain.Users;
-import youtube.youtubeService.repository.ActionLogRepository;
 import youtube.youtubeService.repository.users.UserRepository;
-import youtube.youtubeService.service.ActionLogService;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;

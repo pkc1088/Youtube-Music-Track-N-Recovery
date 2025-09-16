@@ -17,8 +17,8 @@
 - [3. Google Approval Process](#-3-Google-Approval-Process)
 - [4. Internal Policy & Qouta Optimization](#-4-Internal-Policy-&-Qouta-Optimization)
 - [5. Architecture](#-5-Architecture)
-- [6. Implementation Strategy](#-6-Implementation-Strategy)
-- [7. Business Logic](#-7-Business-Logic)
+- [6. Technical Strategy](#-6-Technical-Strategy)
+- [7. Authorization & Recovery Sequence](#-7-Authorization-&-Recovery-Sequence)
 - [8. UI](#-8-UI)
 
 <br>
@@ -189,7 +189,7 @@
 
 - **Serverless VPC Access**: VPC 네트워킹을 통한 서비스 간 보안 강화
 
-- Cloud Scheduler를 통한 복구 작업 자동화
+- **Cloud Scheduler**: 복구 작업 자동화, 멀티 인스턴스 상황에서도 단일 실행 보장
 <br><br>
 
 ### 2. Layered Architecture
@@ -199,7 +199,7 @@
   <!-- <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" /> -->
 </p>
 
-- 'Controller → Service → Repository'의 계층적 단방향 구조
+- Controller → Service → Repository 의 계층적 단방향 구조
 
 - Controller와 Service 간 DTO 경유 데이터 전달
 
@@ -209,7 +209,7 @@
 <br><br>
 
 
-## 🛠️ 6. Implementation Strategy
+## 🛠️ 6. Technical Strategy
 
 ### 1. Orchestration Service
 <p align="center">
@@ -217,7 +217,7 @@
   <!-- <img width="800" height="400" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" /> -->
 </p>
 
-- 트랜잭션 내의 서비스단 코드들을 총 관장
+- 복구 시나리오 수행 시, 트랜잭션 내의 서비스단 코드들을 총 관장
 
 - 서비스 클래스들 간 상호 의존 문제를 방지하고 단방향 구조를 유지
 
@@ -233,6 +233,7 @@
 - **Outbox Pattern 도입 이유:**
   - DB 작업과 API 추가/삭제 작업 분리
     - 롤백 발생 시 데이터 정합성 유지
+
     - 트랜잭션 시간이 불필요하게 길어지는 것 방지
 
   - Outbox로 관리해 정책에 따라 API 추가/삭제 재시도 가능
@@ -241,6 +242,7 @@
 
 - Outbox의 상태 업데이트 시 새로운 트랜잭션(`REQURIES_NEW`) 사용
   - Outbox 이벤트 처리는 DB 최신화가 끝난 후 `AFTER_COMMIT`에 의해 실행
+
   - 스프링의 트랜잭션 컨텍스트와 DB 트랜잭션 간 생명주기를 고려해 새로운 트랜잭션을 수행
 <br><br>
 
@@ -267,23 +269,27 @@
 
 - **Lazy Loading 적용**
   - EAGER 방식 대신 지연 로딩으로 불필요한 쿼리 호출 최소화
+
   - DB 접근 최소화로 성능 최적화
 
 - **DB FK Cascade 적용**
   - 부모 데이터 삭제 시 연관된 자식 데이터의 자동 정리로 데이터 정합성 유지
+
   - DB 엔진 레벨에서 즉시 처리: 대량 삭제/추가 작업 시 JPA Cascade 보다 성능 우위
 
 - **독립적인 `ActionLog`, `Outbox` 테이블**
   - 장애 복구를 위한 표준적인 안정성 패턴 적용
+
   - 다른 엔티티들과 직접적인 연관관계를 맺지 않아 사이드 이펙트 방지
+
   - 독립적인 관리 및 트러블슈팅 용이
 <br><br>
 
 
 
-## 📊 7. Business Logic
+## 📊 7. Authorization & Recovery Sequence
 
-### 1. OAuth2 로그인 및 회원가입
+### 1. OAuth2 Authentication & Authorization Sequence
 <p align="center">
   <img width="1166" height="1180" alt="OAuth2Diagram" src="https://github.com/user-attachments/assets/40b1a7e2-be54-4ec9-b827-339d3d30f2a2" />
 <!--   <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" /> -->
@@ -306,7 +312,7 @@
 - 재생목록 접근 권한(`youtube.force-ssl`) 미허용 시 세션, 쿠키 및 토큰 무효화 후 리다이렉트
 <br><br>
 
-### 2. 복구 시나리오
+### 2. Recovery Sequence
 <img width="1106" height="1176" alt="RecoverDiagram" src="https://github.com/user-attachments/assets/154152a8-9c0a-409b-9a58-5fcbb93fb06f" />
 <!-- <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" /> -->
 
@@ -488,6 +494,7 @@
 
 
 -->
+
 
 
 

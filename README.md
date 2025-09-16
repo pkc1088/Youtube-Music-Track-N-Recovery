@@ -15,10 +15,10 @@
 - [1. Project Overview](#-1-Project-Overview)
 - [2. Existing Service Analysis](#-2-Existing-Service-Analysis)
 - [3. Google Approval Process](#-3-Google-Approval-Process)
-- [4. Internal Policy & Qouta Optimization](#-4-Internal-Policy-&-Qouta-Optimization)
+- [4. Internal Policy & Qouta Optimization](#-4-Internal-Policy--Qouta-Optimization)
 - [5. Architecture](#-5-Architecture)
 - [6. Technical Strategy](#-6-Technical-Strategy)
-- [7. OAuth2 & Recovery Sequence](#-7-OAuth2-&-Recovery-Sequence)
+- [7. OAuth2 & Recovery Sequence](#-7-OAuth2--Recovery-Sequence)
 - [8. UI](#-8-UI)
 
 <br>
@@ -92,6 +92,7 @@
   - **Infra**: Google Cloud Run, Cloud SQL, MemoryStroe for Redis, Cloud Scheduler, Cloud Console
   - **APIs**: Youtube Data API V3, Gemini 2.5 Flash-Lite, MAXMIND GeoIP 
 <br><br>
+
 
 ## 🌐 2. Existing Service Analysis
 
@@ -286,7 +287,6 @@
 <br><br>
 
 
-
 ## 📊 7. OAuth2 & Recovery Sequence
 
 ### 1. OAuth2 Authentication & Authorization Sequence
@@ -330,7 +330,7 @@
   | **재생목록 예외** | 서비스에서 재생목록을 해제하기 전<br>유튜브 내에서 재생목록을 삭제 | 재생목록 API 조회 불가 | 재생목록 삭제 |
   | **음악 예외** | API 조회 시 비정상적인 속성 검출 | 속성 검사로 필터링 | 복구 |
 
-<br><br>
+<br>
 
 
 ## 🚀 8. UI
@@ -494,6 +494,7 @@
 
 
 -->
+
 
 
 

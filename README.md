@@ -13,14 +13,14 @@
 
 
 ## ☑️ 0. Index
-- [1. Project Overview](-1-project-overview)
-- [2. Existing Service Analysis](-2-existing-service-analysis)
-- [3. Google Approval Process](-3-google-approval-process)
-- [4. Internal Policy & Quota Optimization](-4-internal-policy-quota-optimization)
-- [5. Architecture](-5-architecture)
-- [6. Technical Strategy](-6-technical-strategy)
-- [7. OAuth2 & Recovery Flow](-7-oauth2--recovery-flow)
-- [8. UI](-8-ui)
+- [1. Project Overview](#-1-project-overview)
+- [2. Existing Service Analysis](#-2-existing-service-analysis)
+- [3. Google Approval Process](#-3-google-approval-process)
+- [4. Internal Policy & Quota Optimization](#-4-internal-policy-quota-optimization)
+- [5. Architecture](#-5-architecture)
+- [6. Technical Strategy](#-6-technical-strategy)
+- [7. OAuth2 & Recovery Flow](#-7-oauth2--recovery-flow)
+- [8. UI](#-8-ui)
 
 <br>
 
@@ -134,6 +134,7 @@
 <br><br>
 
 
+<a id="-4-internal-policy-quota-optimization"></a>
 ## ✔️ 4. Internal Policy & Quota Optimization
 
 ### 1. 중복 영상 처리 및 복구 정책
@@ -210,6 +211,7 @@
 <br><br>
 
 
+<a id="-6-technical-strategy"></a>
 ## 🛠️ 6. Technical Strategy
 
 ### 1. Orchestration Service
@@ -494,6 +496,7 @@
 
 
 -->
+
 
 
 

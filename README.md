@@ -230,7 +230,8 @@
 
 ### 1. OAuth2 로그인 및 회원가입
 <p align="center">
-  <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" />
+  <img width="1166" height="1180" alt="OAuth2Diagram" src="https://github.com/user-attachments/assets/40b1a7e2-be54-4ec9-b827-339d3d30f2a2" />
+<!--   <img width="3840" height="2650" alt="OAuth2SequenceDiagram" src="https://github.com/user-attachments/assets/f9343027-9d4a-4bd4-ad67-a394d56e1de3" /> -->
 </p>
 
 - 로그인 성공 핸들러를 구축해 회원가입과 로그인을 통합
@@ -245,7 +246,8 @@
 <br><br>
 
 ### 2. 복구 시나리오
-<img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" />
+<img width="1106" height="1176" alt="RecoverDiagram" src="https://github.com/user-attachments/assets/154152a8-9c0a-409b-9a58-5fcbb93fb06f" />
+<!-- <img width="3840" height="2880" alt="RecoverSequenceDiagram" src="https://github.com/user-attachments/assets/f44bf0c1-754f-4300-8d22-8224a586a95d" /> -->
 
 - `Cloud Scheduler` 트리거: 엔드포인트 호출 시 헤더의 `API KEY`를 이용해 유효성 검사
 
@@ -275,7 +277,9 @@
 
 ### 2. Layered Architecture
 <p align="center">
-  <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" />
+
+  <img width="800" height="500" alt="LayeredArchitecutre" src="https://github.com/user-attachments/assets/82d1ccc5-f58c-4e65-85d0-b280dd0ceb65" />
+  <!-- <img width="800" height="500" alt="LayeredArchitecturePart1" src="https://github.com/user-attachments/assets/06f2d72d-9ef3-4bd7-ac66-afe66fc61572" /> -->
 </p>
 
 - '`Controller`→`Service`→`Repository`'의 계층적 단방향 구조
@@ -289,7 +293,8 @@
 
 ### 1. Orchestration Service
 <p align="center">
-  <img width="800" height="400" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" />
+  <img width="800" height="400" alt="OrchestrationService" src="https://github.com/user-attachments/assets/467c60cf-9464-40a7-9a41-20bb0a472602" />
+  <!-- <img width="800" height="400" alt="LayeredArchitecturePart2" src="https://github.com/user-attachments/assets/83fa26c9-a2ab-4cc5-95ec-6cb608b25c7f" /> -->
 </p>
 
 - 트랜잭션 내의 서비스단 코드들을 총 관장
@@ -447,6 +452,7 @@
 - 수작업 백업의 한계를 자동화로 대체
 - 실사용자 관점에서의 불편함을 **기술로 해결한 실용적인 예시**
 <br><br>
+
 
 
 

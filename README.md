@@ -12,14 +12,14 @@
 </p>
 
 ## ☑️ 0. Index
-- [1. Project Overview](#-1-Project-Overview)
-- [2. Existing Service Analysis](#-2-Existing-Service-Analysis)
-- [3. Google Approval Process](#-3-Google-Approval-Process)
-- [4. Internal Policy & Qouta Optimization](#-4-Internal-Policy--Qouta-Optimization)
-- [5. Architecture](#-5-Architecture)
-- [6. Technical Strategy](#-6-Technical-Strategy)
-- [7. OAuth2 & Recovery Sequence](#-7-OAuth2--Recovery-Sequence)
-- [8. UI](#-8-UI)
+- [1. Project Overview](#-1-project-overview)
+- [2. Existing Service Analysis](#-2-existing-service-analysis)
+- [3. Google Approval Process](#-3-google-approval-process)
+- [4. Internal Policy & Qouta Optimization](#-4-internal-policy--qouta-optimization)
+- [5. Architecture](#-5-architecture)
+- [6. Technical Strategy](#-6-technical-strategy)
+- [7. OAuth2 & Recovery Sequence](#-7-oauth2--recovery-sequence)
+- [8. UI](#-8-ui)
 
 <br>
 
@@ -494,6 +494,7 @@
 
 
 -->
+
 
 
 

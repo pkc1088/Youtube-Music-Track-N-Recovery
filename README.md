@@ -148,7 +148,7 @@
   | D | 비정상(1) | 보유(1) | 복구(1) |
   | E | 비정상(2) | 보유(1) | 복구(2), DB 추가(1) |
   | F | 비정상(1) | 보유(2) | 복구(1), DB 삭제(1) |
-  | G | 비정상(n) | 보유(0) | API 삭졔(n) 호출 |
+  | G | 비정상(n) | 보유(0) | API 삭제(n) 호출 |
 <br>
 
 - 재생목록 커스텀화의 극대화를 위해 중복 영상 저장 허용
@@ -250,6 +250,10 @@
 <br><br>
 
 ### 3. Redis 기반 Quota 소비 동적 관리 및 동시성 제어
+
+<p align="center">
+  <img width="904" height="1001" alt="RedisSwimLane2" src="https://github.com/user-attachments/assets/f0a56b3a-c2e4-406d-9848-4544965c74f2" />
+</p>
 
 1. **Redis를 활용한 유연한 동시성 제어 할당량 시스템 구축**
     - 문제:
@@ -389,9 +393,9 @@
   <img width="900" height="800" alt="관리자세션화면" src="https://github.com/user-attachments/assets/626d8fc0-a1d4-4326-ad05-13bc718076f6" />
 </p>
 
-- `Role` 기반 관리자 페이지와 고객 페이지 구분
+- 멀티 인스턴스 환경 대비: Redis 기반 세션 관리
 
-- Redis 기반 세션 관리
+- `Role` 기반 관리자 페이지와 고객 페이지 구분
 
 - 특정 유저 세션 상세 조회 및 즉시 무효화 기능
 <br><br>
@@ -401,9 +405,9 @@
   <img width="900" height="400" alt="관리자할당량화면" src="https://github.com/user-attachments/assets/c40f5841-f6ac-4c25-bd0b-8faffba4c1a7" />
 </p>
 
-- Redis를 이용해 고객별 할당량을 조회 및 동적 조정
+- Redis를 이용해 '고객별 할당량 키' 조회 및 동적 조정 가능
  
-- 전역 할당량 제한키 동적 조절 
+- '전역 할당량 제한 키' 동적 조절 가능
 <br><br>
 
 ### [고객 전용 화면]
@@ -540,6 +544,7 @@
 
 
 -->
+
 
 
 

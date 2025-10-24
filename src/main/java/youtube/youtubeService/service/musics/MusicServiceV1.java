@@ -109,6 +109,7 @@ public class MusicServiceV1 implements MusicService {
             searchResult = youtubeApiClient.searchFromYoutube(query);
             video = youtubeApiClient.fetchSingleVideo(searchResult.getId().getVideoId());
         } catch (IOException e) {
+            log.error("Video for a replacement Searching Error");
             return null;
         }
 

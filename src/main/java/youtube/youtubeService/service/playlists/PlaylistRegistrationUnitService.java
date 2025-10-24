@@ -65,7 +65,7 @@ public class PlaylistRegistrationUnitService {
         String nextPageToken = null;
 
         do {
-            log.info("[paginationPlaylistItemList]: trying to add 1 quota");
+            // log.info("[paginationPlaylistItemList]: trying to add 1 quota");
             if (!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
 
             QuotaPlaylistItemPageDto dto = youtubeApiClient.fetchPlaylistItemPage(playlistId, nextPageToken);
@@ -85,7 +85,7 @@ public class PlaylistRegistrationUnitService {
         List<Video> unlistedCountryVideos = new ArrayList<>();
 
         for (int i = 0; i < pagination; i++) {
-            log.info("[paginationVideoFilterResult]: trying to add 1 quota");
+            // log.info("[paginationVideoFilterResult]: trying to add 1 quota");
             if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
 
             int fromIndex = i * batchSize;
@@ -100,14 +100,10 @@ public class PlaylistRegistrationUnitService {
     }
 
     public List<Playlist> fetchAllPlaylists(String userId, String channelId) throws IOException {
-        // 1. userId 로 oauth2 인증 거쳐 DB 에 저장됐을 channelId 얻기
-//        Users user = userService.getUserByUserId(userId).orElseThrow(() -> new IllegalArgumentException("[No User Found]"));
-//        String channelId = user.getUserChannelId();
-        // 2. channelId로 api 호출 통해 playlist 페이지 단위로 받아오기
         List<Playlist> playlists = new ArrayList<>();
         String nextPageToken = null;
         do {
-            log.info("[getAllPlaylists -> getApiPlaylistsByPage]: trying to add 1 quota");
+            // log.info("[getAllPlaylists -> getApiPlaylistsByPage]: trying to add 1 quota");
             if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
 
             QuotaApiPlaylistsPageDto dto = youtubeApiClient.fetchPlaylistPage(channelId, nextPageToken);

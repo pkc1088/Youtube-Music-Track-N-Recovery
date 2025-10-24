@@ -25,7 +25,8 @@ public class Outbox {
     private String userId;
     private String playlistId;
     private String videoId;
-//    private Long position;
+    @Column(nullable = true)
+    private String playlistItemId;
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING;

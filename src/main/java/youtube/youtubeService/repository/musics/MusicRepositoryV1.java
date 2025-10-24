@@ -48,7 +48,7 @@ public class MusicRepositoryV1 implements MusicRepository{
             musicToUpdate.setVideoUploader(videoToRecover.getVideoUploader());
             musicToUpdate.setVideoDescription(videoToRecover.getVideoDescription());
             musicToUpdate.setVideoTags(videoToRecover.getVideoTags());
-            log.info("DB update completed");
+            log.info("The music record update has been completed");
         } else {
             throw new RuntimeException("DB update error: " + videoIdToDelete);
         }

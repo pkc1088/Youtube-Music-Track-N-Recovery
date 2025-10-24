@@ -15,27 +15,57 @@ public class OutboxProcessor {
 
     private final YoutubeApiClient youtubeApiClient;
 
-    public int processOutbox(Outbox outbox) {
+    public boolean processOutbox(Outbox outbox) {
 
-        int apiOperatedVideoCount = -1;
+        boolean apiOperatedCheck = false;
 
         try {
             if (outbox.getActionType() == Outbox.ActionType.DELETE) {
-
                 log.info("Processing DELETE for Outbox ID: {}", outbox.getId());
-                apiOperatedVideoCount = youtubeApiClient.deleteFromActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistId(), outbox.getVideoId());
-
+                apiOperatedCheck = youtubeApiClient.deleteFromActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistItemId());
             } else if (outbox.getActionType() == Outbox.ActionType.ADD) {
-
                 log.info("Processing ADD for Outbox ID: {}", outbox.getId());
-                apiOperatedVideoCount = youtubeApiClient.addVideoToActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistId(), outbox.getVideoId());
-
+                apiOperatedCheck = youtubeApiClient.addVideoToActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistId(), outbox.getVideoId());
             }
         } catch (Exception e) {
             log.warn("API call failed for Outbox ID: {} - {}", outbox.getId(), e.getMessage());
-            log.warn("apiOperatedVideoCount: {}", apiOperatedVideoCount);
         }
 
-        return apiOperatedVideoCount; // add 는 0, remove 는 1~n 개
+        return apiOperatedCheck;
     }
 }
+
+/** OGCODE BEFORE 1024
+ @Slf4j
+ @Service
+ @RequiredArgsConstructor
+ public class OutboxProcessor {
+
+ private final YoutubeApiClient youtubeApiClient;
+
+ public int processOutbox(Outbox outbox) {
+
+ int apiOperatedVideoCount = -1;
+
+ try {
+ if (outbox.getActionType() == Outbox.ActionType.DELETE) {
+
+ log.info("Processing DELETE for Outbox ID: {}", outbox.getId());
+ apiOperatedVideoCount = youtubeApiClient.deleteFromActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistId(), outbox.getVideoId());
+
+ } else if (outbox.getActionType() == Outbox.ActionType.ADD) {
+
+ log.info("Processing ADD for Outbox ID: {}", outbox.getId());
+ apiOperatedVideoCount = youtubeApiClient.addVideoToActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistId(), outbox.getVideoId());
+
+ }
+ } catch (Exception e) {
+ log.warn("API call failed for Outbox ID: {} - {}", outbox.getId(), e.getMessage());
+ log.warn("apiOperatedVideoCount: {}", apiOperatedVideoCount);
+ }
+
+ return apiOperatedVideoCount; // add 는 0, remove 는 1~n 개
+ }
+ }
+
+ */

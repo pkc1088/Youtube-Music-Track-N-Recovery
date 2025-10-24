@@ -16,13 +16,14 @@ public class OutboxService {
     private final OutboxRepository outboxRepository;
     private final OutboxEventPublisher outboxEventPublisher;
 
-    public void outboxInsert(Outbox.ActionType actionType, String accessToken, String userId, String playlistId, String videoId) {
+    public void outboxInsert(Outbox.ActionType actionType, String accessToken, String userId, String playlistId, String videoId, String playlistItemIdToDelete) {
         Outbox outbox = new Outbox();
         outbox.setActionType(actionType);
         outbox.setAccessToken(accessToken);
         outbox.setUserId(userId);
         outbox.setPlaylistId(playlistId);
         outbox.setVideoId(videoId);
+        outbox.setPlaylistItemId(playlistItemIdToDelete);
         outboxRepository.save(outbox);
         outboxEventPublisher.publish(outbox);
     }

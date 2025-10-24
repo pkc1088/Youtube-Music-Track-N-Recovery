@@ -126,7 +126,7 @@ public class PlaylistServiceV1 implements PlaylistService {
     }
 
     @Override
-    public IllegalVideosAndPaginationDto updatePlaylist(String userId, String countryCode, Playlists playlist) throws IOException {
+    public Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist) throws IOException {
         String playlistId = playlist.getPlaylistId();
         log.info("[update playlist start: {}]", playlistId);
         List<PlaylistItem> pureApiPlaylistItems;
@@ -144,7 +144,6 @@ public class PlaylistServiceV1 implements PlaylistService {
         // 3. API 에서 video 상태 조회
         List<String> pureApiVideoIds = pureApiPlaylistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
 
-        long pagination = (long) Math.ceil((double) pureApiVideoIds.size() / 50);
         VideoFilterResultPageDto videoFilterResult = playlistRegistrationUnitService.fetchAllVideos(userId, pureApiVideoIds, countryCode);
         List<Video> legalVideos = videoFilterResult.getLegalVideos();
         List<Video> unlistedCountryVideos = videoFilterResult.getUnlistedCountryVideos();
@@ -186,21 +185,23 @@ public class PlaylistServiceV1 implements PlaylistService {
             }
         }
 
-        Map<String, Integer> illegalVideoCounts = new HashMap<>();
+        Map<String, List<String>> illegalVideos = new HashMap<>();
 
         for (PlaylistItem item : pureApiPlaylistItems) {
             String videoId = item.getSnippet().getResourceId().getVideoId();
+            String playlistItemId = item.getId();
+
             if (unlistedCountryVideoIds.contains(videoId) || privateDeletedVideoIds.contains(videoId)) {
-                illegalVideoCounts.put(videoId, illegalVideoCounts.getOrDefault(videoId, 0) + 1);
+                illegalVideos.computeIfAbsent(videoId, k -> new ArrayList<>()).add(playlistItemId);
             }
         }
 
         log.info("[update playlist done: {}]", playlistId);
-        return new IllegalVideosAndPaginationDto(illegalVideoCounts, (long) pagination);
+        return illegalVideos;
     }
 }
 
-/** OGCODE BEFORE 0913
+/** OGCODE BEFORE 1024
  @Slf4j
  @Service
  @Transactional
@@ -210,13 +211,16 @@ public class PlaylistServiceV1 implements PlaylistService {
  private final PlaylistRepository playlistRepository;
  private final MusicService musicService;
  private final PlaylistRegistrationUnitService playlistRegistrationUnitService;
+ private final ObjectMapper objectMapper;
 
  public PlaylistServiceV1(UserService userService, PlaylistRepository playlistRepository,
- MusicService musicService, PlaylistRegistrationUnitService playlistRegistrationUnitService) {
+ MusicService musicService, PlaylistRegistrationUnitService playlistRegistrationUnitService,
+ ObjectMapper objectMapper) {
  this.userService = userService;
  this.playlistRepository = playlistRepository;
  this.musicService = musicService;
  this.playlistRegistrationUnitService = playlistRegistrationUnitService;
+ this.objectMapper = objectMapper;
  }
 
  @Override
@@ -247,16 +251,18 @@ public class PlaylistServiceV1 implements PlaylistService {
  @Override
  public PlaylistRegistrationResultDto registerPlaylists(PlaylistRegisterRequestDto request) {
  // 1. DB 에서 사용자가 이미 등록한 플레이리스트 목록을 가져옴
- // List<Playlists> registeredPlaylistIdFromDB = findAllPlaylistsByUserId(request.getUserId());
  List<String> registeredPlaylistIds = findAllPlaylistsByUserId(request.getUserId()).stream().map(Playlists::getPlaylistId).toList();
  // 2. 중복된 플레이리스트는 제외하고 등록
- List<String> newlySelectedPlaylistIds = request.getSelectedPlaylistIds().stream()
- .filter(playlistId -> playlistId != null && !playlistId.isBlank())
- .filter(playlistId -> !registeredPlaylistIds.contains(playlistId)).toList();
+ List<PlaylistDto> newlySelectedPlaylistsDto = request.getSelectedPlaylists(objectMapper);
+
+ List<PlaylistDto> newlySelectedPlaylists = newlySelectedPlaylistsDto.stream()
+ .filter(dto -> dto != null && !dto.getId().isBlank())
+ .filter(dto -> !registeredPlaylistIds.contains(dto.getId()))
+ .toList();
 
  PlaylistRegistrationResultDto dto = null;
- if (!newlySelectedPlaylistIds.isEmpty()) {
- dto = registerSelectedPlaylists(request.getUserId(), newlySelectedPlaylistIds);  // 중복되지 않는 플레이리스트만 등록
+ if (!newlySelectedPlaylists.isEmpty()) {
+ dto = registerSelectedPlaylists(request.getUserId(), newlySelectedPlaylists);  // 중복되지 않는 플레이리스트만 등록
  }
 
  if (request.getDeselectedPlaylistIds() != null && !request.getDeselectedPlaylistIds().isEmpty()) {
@@ -267,42 +273,33 @@ public class PlaylistServiceV1 implements PlaylistService {
  return dto;
  }
 
- private PlaylistRegistrationResultDto registerSelectedPlaylists(String userId, List<String> selectedPlaylistIds) {
+ private PlaylistRegistrationResultDto registerSelectedPlaylists(String userId, List<PlaylistDto> selectedPlaylistsDto) {
  Users user = userService.getUserByUserId(userId).orElseThrow(() -> new IllegalArgumentException("[No User Found]"));
  String countryCode = user.getCountryCode();
- // 1. 전체 플레이리스트 가져오기
- List<Playlist> allPlaylists;
- try {
- allPlaylists = playlistRegistrationUnitService.fetchAllPlaylists(userId, user.getUserChannelId());
- } catch (IOException e) {
- log.info("The user is deleted in a very short amount of time");
- return null;
- }
- // 2. 선택된 ID에 해당하는 Playlist 만 필터링
- List<Playlist> selectedPlaylists = allPlaylists.stream().filter(p -> selectedPlaylistIds.contains(p.getId())).toList();
 
- // 3. playlists, music 도메인에 저장하기
+ // PlaylistDto 를 이용해서 중복 플리 fetch 호출 제거함
  int succeedPlaylistCount = 0;
- for (Playlist getPlaylist : selectedPlaylists) {
+ for (PlaylistDto dto : selectedPlaylistsDto) {
+ log.info("[playlistServiceV1]: {}, {}", dto.getId(), dto.getTitle());
  Playlists playlist = new Playlists();
- playlist.setPlaylistId(getPlaylist.getId());
- playlist.setPlaylistTitle(getPlaylist.getSnippet().getTitle());
+ playlist.setPlaylistId(dto.getId());
+ playlist.setPlaylistTitle(dto.getTitle());
  playlist.setServiceType(Playlists.ServiceType.RECOVER);
  playlist.setUser(user);
  // 3.1 Playlist 객체를 DB에 저장
  try {
- playlistRegistrationUnitService.saveSinglePlaylist(playlist, userId, getPlaylist.getId(), countryCode);
+ playlistRegistrationUnitService.saveSinglePlaylist(playlist, userId, dto.getId(), countryCode);
  } catch (QuotaExceededException ex) {
  log.warn("[Quota Exceeded During Registration]: {}", playlist.getPlaylistTitle());
- log.info("[Aborted] Registration Result: {}/{}", succeedPlaylistCount, selectedPlaylists.size());
- return new PlaylistRegistrationResultDto(succeedPlaylistCount, selectedPlaylists.size());
+ log.info("[Aborted] Registration Result: {}/{}", succeedPlaylistCount, selectedPlaylistsDto.size());
+ return new PlaylistRegistrationResultDto(succeedPlaylistCount, selectedPlaylistsDto.size());
  }
  // 3.2 해당 플레이리스트에 딸린 모든 음악을 Music 도메인에 저장
- log.info("playlist({}) is added to DB", getPlaylist.getSnippet().getTitle());
+ log.info("playlist({}) is added to DB", dto.getTitle());
  succeedPlaylistCount++;
  }
- log.info("[Completed] Registration Result: {}/{}", succeedPlaylistCount, selectedPlaylists.size());
- return new PlaylistRegistrationResultDto(succeedPlaylistCount, selectedPlaylists.size());
+ log.info("[Completed] Registration Result: {}/{}", succeedPlaylistCount, selectedPlaylistsDto.size());
+ return new PlaylistRegistrationResultDto(succeedPlaylistCount, selectedPlaylistsDto.size());
  }
 
  @Override
@@ -379,5 +376,4 @@ public class PlaylistServiceV1 implements PlaylistService {
  return new IllegalVideosAndPaginationDto(illegalVideoCounts, (long) pagination);
  }
  }
-
  */

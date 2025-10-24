@@ -89,6 +89,28 @@ public class ManagementScheduler {
     }
 
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void addTest() {
+        String userId = "112735690496635663877";
+        String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
+        String videoId = "wtjro7_R3-4";
+        String accessToken = userService.getNewAccessTokenByUserId(userId);
+
+        for (int i = 1; i <= 5; i++) {
+            log.info("[Attempt : {}]", i);
+            youtubeApiClient.addVideoToActualPlaylist(accessToken, playlistId, videoId);
+            log.info("=============================================");
+        }
+
+    }
+
+    // @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void deleteTest() {
+        String userId = "112735690496635663877";
+        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        youtubeApiClient.deleteFromActualPlaylist(accessToken, "asdasd");
+    }
+
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void LazyTest() {
         String userId = "101758050105729632425";
         Playlists playlistParam = playlistService.findAllPlaylistsByUserId(userId).get(0);

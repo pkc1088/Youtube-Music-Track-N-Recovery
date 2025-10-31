@@ -2,6 +2,7 @@ package youtube.youtubeService.service.youtube;
 
 import com.google.api.services.youtube.model.*;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.api.YoutubeApiClient;
@@ -20,6 +21,7 @@ import java.util.*;
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class YoutubeServiceV5 implements YoutubeService {
 
     private final ActionLogService actionLogService;
@@ -29,18 +31,19 @@ public class YoutubeServiceV5 implements YoutubeService {
     private final OutboxService outboxService;
     private final QuotaService quotaService;
 
-    public YoutubeServiceV5(ActionLogService actionLogService, YoutubeApiClient youtubeApiClient,
-                            PlaylistService playlistService, MusicService musicService, OutboxService outboxService, QuotaService quotaService) {
-        this.actionLogService = actionLogService;
-        this.youtubeApiClient = youtubeApiClient;
-        this.playlistService = playlistService;
-        this.musicService = musicService;
-        this.outboxService = outboxService;
-        this.quotaService = quotaService;
-    }
+//    public YoutubeServiceV5(ActionLogService actionLogService, YoutubeApiClient youtubeApiClient,
+//                            PlaylistService playlistService, MusicService musicService, OutboxService outboxService, QuotaService quotaService) {
+//        this.actionLogService = actionLogService;
+//        this.youtubeApiClient = youtubeApiClient;
+//        this.playlistService = playlistService;
+//        this.musicService = musicService;
+//        this.outboxService = outboxService;
+//        this.quotaService = quotaService;
+//    }
 
     @Override
     public void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken) {
+//        long startTime = System.nanoTime();
         // 1. 업데이트 및 비정상 음악 목록 가져오기
         Map<String, List<String>> illegalVideosInfo;
         String playlistId = playlist.getPlaylistId();
@@ -132,6 +135,10 @@ public class YoutubeServiceV5 implements YoutubeService {
 
             // if(userId != null) throw new RuntimeException("Intentioned Runtime Exception"); // 고의적 예외 던짐
         }
+
+//        long endTime = System.nanoTime(); // 측정 종료
+//        long elapsedMs = (endTime - startTime) / 1_000_000;
+//        log.info("[fileTrackAndRecover transaction time] {} ms", elapsedMs);
     }
 
     /**

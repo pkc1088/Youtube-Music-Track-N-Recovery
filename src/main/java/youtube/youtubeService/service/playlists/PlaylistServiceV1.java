@@ -7,6 +7,7 @@ import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.Video;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
@@ -28,6 +29,7 @@ import java.util.stream.IntStream;
 @Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PlaylistServiceV1 implements PlaylistService {
 
     private final UserService userService;
@@ -36,15 +38,15 @@ public class PlaylistServiceV1 implements PlaylistService {
     private final PlaylistRegistrationUnitService playlistRegistrationUnitService;
     private final ObjectMapper objectMapper;
 
-    public PlaylistServiceV1(UserService userService, PlaylistRepository playlistRepository,
-                             MusicService musicService, PlaylistRegistrationUnitService playlistRegistrationUnitService,
-                             ObjectMapper objectMapper) {
-        this.userService = userService;
-        this.playlistRepository = playlistRepository;
-        this.musicService = musicService;
-        this.playlistRegistrationUnitService = playlistRegistrationUnitService;
-        this.objectMapper = objectMapper;
-    }
+//    public PlaylistServiceV1(UserService userService, PlaylistRepository playlistRepository,
+//                             MusicService musicService, PlaylistRegistrationUnitService playlistRegistrationUnitService,
+//                             ObjectMapper objectMapper) {
+//        this.userService = userService;
+//        this.playlistRepository = playlistRepository;
+//        this.musicService = musicService;
+//        this.playlistRegistrationUnitService = playlistRegistrationUnitService;
+//        this.objectMapper = objectMapper;
+//    }
 
     @Override
     public List<Playlists> findAllPlaylistsByUserId(String userId){
@@ -130,7 +132,7 @@ public class PlaylistServiceV1 implements PlaylistService {
         String playlistId = playlist.getPlaylistId();
         log.info("[update playlist start: {}]", playlistId);
         List<PlaylistItem> pureApiPlaylistItems;
-        // 1. API 검색으로 고객 플레이리스트 목록 불러오기
+        // 1. API 검색으로 고객 플레이리스트 아이템 목록 불러오기
         try {
             pureApiPlaylistItems = playlistRegistrationUnitService.fetchAllPlaylistItems(userId, playlistId);
         } catch (IOException e) {

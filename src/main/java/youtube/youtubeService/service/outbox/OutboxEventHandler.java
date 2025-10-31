@@ -26,10 +26,10 @@ public class OutboxEventHandler {
 //    @Async("outboxExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOutboxEvent(OutboxCreatedEventDto event) {
-        log.info("::::::Thread Name(handleOutboxEvent - start) : " + Thread.currentThread().getName());
+//        log.info("::::::Thread Name(handleOutboxEvent - start) : " + Thread.currentThread().getName());
         Outbox outbox = outboxRepository.findById(event.getOutboxId()).orElseThrow(() -> new RuntimeException("Outbox not found"));
         handleOutbox(outbox, Outbox.Status.FAILED);
-        log.info("::::::Thread Name(handleOutboxEvent - end): " + Thread.currentThread().getName());
+//        log.info("::::::Thread Name(handleOutboxEvent - end): " + Thread.currentThread().getName());
     }
 
     public void retryFailedOutboxEvents(String userId) {
@@ -61,9 +61,9 @@ public class OutboxEventHandler {
     }
 
     public void handleOutbox(Outbox outbox, Outbox.Status trgStatus) {
-        log.info("::::::Thread Name(handleOutbox - start) : " + Thread.currentThread().getName());
-
+//        log.info("::::::Thread Name(handleOutbox - start) : " + Thread.currentThread().getName());
         boolean apiOperatedCheck = outboxProcessor.processOutbox(outbox);
+//        long startTime = System.nanoTime();  // 트랜잭션 시간 측정 시작
 
         if(apiOperatedCheck) {
             outboxStatusUpdater.updateOutboxStatus(outbox.getId(), Outbox.Status.SUCCESS);
@@ -72,7 +72,11 @@ public class OutboxEventHandler {
             outboxStatusUpdater.updateOutboxStatus(outbox.getId(), trgStatus);
             log.info("[OutboxEventHandler] Marked Outbox ID {} as {} (API failed)", outbox.getId(), trgStatus);
         }
-        log.info("::::::Thread Name(handleOutbox - end) : " + Thread.currentThread().getName());
+
+//        long endTime = System.nanoTime(); // 측정 종료
+//        long elapsedMs = (endTime - startTime) / 1_000_000;
+//        log.info("[updateOutboxStatus transaction time] {} ms", elapsedMs);
+//        log.info("::::::Thread Name(handleOutbox - end) : " + Thread.currentThread().getName());
     }
 
 }

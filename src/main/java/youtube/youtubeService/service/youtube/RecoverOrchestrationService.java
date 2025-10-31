@@ -47,9 +47,13 @@ public class RecoverOrchestrationService {
             for (Playlists playlist : playListsSet) {
                 log.info("{} start", playlist.getPlaylistTitle());
                 try {
-                    log.info("::::::Thread Name(allPlaylistsRecoveryOfAllUsers - start) : " + Thread.currentThread().getName());
+//                    log.info("::::::Thread Name(allPlaylistsRecoveryOfAllUsers - start) : " + Thread.currentThread().getName());
+//                    long overallStart = System.nanoTime();
                     youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken);
-                    log.info("::::::Thread Name(allPlaylistsRecoveryOfAllUsers - end) : " + Thread.currentThread().getName());
+//                    long overallEnd = System.nanoTime(); // 측정 종료
+//                    long elapsedMs = (overallEnd - overallStart) / 1_000_000;
+//                    log.info("[RecoverOrchestrationService transaction time] {} ms", elapsedMs);
+//                    log.info("::::::Thread Name(allPlaylistsRecoveryOfAllUsers - end) : " + Thread.currentThread().getName());
                 } catch (QuotaExceededException ex) {
                     log.warn("[Quota Exceed EX at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), ex.getMessage());
                 } catch (Exception e) {// 예상 못한 런타임 에러 방어

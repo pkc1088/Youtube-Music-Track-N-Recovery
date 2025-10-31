@@ -88,6 +88,16 @@ public class ManagementScheduler {
         log.info("auto scheduler done");
     }
 
+    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void updatePrivacyStatusTest() {
+        String userId = "107155055893692546350";
+        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        String videoId = "XzEoBAltBII";
+        String status = "public"; //"private";
+
+        youtubeApiClient.updateVideoPrivacyStatus(accessToken, videoId, status);
+    }
+
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void addTest() {
         String userId = "112735690496635663877";

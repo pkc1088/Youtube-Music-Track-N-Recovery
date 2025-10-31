@@ -253,6 +253,36 @@ public class YoutubeApiClient {
         return searchResultList.get(0); // 검색 결과 중 첫 번째 동영상 정보 가져오기
     }
 
+    public void updateVideoPrivacyStatus(String accessToken, String videoId, String changedStatus) {
+
+        try {
+            YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), new GoogleCredential()
+                    .setAccessToken(accessToken))
+                    .setApplicationName("youtube-add-playlist-item").build();
+
+            YouTube.Videos.List listRequest = youtube.videos()
+                    .list(Collections.singletonList("id, status"))
+                    .setKey(apiKey)
+                    .setId(Collections.singletonList(videoId));
+
+            Video original = listRequest.execute().getItems().get(0);
+            log.info("Found video: {} with status {}", original.getId(), original.getStatus().getPrivacyStatus());
+
+            // 2. 업데이트용 Video 객체 구성
+            Video updatedVideo = new Video();
+            updatedVideo.setId(videoId);
+            VideoStatus status = new VideoStatus();
+            status.setPrivacyStatus(changedStatus); // "public", "unlisted", or "private"
+            updatedVideo.setStatus(status);
+
+            // 3. update 요청
+            youtube.videos().update(Collections.singletonList("status"), updatedVideo).execute();
+            log.info("Video Status Changed to: {}", changedStatus);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }
 
 

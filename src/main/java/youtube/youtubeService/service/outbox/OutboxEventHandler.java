@@ -72,11 +72,6 @@ public class OutboxEventHandler {
             outboxStatusUpdater.updateOutboxStatus(outbox.getId(), trgStatus);
             log.info("[OutboxEventHandler] Marked Outbox ID {} as {} (API failed)", outbox.getId(), trgStatus);
         }
-
-//        long endTime = System.nanoTime(); // 측정 종료
-//        long elapsedMs = (endTime - startTime) / 1_000_000;
-//        log.info("[updateOutboxStatus transaction time] {} ms", elapsedMs);
-//        log.info("::::::Thread Name(handleOutbox - end) : " + Thread.currentThread().getName());
     }
 
 }

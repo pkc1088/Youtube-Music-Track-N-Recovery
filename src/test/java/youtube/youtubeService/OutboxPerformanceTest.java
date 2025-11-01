@@ -1,84 +1,50 @@
 package youtube.youtubeService;
 
-import com.google.api.services.youtube.model.Video;
-import com.google.api.services.youtube.model.VideoSnippet;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.util.StopWatch;
-import youtube.youtubeService.api.YoutubeApiClient;
-import youtube.youtubeService.domain.*;
-import youtube.youtubeService.repository.ActionLogRepository;
-import youtube.youtubeService.repository.OutboxRepository;
-import youtube.youtubeService.repository.musics.MusicRepository;
+import youtube.youtubeService.domain.ActionLog;
+import youtube.youtubeService.domain.Music;
+import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
-import youtube.youtubeService.repository.users.UserRepository;
 import youtube.youtubeService.service.ActionLogService;
-import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicService;
-import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.outbox.OutboxProcessor;
-import youtube.youtubeService.service.outbox.OutboxService;
-import youtube.youtubeService.service.outbox.OutboxStatusUpdater;
-import youtube.youtubeService.service.playlists.PlaylistService;
+import youtube.youtubeService.service.users.UserService;
 import youtube.youtubeService.service.youtube.YoutubeService;
-
-import java.io.IOException;
 import java.util.*;
-
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
 public class OutboxPerformanceTest {
 
     @MockitoBean
-    private PlaylistService playlistService;
-    @MockitoBean
-    private QuotaService quotaService;
-    @MockitoBean
     private OutboxProcessor outboxProcessor;
-    @MockitoBean
-    private YoutubeApiClient youtubeApiClient;
-    @MockitoSpyBean
-    private MusicService musicService;
     @MockitoBean
     private ActionLogService actionLogService;
 
-    @MockitoSpyBean
-    private OutboxService outboxService;
-    @Autowired
-    private UserRepository usersRepository;
+
+    @Autowired//MockitoSpyBean
+    private UserService userService;
     @Autowired
     private PlaylistRepository playlistRepository;
     @Autowired
-    private MusicRepository musicRepository;
+    private RecoverTestHelper recoverTestHelper;
     @Autowired
-    private OutboxRepository outboxRepository;
-    @Autowired
-    private ActionLogRepository actionLogRepository;
-    @Autowired
-    private OutboxStatusUpdater outboxStatusUpdater;
+    private MusicService musicService;
     @Autowired
     private YoutubeService youtubeService;
-    @Autowired
-    private OutboxEventHandler outboxEventHandler;
 
+    private String brokenVideoId, title, uploader, description, tags, playlistId;
 
-    private Users testUser;
-    private Playlists testPlaylist;
-    private String testBrokenMusic;
-
+    /*
     @BeforeEach
     void setUp() {
 
@@ -118,12 +84,96 @@ public class OutboxPerformanceTest {
             when(outboxProcessor.processOutbox(any())).thenReturn(true);
 
         } catch (IOException e) {
-            // (Mocking 예외 처리)
+        }
+    }
+*/
+
+    @BeforeEach
+    void setUp() {
+
+        try {
+            brokenVideoId = "XzEoBAltBII";
+            title = "The Manhattans - Kiss And Say GoodBye";
+            uploader = "Whistle_Missile";
+            description = "just a test video";
+            tags = "The Manhattams,R&B,Soul,7th album";
+            playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
+
+            when(outboxProcessor.processOutbox(any())).thenReturn(true);
+            when(actionLogService.findTodayRecoverLog(any(ActionLog.ActionType.class), anyString())).thenReturn(Optional.empty());
+        } catch (Exception e) {
+
         }
 
-//        doNothing().when(outboxProcessor).processOutbox(any());
     }
 
+    @Test
+    void testEachRecover() {
+        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId("112735690496635663877");  // pkc1088
+        // String accessTokenForUploader = userService.getNewAccessTokenByUserId("107155055893692546350");     // WhistleMissile
+        List<Long> data = new ArrayList<>();
+
+        for (int i = 1; i <= 100; i++) {
+
+            log.info("====================[{}] START. ====================", i);
+            try {
+                // Before
+                sleep();
+                Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+                // Test
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+                youtubeService.fileTrackAndRecover("112735690496635663877", playlist, "KR", accessTokenForRecoverUser);
+                stopWatch.stop();
+                log.info("[Test - {}] Transaction Time: {} ms", i, stopWatch.getTotalTimeMillis());
+                data.add(stopWatch.getTotalTimeMillis());
+
+                // AFTER (복구 됐을 영상을 다시 비정상 영상으로 돌려놔야 다음 iteration 때 탐지함)
+                sleep();
+                musicService.upsertMusic(new Music(1270L, brokenVideoId, title, uploader, description, tags, playlist));
+            } catch (Exception e) {
+                log.error("Error Occurred At {} - {}", i, e.toString(), e);
+            }
+        }
+
+        System.out.println("------RESULT------");
+        long sum = 0L;
+        for (int i = 0; i < data.size(); i++) {
+            System.out.println((i + 1) + " : " + data.get(i));
+            sum += data.get(i);
+        }
+        System.out.println("------Average------");
+        System.out.println(sum / data.size());
+
+    }
+
+    void sleep() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            // 이 예외가 발생했을 때 현재 스레드의 중단 상태를 다시 복구해주는 것이 좋습니다.
+            Thread.currentThread().interrupt();
+            // 혹은 예외를 로깅하고 적절한 중단 처리를 합니다.
+            System.err.println("스레드 대기 중 인터럽트 발생!");
+        }
+    }
+
+
+//    @Transactional
+//    long measureOutboxTransactionTimeWithAutoStatusUpdateWith100Times(long i, String accessTokenForRecoverUser, Playlists playlist) {
+//
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start();
+//        recoverTestHelper.measureOutboxTransactionTimeWithAutoStatusUpdateWith100Times("112735690496635663877", playlist, "KR", accessTokenForRecoverUser);
+//        stopWatch.stop();
+//        long transactionTime = stopWatch.getTotalTimeMillis();
+//        log.info("[Outbox - {}] Transaction Time: {} ms", i, transactionTime);
+//
+//        return transactionTime;
+//    }
+
+
+/*
     @Test
     @DisplayName("Outbox 아키텍처 - 메인 트랜잭션 성능 측정 (모든 외부 API Mocking)")
     @Transactional // 테스트 종료 후 모든 DB 변경 롤백
@@ -154,30 +204,21 @@ public class OutboxPerformanceTest {
         // 4. (검증) 이벤트 핸들러는 호출되지 않았음 (트랜잭션 분리 성공)
         verify(outboxEventHandler, never()).handleOutboxEvent(any());
     }
+*/
 
-
-    @Test
-    void measureOutboxTransactionTimeWithAutoStatusUpdateWith100Times() {
-//        String userId = "107155055893692546350";
-//        String accessToken = userService.getNewAccessTokenByUserId(userId);
-//        String videoId = "XzEoBAltBII";
-//        String status = "public"; //"private";
-//
-//        youtubeApiClient.updateVideoPrivacyStatus(accessToken, videoId, status);
-    }
-
+/*
     @Test
     void measureOutboxTransactionTime() {
-        //long overallStart = System.nanoTime();
-        // recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
-        //long overallEnd = System.nanoTime();
+        long overallStart = System.nanoTime();
+         recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+        long overallEnd = System.nanoTime();
 
-        //long allTx = (overallEnd - overallStart) / 1_000_000;
-        //long outboxTx = (end - mid) / 1_000_000;
-        //log.info("[Outbox ALL Transaction Time] {} ms", allTx);
-        //log.info("[Outbox requires_new update transaction time] {} ms", outboxTx);
-        //log.info("[Outbox total transaction time] {} ms", mainTx + outboxTx);
+        long allTx = (overallEnd - overallStart) / 1_000_000;
+        long outboxTx = (end - mid) / 1_000_000;
+        log.info("[Outbox ALL Transaction Time] {} ms", allTx);
+        log.info("[Outbox requires_new update transaction time] {} ms", outboxTx);
+        log.info("[Outbox total transaction time] {} ms", mainTx + outboxTx);
     }
-
+*/
 
 }

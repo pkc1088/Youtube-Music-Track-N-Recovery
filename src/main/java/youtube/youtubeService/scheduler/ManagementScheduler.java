@@ -88,7 +88,15 @@ public class ManagementScheduler {
         log.info("auto scheduler done");
     }
 
-    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void addPrivateVideoTest() {
+        // updatePrivacyStatusTest();
+        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId("112735690496635663877");
+        String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
+        youtubeApiClient.addVideoToActualPlaylist(accessTokenForRecoverUser, playlistId, "XzEoBAltBII");
+    }
+
+//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void updatePrivacyStatusTest() {
         String userId = "107155055893692546350";
         String accessToken = userService.getNewAccessTokenByUserId(userId);

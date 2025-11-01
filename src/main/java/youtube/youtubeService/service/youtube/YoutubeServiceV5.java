@@ -105,7 +105,7 @@ public class YoutubeServiceV5 implements YoutubeService {
                         QuotaType.VIDEO_INSERT.getCost(), Outbox.ActionType.ADD, replacementMusic.getVideoId(), null);
 
                 reservedQuotaBackedUp = consumeWithOutbox(userId, playlistId, accessToken, reservedQuotaBackedUp,
-                        QuotaType.VIDEO_DELETE.getCost(), Outbox.ActionType.DELETE, videoIdToDelete, playlistItemIdsToDelete.get(i)); // 여기에만 pagination 만큼 더해주면됨
+                        QuotaType.VIDEO_DELETE.getCost(), Outbox.ActionType.DELETE, videoIdToDelete, playlistItemIdsToDelete.get(i));
 
                 log.info("Recovered [{}] -> [{}] at pos {}", videoIdToDelete, replacementMusic.getVideoId(), pk);
             }
@@ -147,6 +147,18 @@ public class YoutubeServiceV5 implements YoutubeService {
      */
     private long consumeWithOutbox(String userId, String playlistId, String accessToken, long reservedQuotaBackedUp,
                                    long cost, Outbox.ActionType actionType, String videoId, String playlistItemIdToDelete) {
+//        for legacy test
+//        try {
+//            if (actionType.equals(Outbox.ActionType.DELETE)) {
+//                log.info("API DELETE : {}", videoId);
+//                youtubeApiClient.deleteFromActualPlaylist(accessToken, playlistItemIdToDelete);
+//            } else if (actionType.equals(Outbox.ActionType.ADD)) {
+//                log.info("API ADD : {}", videoId);
+//                youtubeApiClient.addVideoToActualPlaylist(accessToken, playlistId, videoId);
+//            }
+//        } catch (Exception e) {
+//            log.warn("API call failed for Actual API: {} - {}", videoId, e.getMessage());
+//        }
 
         if(!quotaService.checkAndConsumeLua(userId, cost)) {
             quotaService.rollbackQuota(userId, reservedQuotaBackedUp);
@@ -155,7 +167,7 @@ public class YoutubeServiceV5 implements YoutubeService {
             reservedQuotaBackedUp += cost;
             outboxService.outboxInsert(actionType, accessToken, userId, playlistId, videoId, playlistItemIdToDelete);
         }
-        log.info("[Quota Reserve]: {}, [Reserved So Far]: {}", cost, reservedQuotaBackedUp);
+        // log.info("[Quota Reserve]: {}, [Reserved So Far]: {}", cost, reservedQuotaBackedUp);
         return reservedQuotaBackedUp;
     }
 }

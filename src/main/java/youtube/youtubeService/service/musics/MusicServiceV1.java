@@ -2,6 +2,7 @@ package youtube.youtubeService.service.musics;
 
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,8 +51,18 @@ public class MusicServiceV1 implements MusicService {
     }
 
     @Override
-    public void dBTrackAndRecoverPosition(String videoIdToDelete, Music replacementMusic, long pk) {
-        musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
+    public void updateMusicWithReplacement(String videoIdToDelete, Music replacementMusic, long pk) {
+
+        Music musicToUpdate = musicRepository.findById(pk).orElseThrow(() -> new EntityNotFoundException("Music not found: " + videoIdToDelete));
+        log.info("Illegal videoId : {} at {}", musicToUpdate.getVideoId(), pk);
+
+        musicToUpdate.setVideoId(replacementMusic.getVideoId());
+        musicToUpdate.setVideoTitle(replacementMusic.getVideoTitle());
+        musicToUpdate.setVideoUploader(replacementMusic.getVideoUploader());
+        musicToUpdate.setVideoDescription(replacementMusic.getVideoDescription());
+        musicToUpdate.setVideoTags(replacementMusic.getVideoTags());
+        log.info("The music record update has been completed");
+        // musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
     }
 
     @Override
@@ -132,3 +143,9 @@ public class MusicServiceV1 implements MusicService {
     }
 
 }
+
+/*
+public void dBTrackAndRecoverPosition(String videoIdToDelete, Music replacementMusic, long pk) {
+        musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
+}
+ */

@@ -1,5 +1,6 @@
 package youtube.youtubeService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,7 +110,9 @@ public class OutboxPerformanceTest {
 
     @Test
     void testEachRecover() {
-        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId("112735690496635663877");  // pkc1088
+        String userId = "112735690496635663877";
+        String refreshToken = userService.getUserByUserId(userId).orElseThrow(() -> new EntityNotFoundException("User not found: " + userId)).getRefreshToken();
+        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId(userId, refreshToken);  // pkc1088
         // String accessTokenForUploader = userService.getNewAccessTokenByUserId("107155055893692546350");     // WhistleMissile
         List<Long> data = new ArrayList<>();
 

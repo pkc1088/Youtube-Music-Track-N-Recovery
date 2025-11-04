@@ -65,16 +65,16 @@ public class UserServiceV1 implements UserService {
     }
 
     @Override
-    public String getNewAccessTokenByUserId(String userId) {
-        log.info("once a day : accessToken <- refreshToken");
-        Users user = userRepository.findByUserId(userId);
-        String refreshToken = user.getRefreshToken();
+    public String getNewAccessTokenByUserId(String userId, String refreshToken) {
+        log.info("[once a day : accessToken <- refreshToken]");
+        //Users user = userRepository.findByUserId(userId);
+        //String refreshToken = user.getRefreshToken();
         String accessToken;
         try {
             accessToken = refreshAccessToken(refreshToken);
         } catch (IOException e) {
-            log.info("{}", e.getMessage());
-            userRepository.deleteUser(user);  // 여기서 예외 잡을때 유저 제거해줘야함 (만약 고객이 보안페이지에서 제거한거라면)
+            log.info("[{}]", e.getMessage());
+            userRepository.deleteById(userId);  // deleteBy(entity) 대신 id를 넘겨서 평시에 findByUserId 할 필요 없도록해서 쿼리 줄임
             return "";
         }
         return accessToken;

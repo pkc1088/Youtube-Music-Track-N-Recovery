@@ -99,7 +99,7 @@ public class YoutubeServiceV5 implements YoutubeService {
             for (int i = 0; i < Math.min(backupMusicListFromDb.size(), apiDuplicatedCount); i++) { // 1:1 매칭 가능한 만큼 복구
                 long pk = backupMusicListFromDb.get(i).getId();
                 // DB 교체 처리
-                musicService.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
+                musicService.updateMusicWithReplacement(videoIdToDelete, replacementMusic, pk);
 
                 reservedQuotaBackedUp = consumeWithOutbox(userId, playlistId, accessToken, reservedQuotaBackedUp,
                         QuotaType.VIDEO_INSERT.getCost(), Outbox.ActionType.ADD, replacementMusic.getVideoId(), null);

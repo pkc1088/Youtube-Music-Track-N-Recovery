@@ -11,7 +11,7 @@ public interface UserService {
 
     void saveUser(Users user);
 
-    String getNewAccessTokenByUserId(String userId);
+    String getNewAccessTokenByUserId(String userId, String refreshToken);
 
     List<Users> findAllUsers();
 

@@ -32,10 +32,11 @@ public class RecoverOrchestrationService {
         for (Users user : users) {
             String userId = user.getUserId();
             String countryCode = user.getCountryCode();
+            String refreshToken = user.getRefreshToken();
             log.info("userId : {}", userId);
 
             // 1. 유저 아이디로 accessToken 발급
-            String accessToken = userService.getNewAccessTokenByUserId(userId);
+            String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
             if(accessToken.equals("")) {
                 // 예외 터지면 getNewAccessToken 에서 고객은 제거 했을꺼고, 다음 고객으로 넘기는 시나리오
                 log.info("abort scheduling bc user left");
@@ -72,7 +73,8 @@ public class RecoverOrchestrationService {
     public void allPlaylistsRecoveryOfOneParticularUserTest() {
 
         String userId  = "112735690496635663877";
-        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        String refreshToken = "abc";
+        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
         String countryCode = "KR";
 
         if(accessToken.equals("")) {

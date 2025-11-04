@@ -31,6 +31,9 @@ public class UserRepositoryV1 implements UserRepository {
         return repository.findAll(); // 정렬 없음
     }
 
+    public void deleteById(String userId) {
+        repository.deleteById(userId);
+    }
 }
 
 //    @Override

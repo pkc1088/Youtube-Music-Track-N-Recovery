@@ -91,7 +91,8 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void addPrivateVideoTest() {
         // updatePrivacyStatusTest();
-        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId("112735690496635663877");
+        String refreshToken = "abc";
+        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId("112735690496635663877", refreshToken);
         String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
         youtubeApiClient.addVideoToActualPlaylist(accessTokenForRecoverUser, playlistId, "XzEoBAltBII");
     }
@@ -99,7 +100,8 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void updatePrivacyStatusTest() {
         String userId = "107155055893692546350";
-        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        String refreshToken = "abc";
+        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
         String videoId = "XzEoBAltBII";
         String status = "public"; //"private";
 
@@ -109,9 +111,10 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void addTest() {
         String userId = "112735690496635663877";
+        String refreshToken = "abc";
         String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
         String videoId = "wtjro7_R3-4";
-        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
 
         for (int i = 1; i <= 5; i++) {
             log.info("[Attempt : {}]", i);
@@ -124,7 +127,8 @@ public class ManagementScheduler {
     // @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void deleteTest() {
         String userId = "112735690496635663877";
-        String accessToken = userService.getNewAccessTokenByUserId(userId);
+        String refreshToken = "abc";
+        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
         youtubeApiClient.deleteFromActualPlaylist(accessToken, "asdasd");
     }
 

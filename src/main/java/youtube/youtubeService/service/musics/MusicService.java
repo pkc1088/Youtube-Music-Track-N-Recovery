@@ -14,7 +14,7 @@ public interface MusicService {
 
     List<Music> getMusicListFromDBThruMusicId(String videoIdToDelete, String playlistId);
 
-    void dBTrackAndRecoverPosition(String videoIdToDelete, Music replacementMusic, long pk);
+    void updateMusicWithReplacement(String videoIdToDelete, Music replacementMusic, long pk);
 
     void upsertMusic(Music music);
 

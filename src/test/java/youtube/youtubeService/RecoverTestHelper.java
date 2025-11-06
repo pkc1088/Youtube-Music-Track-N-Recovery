@@ -20,7 +20,7 @@ public class RecoverTestHelper {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        youtubeService.fileTrackAndRecover("112735690496635663877", playlist, "KR", accessTokenForRecoverUser);
+        //youtubeService.fileTrackAndRecover("112735690496635663877", playlist, "KR", accessTokenForRecoverUser);
         stopWatch.stop();
         long transactionTime = stopWatch.getTotalTimeMillis();
         log.info("[Test - {}] Transaction Time: {} ms", i, transactionTime);

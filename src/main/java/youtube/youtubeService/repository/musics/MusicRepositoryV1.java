@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import youtube.youtubeService.domain.Music;
+import youtube.youtubeService.domain.Playlists;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,9 +16,14 @@ public class MusicRepositoryV1 implements MusicRepository{
 
     private final SdjMusicRepository repository;
 
+//    @Override
+//    public List<Music> findAllMusicByPlaylistId(String playlistId) {
+//        return repository.findByPlaylist_PlaylistId(playlistId); 밑으로 대체
+//    }
     @Override
-    public List<Music> findAllMusicByPlaylistId(String playlistId) {
-        return repository.findByPlaylist_PlaylistId(playlistId);
+    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
+        log.info("[Fetch Join Called]");
+        return repository.findAllWithPlaylistByPlaylistIn(playListsSet);
     }
 
     @Override

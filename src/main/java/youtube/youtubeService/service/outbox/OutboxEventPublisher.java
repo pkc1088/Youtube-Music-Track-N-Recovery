@@ -14,6 +14,6 @@ public class OutboxEventPublisher {
     private final ApplicationEventPublisher publisher;
 
     public void publish(Outbox outbox) {
-        publisher.publishEvent(new OutboxCreatedEventDto(outbox.getId()));
+        publisher.publishEvent(new OutboxCreatedEventDto(outbox.getId(), outbox.getUserId(), outbox.getPlaylistId()));
     }
 }

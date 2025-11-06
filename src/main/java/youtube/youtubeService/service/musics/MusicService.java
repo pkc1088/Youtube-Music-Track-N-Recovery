@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface MusicService {
 
-    List<Music> findAllMusicByPlaylistId(String playlistId);
-
+    //List<Music> findAllMusicByPlaylistId(String playlistId); 밑으로 대체
+    List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet);
     void deleteById(Long pk);
 
     List<Music> getMusicListFromDBThruMusicId(String videoIdToDelete, String playlistId);

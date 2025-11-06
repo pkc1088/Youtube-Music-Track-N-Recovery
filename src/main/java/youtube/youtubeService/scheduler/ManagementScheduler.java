@@ -78,7 +78,7 @@ public class ManagementScheduler {
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
     }
 
-//    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+//    @Scheduled(fixedRate = 500000, initialDelayString = "1000")
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
         log.info("auto scheduler activated");
 

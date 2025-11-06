@@ -35,9 +35,13 @@ public class MusicServiceV1 implements MusicService {
         this.youtubeApiClient = youtubeApiClient;
     }
 
+//    @Override
+//    public List<Music> findAllMusicByPlaylistId(String playlistId) {
+//        return musicRepository.findAllMusicByPlaylistId(playlistId); 밑으로 대체
+//    }
     @Override
-    public List<Music> findAllMusicByPlaylistId(String playlistId) {
-        return musicRepository.findAllMusicByPlaylistId(playlistId);
+    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
+        return musicRepository.findAllWithPlaylistByPlaylistIn(playListsSet);
     }
 
     @Override

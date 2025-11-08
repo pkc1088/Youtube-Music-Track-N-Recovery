@@ -32,7 +32,7 @@ public class YoutubeServiceV5 implements YoutubeService {
     private final QuotaService quotaService;
 
     @Override
-    public void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken, List<Music> preFetchedMusicList) {
+    public void fileTrackAndRecover(String userId, Playlists playlist, String countryCode, String accessToken, List<MusicSummaryDto> preFetchedMusicList) {
 
         Map<String, List<String>> illegalVideosInfo;
         String playlistId = playlist.getPlaylistId();
@@ -78,7 +78,7 @@ public class YoutubeServiceV5 implements YoutubeService {
                 replacementVideo = youtubeApiClient.fetchSingleVideo(recentLogOpt.get().getSourceVideoId());
             } else {
                 if(!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("Quota Exceed");
-                replacementVideo = musicService.searchVideoToReplace(backupMusic, playlist);
+                replacementVideo = musicService.searchVideoToReplace(backupMusic);
             }
 
             replacementMusic = musicService.makeVideoToMusic(replacementVideo, playlist);
@@ -88,7 +88,7 @@ public class YoutubeServiceV5 implements YoutubeService {
             for (int i = 0; i < Math.min(backupMusicListFromDb.size(), apiDuplicatedCount); i++) {
                 long pk = backupMusicListFromDb.get(i).getId();
                 // DB 교체 처리
-                musicService.updateMusicWithReplacement(videoIdToDelete, replacementMusic, pk);
+                musicService.updateMusicWithReplacement(pk, replacementMusic); // musicService.updateMusicWithReplacement(videoIdToDelete, replacementMusic, pk);
 
                 reservedQuotaBackedUp = consumeWithOutbox(userId, playlistId, accessToken, reservedQuotaBackedUp,
                         QuotaType.VIDEO_INSERT.getCost(), Outbox.ActionType.ADD, replacementMusic.getVideoId(), null);

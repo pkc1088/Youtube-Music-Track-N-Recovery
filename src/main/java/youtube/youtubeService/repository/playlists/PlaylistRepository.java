@@ -13,4 +13,6 @@ public interface PlaylistRepository {
     List<Playlists> findAllPlaylistsByUserId(String userId);
 
     void deletePlaylistByPlaylistId(String playlistId);
+
+    List<Playlists> findAllPlaylistsByUserIds(List<String> userIds);
 }

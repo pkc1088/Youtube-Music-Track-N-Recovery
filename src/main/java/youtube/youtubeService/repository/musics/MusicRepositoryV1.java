@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.dto.MusicSummaryDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +21,15 @@ public class MusicRepositoryV1 implements MusicRepository{
 //    public List<Music> findAllMusicByPlaylistId(String playlistId) {
 //        return repository.findByPlaylist_PlaylistId(playlistId); 밑으로 대체
 //    }
+//    @Override
+//    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
+//        log.info("[Fetch Join Called]");
+//        return repository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
+//    }
     @Override
-    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
-        log.info("[Fetch Join Called]");
-        return repository.findAllWithPlaylistByPlaylistIn(playListsSet);
+    public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
+        log.info("[Summary of All Music of All Playlists of This User is Called]");
+        return repository.findAllMusicSummaryByPlaylistIds(playListsSet);
     }
 
     @Override
@@ -47,6 +53,10 @@ public class MusicRepositoryV1 implements MusicRepository{
 
     public void saveAll(List<Music> musicsToSave) {
         repository.saveAll(musicsToSave);
+    }
+
+    public void updateMusicWithReplacement(long pk, Music replacementMusic) {
+        repository.updateMusicWithReplacement(pk, replacementMusic);
     }
 }
 

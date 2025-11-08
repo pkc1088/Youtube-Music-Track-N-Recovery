@@ -10,12 +10,14 @@ import org.springframework.stereotype.Service;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.dto.MusicSummaryDto;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -39,9 +41,13 @@ public class MusicServiceV1 implements MusicService {
 //    public List<Music> findAllMusicByPlaylistId(String playlistId) {
 //        return musicRepository.findAllMusicByPlaylistId(playlistId); 밑으로 대체
 //    }
+//    @Override
+//    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
+//        return musicRepository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
+//    }
     @Override
-    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
-        return musicRepository.findAllWithPlaylistByPlaylistIn(playListsSet);
+    public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
+        return musicRepository.findAllMusicSummaryByPlaylistIds(playListsSet);
     }
 
     @Override
@@ -55,9 +61,9 @@ public class MusicServiceV1 implements MusicService {
     }
 
     @Override
-    public void updateMusicWithReplacement(String videoIdToDelete, Music replacementMusic, long pk) {
+    public void updateMusicWithReplacement(long pk, Music replacementMusic) {
 
-        Music musicToUpdate = musicRepository.findById(pk).orElseThrow(() -> new EntityNotFoundException("Music not found: " + videoIdToDelete));
+        /*Music musicToUpdate = musicRepository.findById(pk).orElseThrow(() -> new EntityNotFoundException("Music not found: " + videoIdToDelete));
         log.info("Illegal videoId : {} at {}", musicToUpdate.getVideoId(), pk);
 
         musicToUpdate.setVideoId(replacementMusic.getVideoId());
@@ -65,8 +71,9 @@ public class MusicServiceV1 implements MusicService {
         musicToUpdate.setVideoUploader(replacementMusic.getVideoUploader());
         musicToUpdate.setVideoDescription(replacementMusic.getVideoDescription());
         musicToUpdate.setVideoTags(replacementMusic.getVideoTags());
+        log.info("The music record update has been completed");*/
+        musicRepository.updateMusicWithReplacement(pk, replacementMusic);
         log.info("The music record update has been completed");
-        // musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
     }
 
     @Override
@@ -76,7 +83,7 @@ public class MusicServiceV1 implements MusicService {
 
     @Override
     public void saveSingleVideo(Video video, Playlists playlist) {
-        Music music = new Music();
+        /*Music music = new Music();
         music.setVideoId(video.getId());
         music.setVideoTitle(video.getSnippet().getTitle());
         music.setVideoUploader(video.getSnippet().getChannelTitle());
@@ -86,13 +93,14 @@ public class MusicServiceV1 implements MusicService {
         music.setVideoTags(joinedTags);
         music.setPlaylist(playlist);
 
-        musicRepository.upsertMusic(music);
+        musicRepository.upsertMusic(music);*/
+        musicRepository.upsertMusic(makeVideoToMusic(video, playlist));
     }
 
     @Override
     public void saveAllVideos(List<Video> legalVideos, Playlists playlist) {
 
-        List<Music> musicsToSave = new ArrayList<>();
+        /*List<Music> musicsToSave = new ArrayList<>();
 
         for (Video video : legalVideos) {
             Music music = new Music();
@@ -107,11 +115,14 @@ public class MusicServiceV1 implements MusicService {
 
             musicsToSave.add(music);
         }
-        musicRepository.saveAll(musicsToSave);
+        musicRepository.saveAll(musicsToSave);*/
+        musicRepository.saveAll(legalVideos.stream()
+                .map(video -> makeVideoToMusic(video, playlist))
+                .collect(Collectors.toList()));
     }
 
     @Override
-    public Video searchVideoToReplace(Music musicToSearch, Playlists playlist) {
+    public Video searchVideoToReplace(Music musicToSearch) {
 
         String query = searchPolicy.search(musicToSearch); // Gemini Policy 사용
         log.info("[searched with]: {}", query);

@@ -37,4 +37,9 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
     public void deletePlaylistByPlaylistId(String playlistId) {
         repository.deleteById(playlistId);
     }
+
+    @Override
+    public List<Playlists> findAllPlaylistsByUserIds(List<String> userIds) {
+        return repository.findAllByUserIdsWithUser(userIds);
+    }
 }

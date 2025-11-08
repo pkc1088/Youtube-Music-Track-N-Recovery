@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.dto.MusicSummaryDto;
 import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
@@ -35,7 +36,11 @@ public class RecoverOrchestrationService {
     public void allPlaylistsRecoveryOfAllUsers() {
 
         List<Users> users = userService.findAllUsers();
-        //List<Users> usersWithPlaylists = userService.findAllUsersWithPlaylists();
+        List<String> userIds = users.stream().map(Users::getUserId).toList();
+        List<Playlists> allPlaylists = playlistService.findAllPlaylistsByUserIds(userIds); // JOIN FETCH
+        Map<String, List<Playlists>> playlistsByUser = allPlaylists.stream().collect(
+                Collectors.groupingBy(playlist -> playlist.getUser().getUserId())          // N+1 발생 안 함 (위에서 join fetch 했으니)
+        );
 
         List<CompletableFuture<Void>> allUserFutures = new ArrayList<>();
 
@@ -54,19 +59,25 @@ public class RecoverOrchestrationService {
                         return; // continue
                     }
 
-                    List<Playlists> playListsSet = playlistService.findAllPlaylistsByUserId(userId);
+//                    List<Playlists> playListsSet = playlistService.findAllPlaylistsByUserId(userId);
+                    List<Playlists> playListsSet = playlistsByUser.getOrDefault(userId, Collections.emptyList()); // DB 조회가 아닌, 메모리 Map 에서 조회
                     // 1-1 해당 유저의 모든 Music을 "단 한 번의 쿼리"로 가져옴
-                    List<Music> allMusicForUser = musicService.findAllWithPlaylistByPlaylistIn(playListsSet);
+//                    List<Music> allMusicForUser = musicService.findAllWithPlaylistByPlaylistIn(playListsSet);
+                    List<MusicSummaryDto> allMusicForUser = musicService.findAllMusicSummaryByPlaylistIds(playListsSet);
                     // 1-2 Playlist ID별로 그룹화 (DB 부하 감소)
-                    Map<String, List<Music>> musicMapByPlaylistId = allMusicForUser.stream().collect(
-                            Collectors.groupingBy(music -> music.getPlaylist().getPlaylistId())
+//                    Map<String, List<Music>> musicMapByPlaylistId = allMusicForUser.stream().collect(
+//                            Collectors.groupingBy(music -> music.getPlaylist().getPlaylistId())
+//                    );
+                    Map<String, List<MusicSummaryDto>> musicMapByPlaylistId = allMusicForUser.stream().collect(
+                            Collectors.groupingBy(MusicSummaryDto::playlistId)
                     );
 
                     for (Playlists playlist : playListsSet) {
                         log.info("[playlistTitle: {}]", playlist.getPlaylistTitle());
+                        List<MusicSummaryDto> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
                         try {
                             // 1-3 미리 조회한 Music 목록을 파라미터로 전달
-                            List<Music> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
+//                            List<Music> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
                             youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken, musicForThisPlaylist);
                         } catch (QuotaExceededException ex) {
                             log.warn("[Quota Exceed EX at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), ex.getMessage());

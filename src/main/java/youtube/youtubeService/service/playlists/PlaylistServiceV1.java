@@ -44,6 +44,11 @@ public class PlaylistServiceV1 implements PlaylistService {
     }
 
     @Override
+    public List<Playlists> findAllPlaylistsByUserIds(List<String> userIds) {
+        return playlistRepository.findAllPlaylistsByUserIds(userIds);
+    }
+
+    @Override
     public void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds) {
         for (String deselectedPlaylist : deselectedPlaylistIds) {
             log.info("playlist({}) is deleted from DB", deselectedPlaylist);
@@ -118,7 +123,7 @@ public class PlaylistServiceV1 implements PlaylistService {
     }
 
     @Override
-    public Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist, List<Music> pureDbMusicList) throws IOException {
+    public Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException {
         String playlistId = playlist.getPlaylistId();
         log.info("[update playlist start: {}]", playlistId);
         List<PlaylistItem> pureApiPlaylistItems;
@@ -152,7 +157,8 @@ public class PlaylistServiceV1 implements PlaylistService {
         log.info("[deleted/private] video count : {}", privateDeletedVideoIds.size());
         // 5. 둘의 차이를 비교 → DB 반영
         Map<String, Long> apiCounts = pureApiVideoIds.stream().collect(Collectors.groupingBy(v -> v, Collectors.counting()));
-        Map<String, Long> dbCounts = pureDbMusicList.stream().collect(Collectors.groupingBy(Music::getVideoId, Collectors.counting()));
+//        Map<String, Long> dbCounts = pureDbMusicList.stream().collect(Collectors.groupingBy(Music::getVideoId, Collectors.counting()));
+        Map<String, Long> dbCounts = pureDbMusicList.stream().collect(Collectors.groupingBy(MusicSummaryDto::videoId, Collectors.counting()));
 
         Set<String> allVideoIds = new HashSet<>(); // 영상 개수가 중요하진 x, 둘을 모두 순회하기 위해 담는 것일 뿐임
         allVideoIds.addAll(apiCounts.keySet());
@@ -172,8 +178,10 @@ public class PlaylistServiceV1 implements PlaylistService {
             }
 
             if (toDeleteCount > 0 && !unlistedCountryVideoIds.contains(videoId) && !privateDeletedVideoIds.contains(videoId)) { // 삭제할 개수만큼만 제한 후 Music 객체에서 ID만 추출 각 ID를 사용하여 삭제
-                pureDbMusicList.stream().filter(m -> m.getVideoId().equals(videoId)).limit(toDeleteCount)
-                        .map(Music::getId).forEach(musicService::deleteById);
+//                pureDbMusicList.stream().filter(m -> m.getVideoId().equals(videoId)).limit(toDeleteCount)
+//                      .map(Music::getId).forEach(musicService::deleteById);
+                pureDbMusicList.stream().filter(m -> m.videoId().equals(videoId)).limit(toDeleteCount)
+                        .map(MusicSummaryDto::id).forEach(musicService::deleteById);
             }
         }
 

@@ -5,7 +5,10 @@ import com.google.api.services.youtube.model.Video;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
@@ -15,6 +18,8 @@ import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,13 +33,14 @@ public class MusicServiceV1 implements MusicService {
     private final MusicRepository musicRepository;
     private final SearchPolicy searchPolicy;
     private final YoutubeApiClient youtubeApiClient;
-
+    private final JdbcTemplate jdbcTemplate;
 
     public MusicServiceV1(MusicRepository musicRepository,
-                          @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, YoutubeApiClient youtubeApiClient) {
+                          @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, YoutubeApiClient youtubeApiClient, JdbcTemplate jdbcTemplate) {
         this.musicRepository = musicRepository;
         this.searchPolicy = searchPolicy;
         this.youtubeApiClient = youtubeApiClient;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
 //    @Override
@@ -62,16 +68,6 @@ public class MusicServiceV1 implements MusicService {
 
     @Override
     public void updateMusicWithReplacement(long pk, Music replacementMusic) {
-
-        /*Music musicToUpdate = musicRepository.findById(pk).orElseThrow(() -> new EntityNotFoundException("Music not found: " + videoIdToDelete));
-        log.info("Illegal videoId : {} at {}", musicToUpdate.getVideoId(), pk);
-
-        musicToUpdate.setVideoId(replacementMusic.getVideoId());
-        musicToUpdate.setVideoTitle(replacementMusic.getVideoTitle());
-        musicToUpdate.setVideoUploader(replacementMusic.getVideoUploader());
-        musicToUpdate.setVideoDescription(replacementMusic.getVideoDescription());
-        musicToUpdate.setVideoTags(replacementMusic.getVideoTags());
-        log.info("The music record update has been completed");*/
         musicRepository.updateMusicWithReplacement(pk, replacementMusic);
         log.info("The music record update has been completed");
     }
@@ -83,42 +79,41 @@ public class MusicServiceV1 implements MusicService {
 
     @Override
     public void saveSingleVideo(Video video, Playlists playlist) {
-        /*Music music = new Music();
-        music.setVideoId(video.getId());
-        music.setVideoTitle(video.getSnippet().getTitle());
-        music.setVideoUploader(video.getSnippet().getChannelTitle());
-        music.setVideoDescription(video.getSnippet().getDescription());
-        List<String> tags = video.getSnippet().getTags();
-        String joinedTags = (tags != null) ? String.join(",", tags) : null;
-        music.setVideoTags(joinedTags);
-        music.setPlaylist(playlist);
-
-        musicRepository.upsertMusic(music);*/
         musicRepository.upsertMusic(makeVideoToMusic(video, playlist));
     }
 
     @Override
     public void saveAllVideos(List<Video> legalVideos, Playlists playlist) {
-
-        /*List<Music> musicsToSave = new ArrayList<>();
-
-        for (Video video : legalVideos) {
-            Music music = new Music();
-            music.setVideoId(video.getId());
-            music.setVideoTitle(video.getSnippet().getTitle());
-            music.setVideoUploader(video.getSnippet().getChannelTitle());
-            music.setVideoDescription(video.getSnippet().getDescription());
-            List<String> tags = video.getSnippet().getTags();
-            String joinedTags = (tags != null) ? String.join(",", tags) : null;
-            music.setVideoTags(joinedTags);
-            music.setPlaylist(playlist);
-
-            musicsToSave.add(music);
-        }
-        musicRepository.saveAll(musicsToSave);*/
-        musicRepository.saveAll(legalVideos.stream()
+        // 1. Video 리스트를 Music 리스트로 변환
+        List<Music> musicsToSave = legalVideos.stream()
                 .map(video -> makeVideoToMusic(video, playlist))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        // 2. JdbcTemplate으로 bulk insert 실행
+        bulkInsertMusic(musicsToSave);
+    }
+
+    // JdbcTemplate 을 사용하는 새 메서드
+    public void bulkInsertMusic(List<Music> musics) {
+        String sql = "INSERT INTO music (video_id, video_title, video_uploader, video_description, video_tags, playlist_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?)";
+
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Music music = musics.get(i);
+                ps.setString(1, music.getVideoId());
+                ps.setString(2, music.getVideoTitle());
+                ps.setString(3, music.getVideoUploader());
+                ps.setString(4, music.getVideoDescription());
+                ps.setString(5, music.getVideoTags());
+                ps.setString(6, music.getPlaylist().getPlaylistId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return musics.size();
+            }
+        });
     }
 
     @Override
@@ -158,8 +153,56 @@ public class MusicServiceV1 implements MusicService {
     }
 
 }
+/** OG saveAllVideos
+ @Override
+ public void saveAllVideos(List<Video> legalVideos, Playlists playlist) {
 
+ //        List<Music> musicsToSave = new ArrayList<>();
+ //
+ //        for (Video video : legalVideos) {
+ //            Music music = new Music();
+ //            music.setVideoId(video.getId());
+ //            music.setVideoTitle(video.getSnippet().getTitle());
+ //            music.setVideoUploader(video.getSnippet().getChannelTitle());
+ //            music.setVideoDescription(video.getSnippet().getDescription());
+ //            List<String> tags = video.getSnippet().getTags();
+ //            String joinedTags = (tags != null) ? String.join(",", tags) : null;
+ //            music.setVideoTags(joinedTags);
+ //            music.setPlaylist(playlist);
+ //
+ //            musicsToSave.add(music);
+ //        }
+ //        musicRepository.saveAll(musicsToSave);
+ musicRepository.saveAll(legalVideos.stream()
+ .map(video -> makeVideoToMusic(video, playlist))
+ .collect(Collectors.toList()));
+ }
+ */
 /*
+saveSingle
+        Music music = new Music();
+        music.setVideoId(video.getId());
+        music.setVideoTitle(video.getSnippet().getTitle());
+        music.setVideoUploader(video.getSnippet().getChannelTitle());
+        music.setVideoDescription(video.getSnippet().getDescription());
+        List<String> tags = video.getSnippet().getTags();
+        String joinedTags = (tags != null) ? String.join(",", tags) : null;
+        music.setVideoTags(joinedTags);
+        music.setPlaylist(playlist);
+
+        musicRepository.upsertMusic(music);
+
+updateMusicWithReplacement
+    Music musicToUpdate = musicRepository.findById(pk).orElseThrow(() -> new EntityNotFoundException("Music not found: " + videoIdToDelete));
+            log.info("Illegal videoId : {} at {}", musicToUpdate.getVideoId(), pk);
+
+            musicToUpdate.setVideoId(replacementMusic.getVideoId());
+            musicToUpdate.setVideoTitle(replacementMusic.getVideoTitle());
+            musicToUpdate.setVideoUploader(replacementMusic.getVideoUploader());
+            musicToUpdate.setVideoDescription(replacementMusic.getVideoDescription());
+            musicToUpdate.setVideoTags(replacementMusic.getVideoTags());
+            log.info("The music record update has been completed");
+
 public void dBTrackAndRecoverPosition(String videoIdToDelete, Music replacementMusic, long pk) {
         musicRepository.dBTrackAndRecoverPosition(videoIdToDelete, replacementMusic, pk);
 }

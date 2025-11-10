@@ -51,7 +51,7 @@ public class PlaylistRegistrationUnitService {
         Users userRef = entityManager.getReference(Users.class, userId); // 불필요한 playlist 관련 select 쿼리 1회 막는 용(바로 persist)
         playlist.setUser(userRef);
         entityManager.persist(playlist);
-
+        entityManager.flush(); // bulk insert 용
         saveAllVideos(userId, playlist, countryCode);
     }
 

@@ -35,17 +35,16 @@ public class PlaylistRegistrationUnitService {
     private final MusicService musicService;
     private final QuotaService quotaService;
 
-
     @Transactional(REQUIRES_NEW)
-    public void saveSinglePlaylist(Playlists playlist, String userId, String playlistId, String countryCode) {
-        playlistRepository.save(playlist);
-        saveAllVideos(userId, playlistId, countryCode);
+    public void saveSinglePlaylist(Playlists playlist, String userId, String countryCode) {
+        Playlists managedPlaylist = playlistRepository.save(playlist);
+        saveAllVideos(userId, managedPlaylist, countryCode);
     }
 
-    private void saveAllVideos(String userId, String playlistId, String countryCode) {
+    private void saveAllVideos(String userId, Playlists playlist, String countryCode) {
         List<PlaylistItem> playlistItems;
         try {
-            playlistItems = fetchAllPlaylistItems(userId, playlistId);
+            playlistItems = fetchAllPlaylistItems(userId, playlist.getPlaylistId());
         } catch (IOException e) {
             log.info("The playlist is deleted in a very short amount of time");
             return; // 이미 진입전에 1 소모한걸 반영했으니 여기선 처리 필요 x
@@ -56,7 +55,7 @@ public class PlaylistRegistrationUnitService {
         VideoFilterResultPageDto videoFilterResult = fetchAllVideos(userId, videoIds, countryCode);
         List<Video> legalVideos = videoFilterResult.getLegalVideos();
         // 4. DB 에 최초 등록
-        Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+        // Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
         musicService.saveAllVideos(legalVideos, playlist);
     }
 
@@ -114,3 +113,29 @@ public class PlaylistRegistrationUnitService {
         return playlists;
     }
 }
+
+/** OGCODE BEFORE 1109
+ @Transactional(REQUIRES_NEW)
+ public void saveSinglePlaylist(Playlists playlist, String userId, String playlistId, String countryCode) {
+ playlistRepository.save(playlist);
+ saveAllVideos(userId, playlistId, countryCode);
+ }
+
+ private void saveAllVideos(String userId, String playlistId, String countryCode) {
+ List<PlaylistItem> playlistItems;
+ try {
+ playlistItems = fetchAllPlaylistItems(userId, playlistId);
+ } catch (IOException e) {
+ log.info("The playlist is deleted in a very short amount of time");
+ return; // 이미 진입전에 1 소모한걸 반영했으니 여기선 처리 필요 x
+ }
+ // 2. 검색할 비디오 ID 리스트 만들기
+ List<String> videoIds = playlistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
+ // 3. 페이지네이션으로 정상 음악만 세부사항 필터링 해오기
+ VideoFilterResultPageDto videoFilterResult = fetchAllVideos(userId, videoIds, countryCode);
+ List<Video> legalVideos = videoFilterResult.getLegalVideos();
+ // 4. DB 에 최초 등록
+ Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+ musicService.saveAllVideos(legalVideos, playlist);
+ }
+ */

@@ -17,10 +17,9 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
 
     private final SdjPlaylistRepository repository;
 
-
     @Override
-    public void save(Playlists playlist) {
-        repository.save(playlist);
+    public Playlists save(Playlists playlist) {
+        return repository.save(playlist);
     }
 
     @Override
@@ -34,8 +33,8 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
     }
 
     @Override
-    public void deletePlaylistByPlaylistId(String playlistId) {
-        repository.deleteById(playlistId);
+    public void deleteAllByPlaylistIdsIn(List<String> deselectedPlaylistIds) {
+        repository.deleteAllByPlaylistIdsIn(deselectedPlaylistIds);
     }
 
     @Override
@@ -43,3 +42,13 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
         return repository.findAllByUserIdsWithUser(userIds);
     }
 }
+
+    /*@Override
+    public void save(Playlists playlist) {
+        repository.save(playlist);
+    }
+     @Override
+    public void deletePlaylistByPlaylistId(String playlistId) {
+        repository.deleteById(playlistId); 밑으로 대체
+    }
+    */

@@ -48,12 +48,20 @@ public class PlaylistServiceV1 implements PlaylistService {
         return playlistRepository.findAllPlaylistsByUserIds(userIds);
     }
 
+//    @Override
+//    public void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds) {
+//        for (String deselectedPlaylist : deselectedPlaylistIds) {
+//            log.info("playlist({}) is deleted from DB", deselectedPlaylist);
+//            playlistRepository.deletePlaylistByPlaylistId(deselectedPlaylist);
+//        }
+//    }
     @Override
     public void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds) {
-        for (String deselectedPlaylist : deselectedPlaylistIds) {
-            log.info("playlist({}) is deleted from DB", deselectedPlaylist);
-            playlistRepository.deletePlaylistByPlaylistId(deselectedPlaylist);
+        if (deselectedPlaylistIds == null || deselectedPlaylistIds.isEmpty()) {
+            return;
         }
+        playlistRepository.deleteAllByPlaylistIdsIn(deselectedPlaylistIds);
+        log.info("Deletion requested for {} playlists.", deselectedPlaylistIds.size());
     }
 
     @Override
@@ -108,7 +116,7 @@ public class PlaylistServiceV1 implements PlaylistService {
             playlist.setUser(user);
             // 3.1 Playlist 객체를 DB에 저장
             try {
-                playlistRegistrationUnitService.saveSinglePlaylist(playlist, userId, dto.getId(), countryCode);
+                playlistRegistrationUnitService.saveSinglePlaylist(playlist, userId, countryCode);
             } catch (QuotaExceededException ex) {
                 log.warn("[Quota Exceeded During Registration]: {}", playlist.getPlaylistTitle());
                 log.info("[Aborted] Registration Result: {}/{}", succeedPlaylistCount, selectedPlaylistsDto.size());

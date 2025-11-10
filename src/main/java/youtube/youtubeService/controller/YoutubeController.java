@@ -66,7 +66,6 @@ public class YoutubeController {
 
     @PostMapping("/playlist/register")
     public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, RedirectAttributes redirectAttributes) {
-        // log.info("[controller]: {}, {}", request.getSelectedPlaylistsJson(), request.getDeselectedPlaylistIds().size());
         PlaylistRegistrationResultDto dto = playlistService.registerPlaylists(request);
         redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute에 담아서 리다이렉트 시 전달
         return "redirect:/welcome";

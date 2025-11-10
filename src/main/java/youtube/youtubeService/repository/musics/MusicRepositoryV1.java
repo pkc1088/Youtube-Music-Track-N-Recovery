@@ -26,6 +26,7 @@ public class MusicRepositoryV1 implements MusicRepository{
 //        log.info("[Fetch Join Called]");
 //        return repository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
 //    }
+
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
         log.info("[Summary of All Music of All Playlists of This User is Called]");
@@ -52,7 +53,7 @@ public class MusicRepositoryV1 implements MusicRepository{
     }
 
     public void saveAll(List<Music> musicsToSave) {
-        repository.saveAll(musicsToSave);
+        repository.saveAll(musicsToSave); // repository.saveAllAndFlush(musicsToSave);
     }
 
     public void updateMusicWithReplacement(long pk, Music replacementMusic) {

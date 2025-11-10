@@ -135,7 +135,7 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void LazyTest() {
         String userId = "101758050105729632425";
-        Playlists playlistParam = playlistService.findAllPlaylistsByUserId(userId).get(0);
+        //Playlists playlistParam = playlistService.findAllPlaylistsByUserId(userId).get(0);
 
         log.info("auto scheduler activated");
 
@@ -174,14 +174,14 @@ public class ManagementScheduler {
 //        log.info("[START] findByUserId");
 
         log.info("[START] playlistService.getPlaylistsByUserId(userId);");
-        List<Playlists> playlists = playlistService.findAllPlaylistsByUserId(userId); // findByUser_UserId (query : 2회)
-        for (Playlists p : playlists) {
-            log.info(p.getPlaylistTitle());
-            Users user = p.getUser();
-            log.info("ususu");
-        }
-        log.info("playlists size : {}", playlists.size());
-        log.info("[DONE] playlistService.getPlaylistsByUserId(userId);");
+//        List<Playlists> playlists = playlistService.findAllPlaylistsByUserId(userId); // findByUser_UserId (query : 2회)
+//        for (Playlists p : playlists) {
+//            log.info(p.getPlaylistTitle());
+//            Users user = p.getUser();
+//            log.info("ususu");
+//        }
+//        log.info("playlists size : {}", playlists.size());
+//        log.info("[DONE] playlistService.getPlaylistsByUserId(userId);");
 //
 //        log.info("[START] musicService.findAllMusicByPlaylistId(playlistId)");
 //        List<Music> musics = musicService.findAllMusicByPlaylistId(playlistId); // findByPlaylist_PlaylistId (query : 2회)

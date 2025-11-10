@@ -9,15 +9,17 @@ import java.util.Map;
 
 public interface PlaylistService {
 
-    List<Playlists> findAllPlaylistsByUserId(String userId);
+
 
     List<Playlists> findAllPlaylistsByUserIds(List<String> userIds);
     Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException;
 
-    void removePlaylistsFromDB(String userId, List<String> deselectedPlaylistIds);
+    void removePlaylistsFromDB(List<String> deselectedPlaylistIds);
 
-//    void registerPlaylists(PlaylistRegisterRequestDto request);
     PlaylistRegistrationResultDto registerPlaylists(PlaylistRegisterRequestDto request);
 
     UserRegisterPlaylistsResponseDto userRegisterPlaylists(String userId) throws IOException;
 }
+
+//    List<Playlists> findAllPlaylistsByUserId(String userId);
+//    void registerPlaylists(PlaylistRegisterRequestDto request);

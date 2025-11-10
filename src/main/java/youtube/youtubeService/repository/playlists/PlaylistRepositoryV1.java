@@ -2,6 +2,7 @@ package youtube.youtubeService.repository.playlists;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -18,18 +19,8 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
     private final SdjPlaylistRepository repository;
 
     @Override
-    public Playlists save(Playlists playlist) {
-        return repository.save(playlist);
-    }
-
-    @Override
     public Playlists findByPlaylistId(String playlistId) {
         return repository.findByPlaylistId(playlistId);
-    }
-
-    @Override
-    public List<Playlists> findAllPlaylistsByUserId(String userId) {
-        return repository.findByUser_UserId(userId);
     }
 
     @Override
@@ -41,6 +32,19 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
     public List<Playlists> findAllPlaylistsByUserIds(List<String> userIds) {
         return repository.findAllByUserIdsWithUser(userIds);
     }
+    @Override
+    public List<Playlists> findAllByUserIdWithUserFetch(String userId) {
+        return repository.findAllByUserIdWithUserFetch(userId);
+    }
+
+    // @Override
+    // public Playlists save(Playlists playlist) {
+    //    return repository.save(playlist);
+    // }
+    //    @Override
+    //    public List<Playlists> findAllPlaylistsByUserId(String userId) {
+    //        return repository.findByUser_UserId(userId);
+    //    }
 }
 
     /*@Override

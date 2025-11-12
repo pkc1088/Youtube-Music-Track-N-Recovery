@@ -23,6 +23,7 @@ import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.dto.QuotaPlaylistItemPageDto;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
@@ -124,12 +125,18 @@ public class ManagementScheduler {
 
     }
 
-    // @Scheduled(fixedRate = 50000, initialDelayString = "1000")
-    public void deleteTest() {
-        String userId = "112735690496635663877";
-        String refreshToken = "abc";
+//     @Scheduled(fixedRate = 50000, initialDelayString = "1000")
+    public void deleteTest() throws IOException {
+        String userId = "111103817226176952211";
+        String refreshToken = "";
         String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
-        youtubeApiClient.deleteFromActualPlaylist(accessToken, "asdasd");
+        String playlistId = "PLP2GOU1oCmVCJYbPqGqald-598Wzybumx";
+
+        QuotaPlaylistItemPageDto dto = youtubeApiClient.fetchPlaylistItemPage(playlistId, null);
+        PlaylistItem pi = dto.getAllPlaylists().get(0);
+        String singlePlaylistItemId = pi.getId();
+
+        youtubeApiClient.deleteFromActualPlaylist(accessToken, singlePlaylistItemId);
     }
 
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")

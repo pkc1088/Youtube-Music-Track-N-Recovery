@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -32,13 +33,19 @@ public class YoutubeController {
     private final PlaylistService playlistService;
     private final ActionLogService actionLogService;
 
-    @GetMapping("/denied")
+    @GetMapping("/channelNotFound")
+    public String channelNotFound() {
+        return "channelNotFound";
+    }
+
+    @GetMapping("/checkboxNotActivated")
     public String permissionDenied() {
-        return "retry"; // session 끊는 행위 필요함
+        return "checkboxNotActivated";
     }
 
     @GetMapping("/bad-user")
-    public String quotaExceeded() { // revoke 는 핸들러에서 이미 처리함. 단순 페이지 제공임
+    public String quotaExceeded() {
+        log.info("[A Bad User - Quota Thief]");
         return "quota-exceeded";
     }
 
@@ -58,6 +65,7 @@ public class YoutubeController {
     }
 
     @GetMapping("/playlist/{userId}")
+    @PreAuthorize("#userId == authentication.principal.name")
     public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
         UserRegisterPlaylistsResponseDto dto = playlistService.userRegisterPlaylists(userId);
         model.addAttribute("dto", dto);
@@ -77,6 +85,7 @@ public class YoutubeController {
     }
 
     @GetMapping("/recovery/{userId}")
+    @PreAuthorize("#userId == authentication.principal.name")
     public String searchRecoveryHistory(@PathVariable String userId, Model model) {
         ActionLogDto dto = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
         model.addAttribute("dto", dto);

@@ -36,7 +36,7 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/js/**", "/images/**", "/css/**", "/", "/api/scheduler/**", "/google9cce108361f8ecd7.html",
-                                    "/privacy-policy.html", "/terms-of-service.html", "/retry.html")
+                                    "/privacy-policy.html", "/terms-of-service.html", "/checkboxNotActivated", "/channelNotFound", "/bad-user")
                     .permitAll()
                     .anyRequest().authenticated()   // 해당 경로 외 모든 요청은 인증 필요, 로그인되지 않은 사용자라면 / 으로 리다이렉트
             )

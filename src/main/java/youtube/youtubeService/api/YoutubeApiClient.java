@@ -1,5 +1,6 @@
 package youtube.youtubeService.api;
 
+import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -14,6 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.dto.*;
+import youtube.youtubeService.exception.ChannelNotFoundException;
+import youtube.youtubeService.exception.CheckBoxNotActivatedException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -49,24 +52,25 @@ public class YoutubeApiClient {
         return video;
     }
 
-    public String fetchChannelId(String accessToken) throws IOException, GeneralSecurityException {
-        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-        YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
-                .setApplicationName("youtube-channel-info")
-                .build();
+    public String fetchChannelId(String accessToken) throws IOException, GeneralSecurityException, ChannelNotFoundException {
+        YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), new GoogleCredential().setAccessToken(accessToken))
+                                        .setApplicationName("youtube-channel-info").build();
 
-        ChannelListResponse response;
         try {
-            response = youtube.channels().list(Collections.singletonList("snippet")).setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
-        } catch (GoogleJsonResponseException e) {
-            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
-            RestTemplate restTemplate = new RestTemplate();
-            restTemplate.postForEntity(revokeUrl, null, String.class);
-            throw new IOException("Unauthorized 'youtube.force-ssl' or No channel found.. so revoked");
-        }
+            ChannelListResponse response = youtube.channels().list(Collections.singletonList("snippet")).setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
 
-        Channel channel = response.getItems().get(0);
-        return channel.getId();
+            List<Channel> channels = response.getItems();
+
+            if (channels == null || channels.isEmpty()) {
+                throw new ChannelNotFoundException("[channel not found]");
+            }
+
+            return channels.get(0).getId();
+
+        } catch (GoogleJsonResponseException e) {
+            log.warn("Google API error while retrieving fetchChannelId : {}", e.getDetails().getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -79,13 +83,19 @@ public class YoutubeApiClient {
         request.setChannelId(channelId);
         request.setMaxResults(50L);
         request.setPageToken(pageToken);
-        PlaylistListResponse response = request.execute();
 
-        List<Playlist> PlaylistsBatch = new ArrayList<>(response.getItems());
-        String nextPageToken = response.getNextPageToken();
-        // log.info("[getApiPlaylistsByPage] - NextPageToken:{}", nextPageToken);
+        try {
+            PlaylistListResponse response = request.execute();
 
-        return new QuotaApiPlaylistsPageDto(PlaylistsBatch, nextPageToken);
+            List<Playlist> PlaylistsBatch = new ArrayList<>(response.getItems());
+            String nextPageToken = response.getNextPageToken();
+
+            return new QuotaApiPlaylistsPageDto(PlaylistsBatch, nextPageToken);
+        } catch (GoogleJsonResponseException e) {
+            log.warn("Google API error while retrieving fetchPlaylistPage : {}", e.getDetails().getMessage());
+            throw e;
+        }
+
     }
 
     /**
@@ -183,7 +193,10 @@ public class YoutubeApiClient {
 
         } catch (GoogleJsonResponseException e) {
             int statusCode = e.getStatusCode();
-            String reason = e.getDetails().getErrors().get(0).getReason();
+            String reason = "Unknown error";
+            if (e.getDetails() != null && e.getDetails().getErrors() != null && !e.getDetails().getErrors().isEmpty()) {
+                reason = e.getDetails().getErrors().get(0).getReason();
+            }
 
             log.warn("YouTube API Error: statusCode={}, reason={}", statusCode, reason);
 
@@ -219,7 +232,10 @@ public class YoutubeApiClient {
 
         } catch (GoogleJsonResponseException e) {
             int statusCode = e.getStatusCode();
-            String reason = e.getDetails().getErrors().get(0).getReason();
+            String reason = "Unknown error";
+            if (e.getDetails() != null && e.getDetails().getErrors() != null && !e.getDetails().getErrors().isEmpty()) {
+                reason = e.getDetails().getErrors().get(0).getReason();
+            }
 
             log.warn("YouTube API Error: statusCode={}, reason={}", statusCode, reason);
 

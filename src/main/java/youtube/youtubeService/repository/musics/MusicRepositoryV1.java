@@ -29,7 +29,7 @@ public class MusicRepositoryV1 implements MusicRepository{
 
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
-        log.info("[Summary of All Music of All Playlists of This User is Called]");
+//        log.info("[Summary of All Music of All Playlists of This User is Called]");
         return repository.findAllMusicSummaryByPlaylistIds(playListsSet);
     }
 

@@ -31,6 +31,7 @@ public class YoutubeApiClient {
     @Value("${youtube.api.key}")
     private String apiKey;
     private final YouTube youtube;
+    private static final String FALLBACK_VIDEO_ID = "t3M2oxdoWuI";
 
     public YoutubeApiClient() {
         youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
@@ -38,18 +39,27 @@ public class YoutubeApiClient {
 
     public Video fetchSingleVideo(String videoId) {
 
-        Video video = null;
         try {
             YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails"));
             request.setKey(apiKey);
             request.setId(Collections.singletonList(videoId));
-            video = request.execute().getItems().get(0);
-            //log.info("Found the video with 'Single Video Search'");
+            VideoListResponse response = request.execute();
+
+            if (response != null && response.getItems() != null && !response.getItems().isEmpty()) {
+                return response.getItems().get(0);
+            }
+
+            if (response == null || response.getItems() == null) {
+                log.warn("VideoListResponse or getItems() was null for {}. Returning fallback.", videoId);
+            } else {
+                log.warn("Video not found by ID (items list was empty): {}. Returning fallback.", videoId);
+            }
+
         } catch (IOException e) {
-            log.info("Cannot find Single(Duplicated) video with this VideoId({})", videoId);
+            log.warn("Failed to fetch videoId {}. Returning Fall Back Video.", videoId);
         }
 
-        return video;
+        return createPlaceholderVideo("This video was supposed to be [" + videoId + "]");
     }
 
     public String fetchChannelId(String accessToken) throws IOException, GeneralSecurityException, ChannelNotFoundException {
@@ -259,14 +269,41 @@ public class YoutubeApiClient {
         return true;
     }
 
-    public SearchResult searchFromYoutube(String query) throws IOException {
-        YouTube.Search.List search = youtube.search().list(Collections.singletonList("id, snippet"));
-        search.setKey(apiKey);
-        search.setQ(query);
+    public SearchResult searchFromYoutube(String query) {
+        try {
+            YouTube.Search.List search = youtube.search().list(Collections.singletonList("id, snippet"));
+            search.setKey(apiKey);
+            search.setQ(query);
+            search.setType(Collections.singletonList("video")); // 비디오만 검색 (추가사항)
 
-        SearchListResponse searchResponse = search.execute();                   // 검색 요청 실행 및 응답 받아오기
-        List<SearchResult> searchResultList = searchResponse.getItems();        // 검색 결과에서 동영상 목록 가져오기
-        return searchResultList.get(0); // 검색 결과 중 첫 번째 동영상 정보 가져오기
+            SearchListResponse searchResponse = search.execute();
+            // 1. 리스트가 null 이 아니고 비어있지 않은지 확인
+            if (searchResponse != null && searchResponse.getItems() != null && !searchResponse.getItems().isEmpty()) {
+                return searchResponse.getItems().get(0);
+            }
+            // 2. (실패 1) 검색 결과가 없는 경우
+            log.warn("YouTube API Search for query '{}' yielded no results. Returning placeholder.", query);
+            return null;
+
+        } catch (Exception e) {
+            // 3. (실패 2) API 호출 자체를 실패한 경우
+            log.warn("YouTube API Search for query '{}' failed: {}. Returning placeholder.", query, e.getMessage());
+            return null;
+        }
+    }
+
+    public Video createPlaceholderVideo(String comment) {
+        Video placeholder = new Video();
+        placeholder.setId(FALLBACK_VIDEO_ID);
+        placeholder.setKind("youtube#video");
+
+        VideoSnippet snippet = new VideoSnippet();
+        snippet.setTitle("FixMyPlaylist - 임시 대체 영상");
+        snippet.setChannelTitle("pkc1088");
+        snippet.setDescription(comment);
+        placeholder.setSnippet(snippet);
+
+        return placeholder;
     }
 
     public void updateVideoPrivacyStatus(String accessToken, String videoId, String changedStatus) {

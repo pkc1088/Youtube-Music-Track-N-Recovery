@@ -17,19 +17,8 @@ public class MusicRepositoryV1 implements MusicRepository{
 
     private final SdjMusicRepository repository;
 
-//    @Override
-//    public List<Music> findAllMusicByPlaylistId(String playlistId) {
-//        return repository.findByPlaylist_PlaylistId(playlistId); 밑으로 대체
-//    }
-//    @Override
-//    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
-//        log.info("[Fetch Join Called]");
-//        return repository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
-//    }
-
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
-//        log.info("[Summary of All Music of All Playlists of This User is Called]");
         return repository.findAllMusicSummaryByPlaylistIds(playListsSet);
     }
 
@@ -44,16 +33,13 @@ public class MusicRepositoryV1 implements MusicRepository{
     }
 
     @Override
+    public void deleteAllByIdInBatch(List<Long> pks) {
+        repository.deleteAllByIdInBatch(pks);
+    }
+
+    @Override
     public List<Music> getMusicListFromDBThruMusicId(String videoId, String playlistId) {
         return repository.findAllByVideoIdAndPlaylistId(videoId, playlistId);
-    }
-
-    public Optional<Music> findById(long id) {
-        return repository.findById(id);
-    }
-
-    public void saveAll(List<Music> musicsToSave) {
-        repository.saveAll(musicsToSave); // repository.saveAllAndFlush(musicsToSave);
     }
 
     public void updateMusicWithReplacement(long pk, Music replacementMusic) {
@@ -61,24 +47,19 @@ public class MusicRepositoryV1 implements MusicRepository{
     }
 }
 
-/*
-
 //    @Override
-//    public void dBTrackAndRecoverPosition(String videoIdToDelete, Music videoToRecover, Long pk) {
-//
-//        Optional<Music> optionalMusic = repository.findById(pk);
-//        if (optionalMusic.isPresent()) {
-//            Music musicToUpdate = optionalMusic.get();
-//            log.info("Illegal videoId : {} at {}", musicToUpdate.getVideoId(), pk);
-//            musicToUpdate.setVideoId(videoToRecover.getVideoId());// videoToRecover 정보로 엔티티 업데이트
-//            musicToUpdate.setVideoTitle(videoToRecover.getVideoTitle());
-//            musicToUpdate.setVideoUploader(videoToRecover.getVideoUploader());
-//            musicToUpdate.setVideoDescription(videoToRecover.getVideoDescription());
-//            musicToUpdate.setVideoTags(videoToRecover.getVideoTags());
-//            log.info("The music record update has been completed");
-//        } else {
-//            throw new RuntimeException("DB update error: " + videoIdToDelete);
-//        }
+//    public List<Music> findAllMusicByPlaylistId(String playlistId) {
+//        return repository.findByPlaylist_PlaylistId(playlistId); 밑으로 대체
 //    }
-
- */
+//    @Override
+//    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
+//        log.info("[Fetch Join Called]");
+//        return repository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
+//    }
+//    public Optional<Music> findById(long id) {
+//        return repository.findById(id);
+//    }
+//
+//    public void saveAll(List<Music> musicsToSave) {
+//        repository.saveAll(musicsToSave); // repository.saveAllAndFlush(musicsToSave);
+//    }

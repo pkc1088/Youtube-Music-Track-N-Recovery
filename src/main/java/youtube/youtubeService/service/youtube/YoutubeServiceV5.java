@@ -140,7 +140,7 @@ public class YoutubeServiceV5 implements YoutubeService {
             reservedQuotaBackedUp += cost;
             outboxService.outboxInsert(actionType, accessToken, userId, playlistId, videoId, playlistItemIdToDelete);
         }
-        // log.info("[Quota Reserve]: {}, [Reserved So Far]: {}", cost, reservedQuotaBackedUp);
+
         return reservedQuotaBackedUp;
     }
 }

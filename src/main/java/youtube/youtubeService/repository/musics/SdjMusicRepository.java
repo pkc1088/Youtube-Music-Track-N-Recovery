@@ -13,10 +13,6 @@ import java.util.Optional;
 
 public interface SdjMusicRepository extends JpaRepository<Music, Long> {
 
-    // List<Music> findByPlaylist_PlaylistId(String playlistId); 밑으로 대체
-
-    // @Query("SELECT m FROM Music m JOIN FETCH m.playlist WHERE m.playlist IN :playlists")
-    // List<Music> findAllWithPlaylistByPlaylistIn(@Param("playlists") List<Playlists> playlists); 이것도 대체됨
 
     @Query("""
         SELECT new youtube.youtubeService.dto.MusicSummaryDto(
@@ -40,3 +36,8 @@ public interface SdjMusicRepository extends JpaRepository<Music, Long> {
             "WHERE m.id = :pk")
     void updateMusicWithReplacement(@Param("pk") Long pk, @Param("music") Music music);
 }
+
+// List<Music> findByPlaylist_PlaylistId(String playlistId); 밑으로 대체
+
+// @Query("SELECT m FROM Music m JOIN FETCH m.playlist WHERE m.playlist IN :playlists")
+// List<Music> findAllWithPlaylistByPlaylistIn(@Param("playlists") List<Playlists> playlists); 이것도 대체됨

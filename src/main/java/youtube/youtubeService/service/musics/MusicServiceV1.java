@@ -44,14 +44,6 @@ public class MusicServiceV1 implements MusicService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-//    @Override
-//    public List<Music> findAllMusicByPlaylistId(String playlistId) {
-//        return musicRepository.findAllMusicByPlaylistId(playlistId); 밑으로 대체
-//    }
-//    @Override
-//    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
-//        return musicRepository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
-//    }
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
         return musicRepository.findAllMusicSummaryByPlaylistIds(playListsSet);
@@ -60,6 +52,11 @@ public class MusicServiceV1 implements MusicService {
     @Override
     public void deleteById(Long pk) {
         musicRepository.deleteById(pk);
+    }
+
+    @Override
+    public void deleteAllByIdInBatch(List<Long> pks) {
+        musicRepository.deleteAllByIdInBatch(pks);
     }
 
     @Override
@@ -76,11 +73,6 @@ public class MusicServiceV1 implements MusicService {
     @Override
     public void upsertMusic(Music music) {
         musicRepository.upsertMusic(music);
-    }
-
-    @Override
-    public void saveSingleVideo(Video video, Playlists playlist) {
-        musicRepository.upsertMusic(makeVideoToMusic(video, playlist));
     }
 
     @Override
@@ -171,7 +163,18 @@ public class MusicServiceV1 implements MusicService {
 
 }
 
-
+//    @Override
+//    public List<Music> findAllMusicByPlaylistId(String playlistId) {
+//        return musicRepository.findAllMusicByPlaylistId(playlistId); 밑으로 대체
+//    }
+//    @Override
+//    public List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet) {
+//        return musicRepository.findAllWithPlaylistByPlaylistIn(playListsSet); 이것도 밑으로 대체됨
+//    }
+//    @Override
+//    public void saveSingleVideo(Video video, Playlists playlist) {
+//        musicRepository.upsertMusic(makeVideoToMusic(video, playlist));
+//    }
 /** OG Before 251115
 
  @Slf4j

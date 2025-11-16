@@ -16,10 +16,10 @@ public interface ActionLogRepository extends JpaRepository<ActionLog, Long> {
 
     List<ActionLog> findByUserIdOrderByCreatedAtDesc(String userId);
 
-    void deleteByUserId(String userId);
-
     @Query(value = "SELECT * FROM action_log " + "WHERE action_type = :actionType " + "AND target_video_id = :targetVideoId " +
         "AND created_at >= :today " + "ORDER BY created_at DESC LIMIT 1", nativeQuery = true)
     Optional<ActionLog> findTodayRecoverLog(@Param("actionType") ActionLog.ActionType actionType,
                                             @Param("targetVideoId") String targetVideoId, @Param("today") LocalDateTime today);
 }
+
+//     void deleteByUserId(String userId);

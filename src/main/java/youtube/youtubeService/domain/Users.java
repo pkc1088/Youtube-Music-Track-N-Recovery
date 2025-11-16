@@ -31,5 +31,3 @@ public class Users {
 
 }
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) // 이 필드는 Playlists 의 Users user 가 주인임
-//    private Set<Playlists> playlists;

@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface MusicService {
 
-    //List<Music> findAllMusicByPlaylistId(String playlistId); 밑으로 대체
-    //List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet); 이것도 밑으로 대체됨
     List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet);
     void deleteById(Long pk);
+
+    void deleteAllByIdInBatch(List<Long> ids);
 
     List<Music> getMusicListFromDBThruMusicId(String videoIdToDelete, String playlistId);
 
@@ -20,12 +20,14 @@ public interface MusicService {
 
     void upsertMusic(Music music);
 
-    void saveSingleVideo(Video video, Playlists playlist);
-
     void saveAllVideos(List<Video> legalVideos, Playlists playlist);
 
-//    Music searchVideoToReplace(Music musicToSearch, Playlists playlist);
     Video searchVideoToReplace(Music musicToSearch);
 
     Music makeVideoToMusic(Video replacementVideo, Playlists playlist);
 }
+
+//    List<Music> findAllMusicByPlaylistId(String playlistId); 밑으로 대체
+//    List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet); 이것도 밑으로 대체됨
+//    void saveSingleVideo(Video video, Playlists playlist);
+//    Music searchVideoToReplace(Music musicToSearch, Playlists playlist);

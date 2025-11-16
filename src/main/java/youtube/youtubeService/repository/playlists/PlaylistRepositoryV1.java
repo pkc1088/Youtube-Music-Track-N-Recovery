@@ -25,7 +25,7 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
 
     @Override
     public void deleteAllByPlaylistIdsIn(List<String> deselectedPlaylistIds) {
-        repository.deleteAllByPlaylistIdsIn(deselectedPlaylistIds);
+        repository.deleteAllByIdInBatch(deselectedPlaylistIds); // repository.deleteAllByPlaylistIdsIn(deselectedPlaylistIds);
     }
 
     @Override

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.Video;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +34,6 @@ public class PlaylistServiceV1 implements PlaylistService {
     private final MusicService musicService;
     private final PlaylistRegistrationUnitService playlistRegistrationUnitService;
     private final ObjectMapper objectMapper;
-
 
     @Override
     public List<Playlists> findAllPlaylistsByUserIds(List<String> userIds) {
@@ -162,6 +163,9 @@ public class PlaylistServiceV1 implements PlaylistService {
         allVideoIds.addAll(apiCounts.keySet());
         allVideoIds.addAll(dbCounts.keySet());
 
+        List<Video> videosToInsert = new ArrayList<>();
+        List<Long> videosToDelete = new ArrayList<>();
+
         for (String videoId : allVideoIds) {
 
             long apiCount = apiCounts.getOrDefault(videoId, 0L); //2
@@ -172,13 +176,23 @@ public class PlaylistServiceV1 implements PlaylistService {
 
             if (toInsertCount > 0 && legalVideoIds.contains(videoId)) { // toInsertCount 만큼 DBAddAction 을 반복
                 legalVideos.stream().filter(v -> v.getId().equals(videoId)).findFirst()
-                        .ifPresent(video -> IntStream.range(0, (int) toInsertCount).forEach(i -> musicService.saveSingleVideo(video, playlist)));
+                        .ifPresent(video -> IntStream.range(0, (int) toInsertCount).forEach(i -> videosToInsert.add(video)));
             }
 
             if (toDeleteCount > 0 && !unlistedCountryVideoIds.contains(videoId) && !privateDeletedVideoIds.contains(videoId)) { // 삭제할 개수만큼만 제한 후 Music 객체에서 ID만 추출 각 ID를 사용하여 삭제
                 pureDbMusicList.stream().filter(m -> m.videoId().equals(videoId)).limit(toDeleteCount)
-                        .map(MusicSummaryDto::id).forEach(musicService::deleteById);
+                        .map(MusicSummaryDto::id).forEach(videosToDelete::add); // pk 추가임
             }
+        }
+
+        if (!videosToInsert.isEmpty()) {
+            musicService.saveAllVideos(videosToInsert, playlist);
+            log.info("[Bulk inserted {} musics into {}]", videosToInsert.size(), playlistId);
+        }
+
+        if (!videosToDelete.isEmpty()) {
+            musicService.deleteAllByIdInBatch(videosToDelete);
+            log.info("[Bulk deleted {} musics from {}]", videosToDelete.size(), playlistId);
         }
 
         Map<String, List<String>> illegalVideos = new HashMap<>();

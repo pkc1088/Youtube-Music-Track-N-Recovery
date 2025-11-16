@@ -116,19 +116,19 @@ public class OutboxEventHandler {
             log.info("[Key-{}] 기다릴 작업이 없습니다.", userKey);
             return;
         }
-        // 2. 리스트의 "현재 스냅샷"을 복사. currentTasks 가 CopyOnWriteArrayList 이므로, 이 스냅샷 생성(new ArrayList<>) 중에 'whenComplete' 스레드가 'remove' 를 해도 충돌하지 않습니다.
+        // 2. 리스트의 "현재 스냅샷"을 복사. currentTasks 가 CopyOnWriteArrayList 이므로, 이 스냅샷 생성(new ArrayList<>) 중에 'whenComplete' 스레드가 'remove' 를 해도 충돌 X
         List<CompletableFuture<Void>> tasksToWaitFor = new ArrayList<>(currentTasks);
-        if (tasksToWaitFor.isEmpty()) { // (스냅샷을 만드는 그 짧은 순간에 모든 작업이 완료되어 remove 됐을 경우)
+        if (tasksToWaitFor.isEmpty()) { // 스냅샷을 만드는 그 짧은 순간에 모든 작업이 완료되어 remove 됐을 경우
             log.info("[Key-{}] (스냅샷) 기다릴 작업이 없습니다.", userKey);
             return;
         }
 
         log.info("[Key-{}] {}개의 보류 중인 작업 완료를 기다립니다...", userKey, tasksToWaitFor.size());
         try {
-            // 복사본(스냅샷)에 대해서만 join()을 수행합니다.
+            // 복사본(스냅샷)에 대해서만 join()을 수행
             CompletableFuture.allOf(tasksToWaitFor.toArray(new CompletableFuture[0])).join();
             log.info("[Key-{}] 스냅샷의 모든 작업 완료됨.", userKey);
-            // 참고: 이 메서드는 리스트나 맵에서 아무것도 'clear'하지 않습니다. 각 Future가 whenComplete 콜백을 통해 스스로를 리스트에서 제거하기 때문입니다.
+            // 이 메서드는 리스트나 맵에서 아무것도 'clear' 하지 X. 각 Future 가 whenComplete 콜백을 통해 스스로를 리스트에서 제거하기 때문
         } catch (Exception e) {
             log.error("[Key-{}] 작업 대기 중 예외 발생: {}", userKey, e.getMessage(), e);
         }

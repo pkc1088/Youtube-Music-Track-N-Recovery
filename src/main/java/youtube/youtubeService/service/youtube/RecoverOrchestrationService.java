@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.dto.MusicSummaryDto;
+import youtube.youtubeService.dto.PlaylistRecoveryPlanDto;
+import youtube.youtubeService.exception.NoPlaylistFoundException;
 import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
@@ -29,9 +30,10 @@ public class RecoverOrchestrationService {
     private final UserService userService;
     private final PlaylistService playlistService;
     private final MusicService musicService;
-    private final YoutubeService youtubeService;
     private final OutboxEventHandler outboxEventHandler;
-    @Qualifier("userExecutor") private final Executor userExecutor;
+    private final RecoveryPlanService recoveryPlanService;
+    private final RecoveryExecuteService recoveryExecuteService;
+    private final Executor userExecutor;
 
     public void allPlaylistsRecoveryOfAllUsers() {
 
@@ -56,18 +58,13 @@ public class RecoverOrchestrationService {
 
                     if (accessToken.equals("")) {
                         log.info("abort scheduling bc user left");
-                        return; // continue
+                        return;
                     }
 
-//                    List<Playlists> playListsSet = playlistService.findAllPlaylistsByUserId(userId);
                     List<Playlists> playListsSet = playlistsByUser.getOrDefault(userId, Collections.emptyList()); // DB 조회가 아닌, 메모리 Map 에서 조회
-                    // 1-1 해당 유저의 모든 Music을 "단 한 번의 쿼리"로 가져옴
-//                    List<Music> allMusicForUser = musicService.findAllWithPlaylistByPlaylistIn(playListsSet);
+
                     List<MusicSummaryDto> allMusicForUser = musicService.findAllMusicSummaryByPlaylistIds(playListsSet);
-                    // 1-2 Playlist ID별로 그룹화 (DB 부하 감소)
-//                    Map<String, List<Music>> musicMapByPlaylistId = allMusicForUser.stream().collect(
-//                            Collectors.groupingBy(music -> music.getPlaylist().getPlaylistId())
-//                    );
+
                     Map<String, List<MusicSummaryDto>> musicMapByPlaylistId = allMusicForUser.stream().collect(
                             Collectors.groupingBy(MusicSummaryDto::playlistId)
                     );
@@ -76,11 +73,17 @@ public class RecoverOrchestrationService {
                         log.info("[playlistTitle: {}]", playlist.getPlaylistTitle());
                         List<MusicSummaryDto> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
                         try {
-                            // 1-3 미리 조회한 Music 목록을 파라미터로 전달
-//                            List<Music> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
-                            youtubeService.fileTrackAndRecover(userId, playlist, countryCode, accessToken, musicForThisPlaylist);
+                            PlaylistRecoveryPlanDto plans = recoveryPlanService.prepareRecoveryPlan(userId, playlist, countryCode, accessToken, musicForThisPlaylist);
+                            // 저기서 FTR no Tx -> updatePlaylist no Tx 거쳐서 나온 전체 명세서 받음
+                            if (plans.hasActions()) {
+                                recoveryExecuteService.executeRecoveryPlan(userId, playlist, accessToken, plans);
+                            } // 아무 plan 없으면 그냥 어제와 똑같은 상황이라 손댈 필요 x 바로 스킵
+
                         } catch (QuotaExceededException ex) {
                             log.warn("[Quota Exceed EX at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), ex.getMessage());
+                        } catch (NoPlaylistFoundException npe) {
+                            playlistService.removePlaylistsFromDB(Collections.singletonList(playlist.getPlaylistId()));
+                            log.warn("[NoPlaylistFoundException is successfully handled -> skip to the next]");
                         } catch (Exception e) {
                             log.warn("[Unexpected Error at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), e.getMessage());
                         }

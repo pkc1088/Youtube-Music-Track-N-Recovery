@@ -22,9 +22,11 @@ public interface MusicService {
 
     void saveAllVideos(List<Video> legalVideos, Playlists playlist);
 
+    void bulkInsertMusic(List<Music> musics);
+
     Video searchVideoToReplace(Music musicToSearch);
 
-    Music makeVideoToMusic(Video replacementVideo, Playlists playlist);
+    // Music makeVideoToMusic(Video replacementVideo, Playlists playlist);
 }
 
 //    List<Music> findAllMusicByPlaylistId(String playlistId); 밑으로 대체

@@ -12,7 +12,8 @@ public interface PlaylistService {
 
 
     List<Playlists> findAllPlaylistsByUserIds(List<String> userIds);
-    Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException;
+
+    //Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException;
 
     void removePlaylistsFromDB(List<String> deselectedPlaylistIds);
 

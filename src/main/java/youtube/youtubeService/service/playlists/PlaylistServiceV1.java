@@ -124,6 +124,7 @@ public class PlaylistServiceV1 implements PlaylistService {
         return new PlaylistRegistrationResultDto(succeedPlaylistCount, selectedPlaylistsDto.size());
     }
 
+    /*
     @Override
     public Map<String, List<String>> updatePlaylist(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException {
         String playlistId = playlist.getPlaylistId();
@@ -209,6 +210,7 @@ public class PlaylistServiceV1 implements PlaylistService {
         log.info("[update playlist done: {}]", playlistId);
         return illegalVideos;
     }
+    */
 }
 
 /** OG CODE BEFORE 1111

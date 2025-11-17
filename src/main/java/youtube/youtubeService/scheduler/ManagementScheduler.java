@@ -33,7 +33,6 @@ import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
 import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
-import youtube.youtubeService.service.youtube.YoutubeService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +46,6 @@ public class ManagementScheduler {
     @Value("${youtube.api.key}")
     private String apiKey;
     private final PlaylistService playlistService;
-    private final YoutubeService youtubeService;
     private final UserService userService;
     private final UserRepository userRepository;
     private final SearchPolicy searchPolicy;
@@ -60,12 +58,12 @@ public class ManagementScheduler {
     private final YouTube youtube;
 
     @Autowired
-    public ManagementScheduler(PlaylistService playlistService, YoutubeService youtubeService, UserService userService,
+    public ManagementScheduler(PlaylistService playlistService, UserService userService,
                                UserRepository userRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
                                MusicRepository musicRepository, PlaylistRepository playlistRepository, YoutubeApiClient youtubeApiClient,
                                RecoverOrchestrationService recoverOrchestrationService, OutboxEventHandler outboxEventHandler, MusicService musicService) {
         this.playlistService = playlistService;
-        this.youtubeService = youtubeService;
+        // this.youtubeService = youtubeService;
         this.userService = userService;
         this.userRepository = userRepository;
         this.musicRepository = musicRepository;

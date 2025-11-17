@@ -35,13 +35,15 @@ public class MusicServiceV1 implements MusicService {
     private final SearchPolicy searchPolicy;
     private final YoutubeApiClient youtubeApiClient;
     private final JdbcTemplate jdbcTemplate;
+    private final MusicConverterHelper musicConverterHelper;
 
-    public MusicServiceV1(MusicRepository musicRepository,
-                          @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, YoutubeApiClient youtubeApiClient, JdbcTemplate jdbcTemplate) {
+    public MusicServiceV1(MusicRepository musicRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, YoutubeApiClient youtubeApiClient,
+                          JdbcTemplate jdbcTemplate, MusicConverterHelper musicConverterHelper) {
         this.musicRepository = musicRepository;
         this.searchPolicy = searchPolicy;
         this.youtubeApiClient = youtubeApiClient;
         this.jdbcTemplate = jdbcTemplate;
+        this.musicConverterHelper = musicConverterHelper;
     }
 
     @Override
@@ -67,7 +69,7 @@ public class MusicServiceV1 implements MusicService {
     @Override
     public void updateMusicWithReplacement(long pk, Music replacementMusic) {
         musicRepository.updateMusicWithReplacement(pk, replacementMusic);
-        log.info("The music record update has been completed");
+        //log.info("The music record update has been completed");
     }
 
     @Override
@@ -79,13 +81,14 @@ public class MusicServiceV1 implements MusicService {
     public void saveAllVideos(List<Video> legalVideos, Playlists playlist) {
         // 1. Video 리스트를 Music 리스트로 변환
         List<Music> musicsToSave = legalVideos.stream()
-                .map(video -> makeVideoToMusic(video, playlist))
+                .map(video -> musicConverterHelper.makeVideoToMusic(video, playlist))
                 .collect(Collectors.toList());
         // 2. JdbcTemplate으로 bulk insert 실행
         bulkInsertMusic(musicsToSave);
     }
 
     // JdbcTemplate 을 사용하는 새 메서드
+    @Override
     public void bulkInsertMusic(List<Music> musics) {
         String sql = "INSERT INTO music (video_id, video_title, video_uploader, video_description, video_tags, playlist_id) " +
                         "VALUES (?, ?, ?, ?, ?, ?)";
@@ -147,7 +150,7 @@ public class MusicServiceV1 implements MusicService {
 
     }
 
-    @Override
+    /*@Override
     public Music makeVideoToMusic(Video replacementVideo, Playlists playlist) {
         Music music = new Music();
         music.setVideoId(replacementVideo.getId());
@@ -159,7 +162,7 @@ public class MusicServiceV1 implements MusicService {
         music.setVideoTags(joinedTags);
         music.setPlaylist(playlist);
         return music;
-    }
+    }*/
 
 }
 

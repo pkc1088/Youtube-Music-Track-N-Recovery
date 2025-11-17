@@ -17,7 +17,7 @@ import youtube.youtubeService.service.outbox.OutboxService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import java.io.IOException;
 import java.util.*;
-
+/*
 @Slf4j
 @Service
 @Transactional
@@ -126,10 +126,10 @@ public class YoutubeServiceV5 implements YoutubeService {
 
     }
 
-    /**
-     * outbox 넣기전에 할당량 소비 예측 후 언제든 초과되면 런타임 예외 던져야함 (플리 단위로 롤백이니)
-     * 그리고 여기서 롤백 시 할당량 재지급도 해줘야함 카운트 고려해서
-     */
+
+      // outbox 넣기전에 할당량 소비 예측 후 언제든 초과되면 런타임 예외 던져야함 (플리 단위로 롤백이니)
+      // 그리고 여기서 롤백 시 할당량 재지급도 해줘야함 카운트 고려해서
+
     private long consumeWithOutbox(String userId, String playlistId, String accessToken, long reservedQuotaBackedUp,
                                    long cost, Outbox.ActionType actionType, String videoId, String playlistItemIdToDelete) {
 
@@ -144,7 +144,7 @@ public class YoutubeServiceV5 implements YoutubeService {
         return reservedQuotaBackedUp;
     }
 }
-
+*/
 
 /** OG CODE BEFORE 1104
      @Slf4j

@@ -16,7 +16,6 @@ import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxProcessor;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.YoutubeService;
 import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,8 +39,8 @@ public class OutboxPerformanceTest {
     private RecoverTestHelper recoverTestHelper;
     @Autowired
     private MusicService musicService;
-    @Autowired
-    private YoutubeService youtubeService;
+//    @Autowired
+//    private YoutubeService youtubeService;
 
     private String brokenVideoId, title, uploader, description, tags, playlistId;
 

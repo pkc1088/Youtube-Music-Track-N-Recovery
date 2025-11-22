@@ -21,8 +21,6 @@ import youtube.youtubeService.service.outbox.OutboxProcessor;
 import youtube.youtubeService.service.outbox.OutboxService;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.YoutubeService;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,8 +49,8 @@ public class YoutubeApiStressTest {
     private RecoverTestHelper recoverTestHelper;
     @Autowired
     private MusicService musicService;
-    @Autowired
-    private YoutubeService youtubeService;
+//    @Autowired
+//    private YoutubeService youtubeService;
     @Autowired
     private PlaylistRegistrationUnitService playlistRegistrationUnitService;
 

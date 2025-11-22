@@ -13,10 +13,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import youtube.youtubeService.dto.ActionLogDto;
-import youtube.youtubeService.dto.PlaylistRegisterRequestDto;
-import youtube.youtubeService.dto.PlaylistRegistrationResultDto;
-import youtube.youtubeService.dto.UserRegisterPlaylistsResponseDto;
+import youtube.youtubeService.dto.response.ActionLogResponseDto;
+import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
+import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
+import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
@@ -74,7 +74,7 @@ public class YoutubeController {
 
     @PostMapping("/playlist/register")
     public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, RedirectAttributes redirectAttributes) {
-        PlaylistRegistrationResultDto dto = playlistService.registerPlaylists(request);
+        PlaylistRegisterResponseDto dto = playlistService.registerPlaylists(request);
         redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute에 담아서 리다이렉트 시 전달
         return "redirect:/welcome";
     }
@@ -87,7 +87,7 @@ public class YoutubeController {
     @GetMapping("/recovery/{userId}")
     @PreAuthorize("#userId == authentication.principal.name")
     public String searchRecoveryHistory(@PathVariable String userId, Model model) {
-        ActionLogDto dto = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
+        ActionLogResponseDto dto = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
         model.addAttribute("dto", dto);
         return "recovery_history";
     }

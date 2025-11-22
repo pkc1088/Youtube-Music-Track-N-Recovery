@@ -1,4 +1,4 @@
-package youtube.youtubeService.dto;
+package youtube.youtubeService.dto.internal;
 
 import youtube.youtubeService.domain.Music;
 

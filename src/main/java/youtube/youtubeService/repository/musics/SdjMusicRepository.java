@@ -6,16 +6,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.MusicSummaryDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface SdjMusicRepository extends JpaRepository<Music, Long> {
 
 
     @Query("""
-        SELECT new youtube.youtubeService.dto.MusicSummaryDto(
+        SELECT new youtube.youtubeService.dto.internal.MusicSummaryDto(
             m.id, m.videoId, m.videoTitle, m.videoUploader, m.playlist.playlistId
         )
         FROM Music m

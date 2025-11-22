@@ -1,11 +1,12 @@
 package youtube.youtubeService.service.playlists;
 
-import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.*;
+import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
+import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
+import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
+
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 public interface PlaylistService {
 
@@ -17,7 +18,7 @@ public interface PlaylistService {
 
     void removePlaylistsFromDB(List<String> deselectedPlaylistIds);
 
-    PlaylistRegistrationResultDto registerPlaylists(PlaylistRegisterRequestDto request);
+    PlaylistRegisterResponseDto registerPlaylists(PlaylistRegisterRequestDto request);
 
     UserRegisterPlaylistsResponseDto userRegisterPlaylists(String userId) throws IOException;
 }

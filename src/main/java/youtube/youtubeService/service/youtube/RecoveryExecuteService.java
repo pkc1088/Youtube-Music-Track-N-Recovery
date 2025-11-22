@@ -9,9 +9,9 @@ import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Outbox;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.enums.QuotaType;
-import youtube.youtubeService.dto.PlannedOutboxDto;
-import youtube.youtubeService.dto.PlaylistRecoveryPlanDto;
-import youtube.youtubeService.dto.PlannedReplacementDto;
+import youtube.youtubeService.dto.internal.PlannedOutboxDto;
+import youtube.youtubeService.dto.internal.PlaylistRecoveryPlanDto;
+import youtube.youtubeService.dto.internal.PlannedReplacementDto;
 import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.QuotaService;
@@ -45,7 +45,7 @@ public class RecoveryExecuteService {
 
             if (plan.videosToDelete() != null && !plan.videosToDelete().isEmpty()) {
                 musicService.deleteAllByIdInBatch(plan.videosToDelete());
-                log.info("[TX-Delete] Playlist {}: Bulk deleted {} musics from sync", playlistId, plan.videosToDelete().size());
+                log.info("[TX-Update] Playlist {}: Bulk deleted {} musics from sync", playlistId, plan.videosToDelete().size());
             }
 
             // --- 계획한 작업 실행 (메인 복구 로직) ---
@@ -127,7 +127,9 @@ public class RecoveryExecuteService {
             throw new QuotaExceededException("Quota Exceed");
         } else {
             reservedQuotaBackedUp += cost;
+//            StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
             outboxService.outboxInsert(actionType, accessToken, userId, playlistId, videoId, playlistItemIdToDelete);
+//            transactionWatch.stop(); log.info("[Test] outboxInsert Time: {} ms", transactionWatch.getTotalTimeMillis());
         }
 
         return reservedQuotaBackedUp;

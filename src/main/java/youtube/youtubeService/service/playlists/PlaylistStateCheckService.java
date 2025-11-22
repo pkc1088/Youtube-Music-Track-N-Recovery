@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.MusicSummaryDto;
-import youtube.youtubeService.dto.PlannedPlaylistUpdateDto;
-import youtube.youtubeService.dto.VideoFilterResultPageDto;
+import youtube.youtubeService.dto.internal.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.PlannedPlaylistUpdateDto;
+import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.exception.NoPlaylistFoundException;
 import java.io.IOException;
 import java.util.*;
@@ -28,7 +28,9 @@ public class PlaylistStateCheckService {
         List<PlaylistItem> pureApiPlaylistItems;
 
         try {
+//            StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
             pureApiPlaylistItems = playlistRegistrationUnitService.fetchAllPlaylistItems(userId, playlistId);
+//            transactionWatch.stop(); log.info("[Test] fetchAllPlaylistItems Time: {} ms", transactionWatch.getTotalTimeMillis());
         } catch (IOException e) {
             // removePlaylistsFromDB 이거 오케에서 호출하도록 밖으로 뺏음.
             log.warn("[This playlist has been removed by the owner({})]", playlistId);
@@ -37,10 +39,11 @@ public class PlaylistStateCheckService {
 
         // 3. API 에서 video 상태 조회
         List<String> pureApiVideoIds = pureApiPlaylistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
-
+//        StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
         VideoFilterResultPageDto videoFilterResult = playlistRegistrationUnitService.fetchAllVideos(userId, pureApiVideoIds, countryCode);
-        List<Video> legalVideos = videoFilterResult.getLegalVideos();
-        List<Video> unlistedCountryVideos = videoFilterResult.getUnlistedCountryVideos();
+//        transactionWatch.stop(); log.info("[Test] fetchAllVideos Time: {} ms", transactionWatch.getTotalTimeMillis());
+        List<Video> legalVideos = videoFilterResult.legalVideos();
+        List<Video> unlistedCountryVideos = videoFilterResult.unlistedCountryVideos();
 
         // 4-1. 정상 비디오
         List<String> legalVideoIds = legalVideos.stream().map(Video::getId).toList();

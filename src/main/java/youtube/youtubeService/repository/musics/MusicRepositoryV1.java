@@ -5,10 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.MusicSummaryDto;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Repository

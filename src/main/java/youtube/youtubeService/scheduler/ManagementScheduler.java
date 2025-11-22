@@ -21,9 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
-import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.domain.Users;
-import youtube.youtubeService.dto.QuotaPlaylistItemPageDto;
+import youtube.youtubeService.dto.internal.QuotaPlaylistItemPageDto;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
@@ -131,7 +129,7 @@ public class ManagementScheduler {
         String playlistId = "PLP2GOU1oCmVCJYbPqGqald-598Wzybumx";
 
         QuotaPlaylistItemPageDto dto = youtubeApiClient.fetchPlaylistItemPage(playlistId, null);
-        PlaylistItem pi = dto.getAllPlaylists().get(0);
+        PlaylistItem pi = dto.allPlaylists().get(0);
         String singlePlaylistItemId = pi.getId();
 
         youtubeApiClient.deleteFromActualPlaylist(accessToken, singlePlaylistItemId);

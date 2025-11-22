@@ -2,12 +2,11 @@ package youtube.youtubeService.service.youtube;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
-import youtube.youtubeService.dto.MusicSummaryDto;
-import youtube.youtubeService.dto.PlaylistRecoveryPlanDto;
+import youtube.youtubeService.dto.internal.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.PlaylistRecoveryPlanDto;
 import youtube.youtubeService.exception.NoPlaylistFoundException;
 import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.musics.MusicService;
@@ -53,7 +52,9 @@ public class RecoverOrchestrationService {
                     String userId = user.getUserId();
                     String countryCode = user.getCountryCode();
                     String refreshToken = user.getRefreshToken();
+//                    StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
                     String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
+//                    transactionWatch.stop(); log.info("[Test] AccessToken Time: {} ms", transactionWatch.getTotalTimeMillis());
                     log.info("[userId: {}]", userId);
 
                     if (accessToken.equals("")) {
@@ -76,7 +77,9 @@ public class RecoverOrchestrationService {
                             PlaylistRecoveryPlanDto plans = recoveryPlanService.prepareRecoveryPlan(userId, playlist, countryCode, accessToken, musicForThisPlaylist);
                             // 저기서 FTR no Tx -> updatePlaylist no Tx 거쳐서 나온 전체 명세서 받음
                             if (plans.hasActions()) {
+//                                StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
                                 recoveryExecuteService.executeRecoveryPlan(userId, playlist, accessToken, plans);
+//                                transactionWatch.stop(); log.info("[Test] Transaction Time: {} ms", transactionWatch.getTotalTimeMillis());
                             } // 아무 plan 없으면 그냥 어제와 똑같은 상황이라 손댈 필요 x 바로 스킵
 
                         } catch (QuotaExceededException ex) {

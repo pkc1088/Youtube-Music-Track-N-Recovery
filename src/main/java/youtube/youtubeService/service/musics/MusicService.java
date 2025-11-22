@@ -3,7 +3,7 @@ package youtube.youtubeService.service.musics;
 import com.google.api.services.youtube.model.Video;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.MusicSummaryDto;
 
 import java.util.List;
 

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Outbox;
 
@@ -22,10 +23,14 @@ public class OutboxProcessor {
         try {
             if (outbox.getActionType() == Outbox.ActionType.DELETE) {
                 log.info("Processing DELETE for Outbox ID: {}", outbox.getId());
+//                StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
                 apiOperatedCheck = youtubeApiClient.deleteFromActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistItemId());
+//                transactionWatch.stop(); log.info("[Test] deleteFromActualPlaylist Time: {} ms", transactionWatch.getTotalTimeMillis());
             } else if (outbox.getActionType() == Outbox.ActionType.ADD) {
                 log.info("Processing ADD for Outbox ID: {}", outbox.getId());
+//                StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
                 apiOperatedCheck = youtubeApiClient.addVideoToActualPlaylist(outbox.getAccessToken(), outbox.getPlaylistId(), outbox.getVideoId());
+//                transactionWatch.stop(); log.info("[Test] addVideoToActualPlaylist Time: {} ms", transactionWatch.getTotalTimeMillis());
             }
         } catch (Exception e) {
             log.warn("API call failed for Outbox ID: {} - {}", outbox.getId(), e.getMessage());

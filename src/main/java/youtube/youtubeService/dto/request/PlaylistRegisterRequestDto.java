@@ -1,10 +1,11 @@
-package youtube.youtubeService.dto;
+package youtube.youtubeService.dto.request;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import youtube.youtubeService.dto.internal.PlaylistDto;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -13,15 +13,13 @@ import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.domain.enums.QuotaType;
-import youtube.youtubeService.dto.PlaylistDto;
-import youtube.youtubeService.dto.QuotaApiPlaylistsPageDto;
-import youtube.youtubeService.dto.QuotaPlaylistItemPageDto;
-import youtube.youtubeService.dto.VideoFilterResultPageDto;
+import youtube.youtubeService.dto.internal.PlaylistDto;
+import youtube.youtubeService.dto.internal.QuotaApiPlaylistsPageDto;
+import youtube.youtubeService.dto.internal.QuotaPlaylistItemPageDto;
+import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.exception.QuotaExceededException;
-import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicService;
-import youtube.youtubeService.service.users.UserService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,7 +65,7 @@ public class PlaylistRegistrationUnitService {
         List<String> videoIds = playlistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
         // 3. 페이지네이션으로 정상 음악만 세부사항 필터링 해오기
         VideoFilterResultPageDto videoFilterResult = fetchAllVideos(userId, videoIds, countryCode);
-        List<Video> legalVideos = videoFilterResult.getLegalVideos();
+        List<Video> legalVideos = videoFilterResult.legalVideos();
         // 4. DB 에 최초 등록
         musicService.saveAllVideos(legalVideos, playlist);
     }
@@ -81,8 +79,8 @@ public class PlaylistRegistrationUnitService {
             if (!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
 
             QuotaPlaylistItemPageDto dto = youtubeApiClient.fetchPlaylistItemPage(playlistId, nextPageToken);
-            playlistItems.addAll(dto.getAllPlaylists());
-            nextPageToken = dto.getNextPageToken();
+            playlistItems.addAll(dto.allPlaylists());
+            nextPageToken = dto.nextPageToken();
         } while (nextPageToken != null);
 
         return playlistItems;
@@ -104,8 +102,8 @@ public class PlaylistRegistrationUnitService {
             int toIndex = Math.min(fromIndex + batchSize, total);
             List<String> videoIdsBatch = videoIds.subList(fromIndex, toIndex);
             VideoFilterResultPageDto videoFilterResult = youtubeApiClient.fetchVideoPage(videoIdsBatch, countryCode);
-            legalVideos.addAll(videoFilterResult.getLegalVideos());
-            unlistedCountryVideos.addAll(videoFilterResult.getUnlistedCountryVideos());
+            legalVideos.addAll(videoFilterResult.legalVideos());
+            unlistedCountryVideos.addAll(videoFilterResult.unlistedCountryVideos());
         }
 
         return new VideoFilterResultPageDto(legalVideos, unlistedCountryVideos);
@@ -119,8 +117,8 @@ public class PlaylistRegistrationUnitService {
             if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
 
             QuotaApiPlaylistsPageDto dto = youtubeApiClient.fetchPlaylistPage(channelId, nextPageToken);
-            playlists.addAll(dto.getPlaylists());
-            nextPageToken = dto.getNextPageToken();
+            playlists.addAll(dto.playlists());
+            nextPageToken = dto.nextPageToken();
         } while (nextPageToken != null);
 
         return playlists;

@@ -1,9 +1,5 @@
 package youtube.youtubeService.service.youtube;
 
-import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.MusicSummaryDto;
-import java.util.List;
-
 /*
 public interface YoutubeService {
 

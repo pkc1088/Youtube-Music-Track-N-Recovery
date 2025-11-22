@@ -1,8 +1,5 @@
 package youtube.youtubeService.api;
 
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.AccessToken;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -13,16 +10,15 @@ import com.google.api.services.youtube.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import youtube.youtubeService.dto.*;
+import youtube.youtubeService.dto.internal.QuotaApiPlaylistsPageDto;
+import youtube.youtubeService.dto.internal.QuotaPlaylistItemPageDto;
+import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.exception.ChannelNotFoundException;
-import youtube.youtubeService.exception.CheckBoxNotActivatedException;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 @Slf4j

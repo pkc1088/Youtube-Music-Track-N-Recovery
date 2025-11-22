@@ -2,10 +2,9 @@ package youtube.youtubeService.repository.musics;
 
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.dto.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.MusicSummaryDto;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface MusicRepository {
 

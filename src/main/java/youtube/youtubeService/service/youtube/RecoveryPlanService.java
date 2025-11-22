@@ -10,7 +10,7 @@ import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Outbox;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.enums.QuotaType;
-import youtube.youtubeService.dto.*;
+import youtube.youtubeService.dto.internal.*;
 import youtube.youtubeService.exception.NoPlaylistFoundException;
 import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.ActionLogService;
@@ -74,7 +74,9 @@ public class RecoveryPlanService {
             }
 
             Music backupMusic = backupMusicListFromDb.get(0); // = videoIdToDelete
+//            StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
             Optional<ActionLog> recentLogOpt = actionLogService.findTodayRecoverLog(ActionLog.ActionType.RECOVER, backupMusic.getVideoId());
+//            transactionWatch.stop(); log.info("[Test] findTodayRecoverLog Time: {} ms", transactionWatch.getTotalTimeMillis());
             Music replacementMusic;
             Video replacementVideo;
 
@@ -84,7 +86,9 @@ public class RecoveryPlanService {
                 replacementVideo = youtubeApiClient.fetchSingleVideo(recentLogOpt.get().getSourceVideoId());
             } else {
                 if(!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("Quota Exceed");
+//                transactionWatch = new StopWatch(); transactionWatch.start();
                 replacementVideo = musicService.searchVideoToReplace(backupMusic);
+//                transactionWatch.stop(); log.info("[Test] searchVideoToReplace Time: {} ms", transactionWatch.getTotalTimeMillis());
             }
 
             replacementMusic = musicConverterHelper.makeVideoToMusic(replacementVideo, playlist);

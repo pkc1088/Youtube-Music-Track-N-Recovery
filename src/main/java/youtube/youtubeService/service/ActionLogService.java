@@ -6,12 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import youtube.youtubeService.domain.ActionLog;
 import youtube.youtubeService.domain.Music;
-import youtube.youtubeService.dto.ActionLogDto;
+import youtube.youtubeService.dto.response.ActionLogResponseDto;
 import youtube.youtubeService.repository.ActionLogRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -22,8 +21,8 @@ public class ActionLogService {
 
     private final ActionLogRepository actionLogRepository;
 
-    public ActionLogDto findByUserIdOrderByCreatedAtDesc(String userId) {
-        return new ActionLogDto(userId, actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId));
+    public ActionLogResponseDto findByUserIdOrderByCreatedAtDesc(String userId) {
+        return new ActionLogResponseDto(userId, actionLogRepository.findByUserIdOrderByCreatedAtDesc(userId));
     }
 
     public void actionLogSave(String userId, String playlistId, ActionLog.ActionType actionType, Music trgVid, Music srcVid) {

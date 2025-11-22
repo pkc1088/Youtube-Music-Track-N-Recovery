@@ -1,4 +1,4 @@
-package youtube.youtubeService.dto;
+package youtube.youtubeService.dto.response;
 
 import com.google.api.services.youtube.model.Playlist;
 import lombok.*;

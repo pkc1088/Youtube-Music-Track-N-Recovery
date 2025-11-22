@@ -7,7 +7,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import youtube.youtubeService.config.ExecutorConfig.PartitionedExecutor;
 import youtube.youtubeService.domain.Outbox;
-import youtube.youtubeService.dto.OutboxCreatedEventDto;
+import youtube.youtubeService.dto.internal.OutboxCreatedEventDto;
 import youtube.youtubeService.domain.enums.QuotaType;
 import youtube.youtubeService.repository.OutboxRepository;
 import youtube.youtubeService.service.QuotaService;
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
@@ -34,7 +33,7 @@ public class OutboxEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleInitialOutboxEvent(OutboxCreatedEventDto eventDto) {
 
-        Outbox outbox = outboxRepository.findById(eventDto.getOutboxId()).orElseThrow(() -> new RuntimeException("Outbox not found, id=" + eventDto.getOutboxId()));
+        Outbox outbox = outboxRepository.findById(eventDto.outboxId()).orElseThrow(() -> new RuntimeException("Outbox not found, id=" + eventDto.outboxId()));
         handleOutboxEvent(outbox, Outbox.Status.FAILED);
 
     }
@@ -86,7 +85,9 @@ public class OutboxEventHandler {
 
                 try {
                     boolean apiOperatedCheck = outboxProcessor.processOutbox(outbox);
+//                    StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
                     outboxStatusUpdater.updateOutboxStatus(outbox.getId(), apiOperatedCheck ? Outbox.Status.SUCCESS : nextStatus);
+//                    transactionWatch.stop(); log.info("[Test] updateOutboxStatus Time: {} ms", transactionWatch.getTotalTimeMillis());
                     log.info("::: Marked Outbox ID {} as {}", outbox.getId(), apiOperatedCheck ? Outbox.Status.SUCCESS : nextStatus);
 
                 } catch (Exception e) {

@@ -1,4 +1,4 @@
-package youtube.youtubeService.dto;
+package youtube.youtubeService.dto.internal;
 
 public record MusicSummaryDto(
         Long id,

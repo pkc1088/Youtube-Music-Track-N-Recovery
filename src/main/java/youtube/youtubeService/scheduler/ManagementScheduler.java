@@ -80,7 +80,6 @@ public class ManagementScheduler {
         log.info("auto scheduler activated");
 
         recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
-//        recoverOrchestrationService.allPlaylistsRecoveryOfOneParticularUserTest();
 
         log.info("auto scheduler done");
     }
@@ -108,12 +107,12 @@ public class ManagementScheduler {
 //    @Scheduled(fixedRate = 50000, initialDelayString = "1000")
     public void addTest() {
         String userId = "112735690496635663877";
-        String refreshToken = "abc";
+        String refreshToken = "";
         String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
-        String videoId = "wtjro7_R3-4";
+        String videoId = "gQHcttM8niw";
         String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
 
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 1; i++) {
             log.info("[Attempt : {}]", i);
             youtubeApiClient.addVideoToActualPlaylist(accessToken, playlistId, videoId);
             log.info("=============================================");
@@ -339,8 +338,8 @@ public class ManagementScheduler {
         musicToSearch.setVideoUploader("manhattan lover");
         musicToSearch.setVideoDescription("kiss and say good bye is a good music sung by The Manhattans");
         musicToSearch.setVideoTags("R&B, Soul");
-        String text = searchPolicy.search(musicToSearch);
-        System.out.println(text);
+//        String text = searchPolicy.search(musicToSearch);
+//        System.out.println(text);
     }
 
 }

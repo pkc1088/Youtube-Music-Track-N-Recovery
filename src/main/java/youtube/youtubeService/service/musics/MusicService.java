@@ -3,6 +3,7 @@ package youtube.youtubeService.service.musics;
 import com.google.api.services.youtube.model.Video;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.dto.internal.MusicSummaryDto;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public interface MusicService {
 
     void deleteAllByIdInBatch(List<Long> ids);
 
-    List<Music> getMusicListFromDBThruMusicId(String videoIdToDelete, String playlistId);
+    List<MusicDetailsDto> getMusicListFromDBThruMusicId(String videoIdToDelete, String playlistId);
 
     void updateMusicWithReplacement(long pk, Music replacementMusic);
 
@@ -24,12 +25,6 @@ public interface MusicService {
 
     void bulkInsertMusic(List<Music> musics);
 
-    Video searchVideoToReplace(Music musicToSearch);
+    Video searchVideoToReplace(MusicDetailsDto musicToSearch);
 
-    // Music makeVideoToMusic(Video replacementVideo, Playlists playlist);
 }
-
-//    List<Music> findAllMusicByPlaylistId(String playlistId); 밑으로 대체
-//    List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet); 이것도 밑으로 대체됨
-//    void saveSingleVideo(Video video, Playlists playlist);
-//    Music searchVideoToReplace(Music musicToSearch, Playlists playlist);

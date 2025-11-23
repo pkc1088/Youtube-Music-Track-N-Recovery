@@ -18,7 +18,6 @@ public interface UserService {
     void deleteUserAccount(String userId);
 
     void revokeUser(String refreshToken);
-//    Users findByUserId(String userId);
-//    void deleteUser(Users user);
+
 
 }

@@ -37,22 +37,4 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
         return repository.findAllByUserIdWithUserFetch(userId);
     }
 
-    // @Override
-    // public Playlists save(Playlists playlist) {
-    //    return repository.save(playlist);
-    // }
-    //    @Override
-    //    public List<Playlists> findAllPlaylistsByUserId(String userId) {
-    //        return repository.findByUser_UserId(userId);
-    //    }
 }
-
-    /*@Override
-    public void save(Playlists playlist) {
-        repository.save(playlist);
-    }
-     @Override
-    public void deletePlaylistByPlaylistId(String playlistId) {
-        repository.deleteById(playlistId); 밑으로 대체
-    }
-    */

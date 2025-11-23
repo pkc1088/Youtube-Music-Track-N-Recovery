@@ -15,7 +15,3 @@ public interface PlaylistRepository {
 
     List<Playlists> findAllByUserIdWithUserFetch(String userId);
 }
-
-// Playlists save(Playlists playlist); //void save(Playlists playlist);
-// List<Playlists> findAllPlaylistsByUserId(String userId);
-// void deletePlaylistByPlaylistId(String playlistId); 밑으로 대체

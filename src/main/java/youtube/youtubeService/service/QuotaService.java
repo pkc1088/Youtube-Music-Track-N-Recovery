@@ -36,7 +36,6 @@ public class QuotaService {
 
     // 조회용 키 생성
     public String getQuotaKey(String userId) {
-        // String today = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
         String todayPt = LocalDate.now(ZoneId.of("America/Los_Angeles")).format(DateTimeFormatter.BASIC_ISO_DATE);
         return "quota:" + userId + ":" + todayPt; // 오늘 날짜별 quota 키 생성
     }
@@ -167,40 +166,3 @@ public class QuotaService {
         return keys;
     }
 }
-
-/*
-public void rollbackQuota(String userId, long cost) {
-        redisTemplate.opsForValue().decrement(getQuotaKey(userId), cost);
-    }
-
-public boolean checkAndConsumeLua(String userId, long cost) {
-    String key = getQuotaKey(userId);
-    String script =
-            "local current = redis.call('GET', KEYS[1]) " +
-                    "if not current then current = 0 else current = tonumber(current) end " +
-                    "if (current + tonumber(ARGV[1])) > tonumber(ARGV[2]) then " +
-                    "   return 0 " + // quota 초과 → 실패
-                    "else " +
-                    "   local newVal = redis.call('INCRBY', KEYS[1], ARGV[1]) " +
-                    "   if newVal == tonumber(ARGV[1]) then " +
-                    "       redis.call('EXPIRE', KEYS[1], ARGV[3]) " + // 새 키면 TTL 설정
-                    "   end " +
-                    "   return 1 " + // 성공
-                    "end";
-
-    long secondsUntilMidnight = Duration.between(LocalDateTime.now(), LocalDate.now().plusDays(1).atStartOfDay()).getSeconds();
-    // targetTime = LocalTime.of(9, 0);
-    DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(script, Long.class);
-    Long result = redisTemplate.execute(
-            redisScript,
-            Collections.singletonList(key),
-            String.valueOf(cost),
-            String.valueOf(DAILY_LIMIT),
-            String.valueOf(secondsUntilMidnight)
-    );
-
-    return result != null && result == 1L;
-}
-
-
- */

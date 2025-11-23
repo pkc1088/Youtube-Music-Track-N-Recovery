@@ -32,10 +32,3 @@ public class PlaylistRegisterRequestDto {
     }
 }
 
-/** OG 0913
-@Data
-public class PlaylistRegisterRequestDto {
-    private String userId;
-    private List<String> selectedPlaylistIds = new ArrayList<>();
-    private List<String> deselectedPlaylistIds = new ArrayList<>();
-}*/

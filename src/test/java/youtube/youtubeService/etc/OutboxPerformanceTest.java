@@ -1,6 +1,5 @@
-package youtube.youtubeService.apiTest;
+package youtube.youtubeService.etc;
 
-import com.google.api.services.youtube.model.PlaylistItem;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,33 +7,31 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import youtube.youtubeService.etc.RecoverTestHelper;
+import org.springframework.util.StopWatch;
 import youtube.youtubeService.domain.ActionLog;
+import youtube.youtubeService.domain.Music;
+import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.musics.MusicService;
-import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
+import youtube.youtubeService.service.outbox.OutboxProcessor;
 import youtube.youtubeService.service.users.UserService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
-public class YoutubeApiStressTest {
+public class OutboxPerformanceTest {
 
-//    @MockitoBean
-//    private OutboxProcessor outboxProcessor;
+    @MockitoBean
+    private OutboxProcessor outboxProcessor;
     @MockitoBean
     private ActionLogService actionLogService;
 
-    @Autowired
-    private OutboxInsertTest outboxInsertTest;
-    @Autowired
+
+    @Autowired//MockitoSpyBean
     private UserService userService;
     @Autowired
     private PlaylistRepository playlistRepository;
@@ -42,10 +39,6 @@ public class YoutubeApiStressTest {
     private RecoverTestHelper recoverTestHelper;
     @Autowired
     private MusicService musicService;
-//    @Autowired
-//    private YoutubeService youtubeService;
-    @Autowired
-    private PlaylistRegistrationUnitService playlistRegistrationUnitService;
 
     private String brokenVideoId, title, uploader, description, tags, playlistId;
 
@@ -60,9 +53,12 @@ public class YoutubeApiStressTest {
             tags = "The Manhattams,R&B,Soul,7th album";
             playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
 
+            when(outboxProcessor.processOutbox(any())).thenReturn(true);
             when(actionLogService.findTodayRecoverLog(any(ActionLog.ActionType.class), anyString())).thenReturn(Optional.empty());
         } catch (Exception e) {
+
         }
+
     }
 
     @Test
@@ -70,25 +66,40 @@ public class YoutubeApiStressTest {
         String userId = "112735690496635663877";
         String refreshToken = userService.getUserByUserId(userId).orElseThrow(() -> new EntityNotFoundException("User not found: " + userId)).getRefreshToken();
         String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId(userId, refreshToken);  // pkc1088
-        List<String> videoIdToInsertList = List.of("Oz-b86LZ21c", "cJLH5yXoqi8", "Uc8wmLul3uw", "wtjro7_R3-4");
-        List<PlaylistItem> pureApiPlaylistItems = new ArrayList<>();
+        // String accessTokenForUploader = userService.getNewAccessTokenByUserId("107155055893692546350");     // WhistleMissile
+        List<Long> data = new ArrayList<>();
 
-        // CountDownLatch latch = new CountDownLatch(1);
+        for (int i = 1; i <= 100; i++) {
 
-        try {
-            pureApiPlaylistItems = playlistRegistrationUnitService.fetchAllPlaylistItems(userId, playlistId);
-        } catch (Exception e) {
-            e.printStackTrace();
+            log.info("====================[{}] START. ====================", i);
+            try {
+                // Before
+                sleep();
+                Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+                // Test
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+                //youtubeService.fileTrackAndRecover("112735690496635663877", playlist, "KR", accessTokenForRecoverUser);
+                stopWatch.stop();
+                log.info("[Test - {}] Transaction Time: {} ms", i, stopWatch.getTotalTimeMillis());
+                data.add(stopWatch.getTotalTimeMillis());
+
+                // AFTER (복구 됐을 영상을 다시 비정상 영상으로 돌려놔야 다음 iteration 때 탐지함)
+                sleep();
+                musicService.upsertMusic(new Music(1270L, brokenVideoId, title, uploader, description, tags, playlist));
+            } catch (Exception e) {
+                log.error("Error Occurred At {} - {}", i, e.toString(), e);
+            }
         }
 
-        // 4곡 삭제하고 4곡 VEVO 추가 (트랜잭션 파야지 outboxEventHandler 발동함)
-        outboxInsertTest.outboxInsert(pureApiPlaylistItems, accessTokenForRecoverUser, userId, playlistId, videoIdToInsertList);
-
-        for(int i = 1; i <= 8; i++) {
-            sleep();
+        System.out.println("------RESULT------");
+        long sum = 0L;
+        for (int i = 0; i < data.size(); i++) {
+            System.out.println((i + 1) + " : " + data.get(i));
+            sum += data.get(i);
         }
-
-        log.info("[Test Done]");
+        System.out.println("------Average------");
+        System.out.println(sum / data.size());
 
     }
 
@@ -96,9 +107,7 @@ public class YoutubeApiStressTest {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            // 이 예외가 발생했을 때 현재 스레드의 중단 상태를 다시 복구해주는 것이 좋습니다.
             Thread.currentThread().interrupt();
-            // 혹은 예외를 로깅하고 적절한 중단 처리를 합니다.
             System.err.println("스레드 대기 중 인터럽트 발생!");
         }
     }

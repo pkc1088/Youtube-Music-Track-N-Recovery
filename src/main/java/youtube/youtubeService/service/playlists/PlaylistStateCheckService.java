@@ -28,20 +28,15 @@ public class PlaylistStateCheckService {
         List<PlaylistItem> pureApiPlaylistItems;
 
         try {
-//            StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
             pureApiPlaylistItems = playlistRegistrationUnitService.fetchAllPlaylistItems(userId, playlistId);
-//            transactionWatch.stop(); log.info("[Test] fetchAllPlaylistItems Time: {} ms", transactionWatch.getTotalTimeMillis());
         } catch (IOException e) {
-            // removePlaylistsFromDB 이거 오케에서 호출하도록 밖으로 뺏음.
             log.warn("[This playlist has been removed by the owner({})]", playlistId);
             throw new NoPlaylistFoundException("[no playlist found exception]");
         }
 
         // 3. API 에서 video 상태 조회
         List<String> pureApiVideoIds = pureApiPlaylistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
-//        StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
         VideoFilterResultPageDto videoFilterResult = playlistRegistrationUnitService.fetchAllVideos(userId, pureApiVideoIds, countryCode);
-//        transactionWatch.stop(); log.info("[Test] fetchAllVideos Time: {} ms", transactionWatch.getTotalTimeMillis());
         List<Video> legalVideos = videoFilterResult.legalVideos();
         List<Video> unlistedCountryVideos = videoFilterResult.unlistedCountryVideos();
 

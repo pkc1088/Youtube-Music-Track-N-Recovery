@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import youtube.youtubeService.domain.Music;
+import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.policy.SearchPolicy;
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,15 +25,18 @@ public class GeminiModelTest {
     @Qualifier("geminiSearchQuery")
     SearchPolicy searchPolicy;
 
-    private Music musicToSearch = new Music();
+    private final MusicDetailsDto musicToSearch = new MusicDetailsDto(
+            7777L, "videoId123", "Kiss And Say GoodBye", "Manhattans",
+            "This is an American Group", "R&B SOUL", "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t"
+    );
 
     @BeforeEach
     void setUp() {
-        musicToSearch.setVideoId("videoId123");
-        musicToSearch.setVideoTitle("Kiss And Say GoodBye");
-        musicToSearch.setVideoUploader("Manhattans");
-        musicToSearch.setVideoDescription("This is an American Group");
-        musicToSearch.setVideoTags("R&B SOUL");
+//        musicToSearch.videoId("videoId123");
+//        musicToSearch.setVideoTitle("Kiss And Say GoodBye");
+//        musicToSearch.setVideoUploader("Manhattans");
+//        musicToSearch.setVideoDescription("This is an American Group");
+//        musicToSearch.setVideoTags("R&B SOUL");
 
     }
 

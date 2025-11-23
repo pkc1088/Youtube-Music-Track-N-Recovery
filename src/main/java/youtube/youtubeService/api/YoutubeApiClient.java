@@ -166,7 +166,6 @@ public class YoutubeApiClient {
             PlaylistItemListResponse response = request.execute();
             List<PlaylistItem> items = response.getItems();
             String nextPageToken = response.getNextPageToken();
-            // log.info("[getPlaylistItemListByPage] - nextPageToken:{}", nextPageToken);
 
             return new QuotaPlaylistItemPageDto(items, nextPageToken);
         } catch (GoogleJsonResponseException e) {
@@ -179,7 +178,6 @@ public class YoutubeApiClient {
     }
 
     public boolean addVideoToActualPlaylist(String accessToken, String playlistId, String videoId) {
-        // if(playlistId.length() % 2 == 0) throw new RuntimeException("addVideoToActualPlaylist intended RuntimeException"); // 고의적 예외 던짐
 
         try {
             YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), new GoogleCredential().setAccessToken(accessToken))
@@ -227,7 +225,6 @@ public class YoutubeApiClient {
     }
 
     public boolean deleteFromActualPlaylist(String accessToken, String playlistItemId) {
-        // if(true) throw new RuntimeException("deleteFromActualPlaylist intended RuntimeException"); // 고의적 예외 던짐
 
         try {
             YouTube youtube = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), new GoogleCredential().setAccessToken(accessToken))

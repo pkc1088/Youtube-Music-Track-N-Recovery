@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import youtube.youtubeService.domain.Music;
+import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.policy.SearchPolicy;
 
 import java.util.*;
@@ -57,7 +58,7 @@ public class GeminiSearchPolicy implements SearchPolicy {
     }
 
     @Override
-    public String search(Music musicToSearch) {
+    public String search(MusicDetailsDto musicToSearch) {
 
         String query = setPrompt(musicToSearch);
         String modelToUse;
@@ -85,22 +86,22 @@ public class GeminiSearchPolicy implements SearchPolicy {
             /**
              * 여기서는 할만큼 했으니 그냥 '제목-가수'로 넘겨주자
              */
-            return musicToSearch.getVideoTitle().concat(" - ").concat(musicToSearch.getVideoUploader()); // throw e; // RuntimeException 임
+            return musicToSearch.videoTitle().concat(" - ").concat(musicToSearch.videoUploader()); // throw e; // RuntimeException 임
         }
     }
 
-    public String setPrompt(Music musicToSearch) {
+    public String setPrompt(MusicDetailsDto musicToSearch) {
         StringBuilder promptBuilder = new StringBuilder();
         promptBuilder.append("다음 유튜브에 게시된 음악 영상 정보를 보고, 노래 제목과 가수를 '노래제목-가수' 형식으로 정확히 알려줘. 반드시 이 양식을 지켜야 해.\n\n");
-        promptBuilder.append("영상 제목: ").append(musicToSearch.getVideoTitle()).append("\n");
-        promptBuilder.append("업로더: ").append(musicToSearch.getVideoUploader()).append("\n");
+        promptBuilder.append("영상 제목: ").append(musicToSearch.videoTitle()).append("\n");
+        promptBuilder.append("업로더: ").append(musicToSearch.videoUploader()).append("\n");
 
-        if (musicToSearch.getVideoTags() != null && !musicToSearch.getVideoTags().isBlank()) {
-            promptBuilder.append("태그: ").append(musicToSearch.getVideoTags()).append("\n");
+        if (musicToSearch.videoTags() != null && !musicToSearch.videoTags().isBlank()) {
+            promptBuilder.append("태그: ").append(musicToSearch.videoTags()).append("\n");
         }
 
-        if (musicToSearch.getVideoDescription() != null && !musicToSearch.getVideoDescription().isBlank()) {
-            promptBuilder.append("설명: ").append(musicToSearch.getVideoDescription()).append("\n");
+        if (musicToSearch.videoDescription() != null && !musicToSearch.videoDescription().isBlank()) {
+            promptBuilder.append("설명: ").append(musicToSearch.videoDescription()).append("\n");
         }
 
         promptBuilder.append("\n답변은 반드시 '노래 제목-가수' 형식으로만 해줘.");

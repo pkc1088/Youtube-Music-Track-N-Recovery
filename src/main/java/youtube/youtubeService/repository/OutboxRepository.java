@@ -5,17 +5,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import youtube.youtubeService.domain.Outbox;
 import java.util.List;
+import java.util.Optional;
 
 public interface OutboxRepository extends JpaRepository<Outbox, Long> {
 
     List<Outbox> findByUserIdAndStatus(String userId, Outbox.Status status);
-}
 
-//    @Query("""
-//        SELECT o.id FROM Outbox o WHERE o.userId = :userId AND o.playlistId = :playlistId AND o.videoId = :videoId AND o.status IN :statuses
-//    """)
-//    List<Long> findIdsByUserIdAndPlaylistIdAndVideoIdAndStatusIn(
-//            @Param("userId") String userId, @Param("playlistId") String playlistId,
-//            @Param("videoId") String videoId, @Param("statuses") List<Outbox.Status> statuses
-//    );
-//    List<Outbox> findByStatus(Outbox.Status status);
+    Optional<Outbox> findOutboxById(Long id); // findById (x) 이름 다르게 만들어서 사용자 정의로 씀
+}

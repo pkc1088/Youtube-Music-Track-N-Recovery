@@ -62,7 +62,8 @@ public class RecoveryPlanService {
             List<String> playlistItemIdsToDelete = entry.getValue();
             int apiDuplicatedCount = playlistItemIdsToDelete.size();
             //  DB 에서 해당 videoId + playlistId 를 가진 모든 음악 조회
-            List<Music> backupMusicListFromDb = musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId);
+//            List<Music> backupMusicListFromDb = musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId);
+            List<MusicDetailsDto> backupMusicListFromDb = musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId);
 
             if (backupMusicListFromDb.isEmpty()) {
                 // 백업이 없으면 그냥 중복 개수만큼 삭제
@@ -73,9 +74,10 @@ public class RecoveryPlanService {
                 continue;
             }
 
-            Music backupMusic = backupMusicListFromDb.get(0); // = videoIdToDelete
+//            Music backupMusic = backupMusicListFromDb.get(0);
+            MusicDetailsDto backupMusic = backupMusicListFromDb.get(0);
 //            StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
-            Optional<ActionLog> recentLogOpt = actionLogService.findTodayRecoverLog(ActionLog.ActionType.RECOVER, backupMusic.getVideoId());
+            Optional<ActionLog> recentLogOpt = actionLogService.findTodayRecoverLog(ActionLog.ActionType.RECOVER, backupMusic.videoId());
 //            transactionWatch.stop(); log.info("[Test] findTodayRecoverLog Time: {} ms", transactionWatch.getTotalTimeMillis());
             Music replacementMusic;
             Video replacementVideo;
@@ -86,16 +88,14 @@ public class RecoveryPlanService {
                 replacementVideo = youtubeApiClient.fetchSingleVideo(recentLogOpt.get().getSourceVideoId());
             } else {
                 if(!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("Quota Exceed");
-//                transactionWatch = new StopWatch(); transactionWatch.start();
                 replacementVideo = musicService.searchVideoToReplace(backupMusic);
-//                transactionWatch.stop(); log.info("[Test] searchVideoToReplace Time: {} ms", transactionWatch.getTotalTimeMillis());
             }
 
             replacementMusic = musicConverterHelper.makeVideoToMusic(replacementVideo, playlist);
 
             // 복구 횟수만큼 추가 & 삭제 (1:1 매칭 가능한 만큼 복구)
             for (int i = 0; i < Math.min(backupMusicListFromDb.size(), apiDuplicatedCount); i++) {
-                long pk = backupMusicListFromDb.get(i).getId();
+                long pk = backupMusicListFromDb.get(i).id();
                 // DB 교체 처리
                 plannedReplacementDto.add(new PlannedReplacementDto(pk, replacementMusic, backupMusic));
 
@@ -107,7 +107,7 @@ public class RecoveryPlanService {
             // 엣지케이스 1
             if (backupMusicListFromDb.size() > apiDuplicatedCount) { // 4(DB) > 2(API)
                 for (int i = apiDuplicatedCount; i < backupMusicListFromDb.size(); i++) {
-                    long rowPk = backupMusicListFromDb.get(i).getId();
+                    long rowPk = backupMusicListFromDb.get(i).id();
                     edgeDelete.add(rowPk);
                     log.info("[Planned] Delete extra duplicated video on DB : {}", rowPk);
                 }

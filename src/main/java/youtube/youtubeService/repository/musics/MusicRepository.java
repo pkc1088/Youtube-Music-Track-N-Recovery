@@ -2,6 +2,7 @@ package youtube.youtubeService.repository.musics;
 
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.dto.internal.MusicSummaryDto;
 
 import java.util.List;
@@ -16,12 +17,8 @@ public interface MusicRepository {
 
     void deleteAllByIdInBatch(List<Long> pks);
 
-    List<Music> getMusicListFromDBThruMusicId(String videoId, String playlistId);
+    List<MusicDetailsDto> getMusicListFromDBThruMusicId(String videoId, String playlistId);
 
     void updateMusicWithReplacement(long pk, Music replacementMusic);
-}
 
-// List<Music> findAllMusicByPlaylistId(String playlistId); 밑으로 대체
-// List<Music> findAllWithPlaylistByPlaylistIn(List<Playlists> playListsSet); 이것도 밑으로 대체됨
-//    void saveAll(List<Music> musicsToSave);
-//    Optional<Music> findById(long pk);
+}

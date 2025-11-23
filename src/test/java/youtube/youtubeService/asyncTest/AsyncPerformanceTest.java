@@ -12,6 +12,7 @@ import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.repository.musics.SdjMusicRepository;
 import youtube.youtubeService.repository.playlists.SdjPlaylistRepository;
@@ -38,25 +39,22 @@ public class AsyncPerformanceTest {
     @Autowired
     private RecoverOrchestrationService recoverOrchestrationService;
 
-    // === 모킹(Mocking) 대상 ===
     @MockitoSpyBean
-    private UserService userService;
+    UserService userService;
     @MockitoSpyBean
-    private PlaylistService playlistService;
+    ActionLogService actionLogService;
     @MockitoSpyBean
-    private ActionLogService actionLogService;
+    MusicService musicService;
     @MockitoSpyBean
-    private MusicService musicService;
+    PlaylistRegistrationUnitService playlistRegistrationUnitService;
     @MockitoSpyBean
-    private PlaylistRegistrationUnitService playlistRegistrationUnitService;
+    UserRepository userRepository;
     @MockitoSpyBean
-    private UserRepository userRepository;
-    @MockitoSpyBean
-    private OutboxEventHandler outboxEventHandler;
+    OutboxEventHandler outboxEventHandler;
     @MockitoBean
-    private YoutubeApiClient youtubeApiClient;
+    YoutubeApiClient youtubeApiClient;
     @MockitoBean
-    private QuotaService quotaService;
+    QuotaService quotaService;
 
     @Autowired
     SdjPlaylistRepository sdjPlaylistRepository;
@@ -73,48 +71,48 @@ public class AsyncPerformanceTest {
 
         log.info("--- Mocks Setup Start ---");
 
-        // 1. (UserService) 유저 제한 해제 (즉시 "mock-token" 반환)
+
         doAnswer(i -> {
             Thread.sleep(370);
             return "mock-access-token";
         }).when(userService).getNewAccessTokenByUserId(any(), any());
 
-        // 2. (Planner) '읽기' 할당량 항상 통과
+        // (Planner) '읽기' 할당량 항상 통과
         doReturn(true).when(quotaService).checkAndConsumeLua(any(), any(Long.class));
 
-        // 3. (Planner) API 호출 모킹
+        // (Planner) API 호출 모킹
         doAnswer(i -> {
-            Thread.sleep(750);
+            Thread.sleep(516);
             String userId = i.getArgument(0, String.class);
             String playlistId = i.getArgument(1, String.class);
             return makeFakePlaylistItem(userId, playlistId);
         }).when(playlistRegistrationUnitService).fetchAllPlaylistItems(any(), any());
 
         doAnswer(i -> {
-            Thread.sleep(700);
+            Thread.sleep(171);
             String userId = i.getArgument(0, String.class);
             List<String> videoIds = i.getArgument(1);
             return makeFakeVideo(userId, videoIds);
         }).when(playlistRegistrationUnitService).fetchAllVideos(any(), anyList(), any());
 
         doAnswer(i -> {
-            Thread.sleep(35);
+            Thread.sleep(1);
             return Optional.empty();
         }).when(actionLogService).findTodayRecoverLog(any(), any());
 
         doAnswer(i -> {
-            Thread.sleep(1550); // GEMINI Search + API Query search + API SingleVideo search
-            Music backupMusic = i.getArgument(0, Music.class);
+            Thread.sleep(978); // Primary GEMINI Search + API Query search + API SingleVideo search
+            MusicDetailsDto backupMusic = i.getArgument(0, MusicDetailsDto.class);
             return makeFakeReplacementVideo(backupMusic);
         }).when(musicService).searchVideoToReplace(any());
 
         doAnswer(i -> {
-            Thread.sleep(950);
+            Thread.sleep(793);
             return true;
         }).when(youtubeApiClient).addVideoToActualPlaylist(any(), any(), any());
 
         doAnswer(i -> {
-            Thread.sleep(770);
+            Thread.sleep(708);
             return true;
         }).when(youtubeApiClient).deleteFromActualPlaylist(any(), any());
 
@@ -137,14 +135,14 @@ public class AsyncPerformanceTest {
         return new VideoFilterResultPageDto(legalVideos, unlistedCountryVideos);
     }
 
-    private Video makeFakeReplacementVideo(Music backupMusic) {
+    private Video makeFakeReplacementVideo(MusicDetailsDto backupMusic) {
         Video video = new Video();
         video.setId("replacement-video");
         VideoSnippet snippet = new VideoSnippet();
-        snippet.setTitle(backupMusic.getVideoTitle());
-        snippet.setChannelTitle(backupMusic.getVideoUploader());
-        snippet.setDescription(backupMusic.getVideoDescription());
-        snippet.setTags(Collections.singletonList(backupMusic.getVideoTags()));
+        snippet.setTitle(backupMusic.videoTitle());
+        snippet.setChannelTitle(backupMusic.videoUploader());
+        snippet.setDescription(backupMusic.videoDescription());
+        snippet.setTags(Collections.singletonList(backupMusic.videoTags()));
         video.setSnippet(snippet);
 
         return video;
@@ -169,7 +167,6 @@ public class AsyncPerformanceTest {
 
     private List<PlaylistItem> makeFakePlaylistItem(String userId, String playlistId) {
         List<PlaylistItem> mockPlaylistItems = new ArrayList<>();
-        // PlaylistItem getId(), getSnippet().getResourceId().getVideoId()
 
         for (int m = 1; m <= MUSIC_PER_PLAYLIST; m++) {
             PlaylistItem playlistItem = new PlaylistItem();
@@ -266,31 +263,3 @@ public class AsyncPerformanceTest {
 
 
 }
-
-/*
-//        playlistRegistrationUnitService.forTestSavePlaylists(allPlaylists);
-//        playlistRegistrationUnitService.forTestSaveMusics(allMusic);
-    @Transactional
-    public void forTestSavePlaylists(List<Playlists> allPlaylists) {
-        for (Playlists p : allPlaylists) {
-            if (entityManager.find(Playlists.class, p.getPlaylistId()) == null) {
-                entityManager.persist(p);
-            } else {
-                entityManager.merge(p); // ID가 있으면 merge
-            }
-        }
-        entityManager.flush();
-        entityManager.clear();
-    }
-    @Transactional
-    public void forTestSaveMusics(List<Music> allMusic) {
-        for (Music m : allMusic) {
-            entityManager.merge(m);
-        }
-        entityManager.flush();
-        entityManager.clear();
-    }
-
-
-
- */

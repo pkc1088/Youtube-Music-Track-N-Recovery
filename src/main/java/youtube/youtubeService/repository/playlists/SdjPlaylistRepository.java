@@ -16,10 +16,6 @@ public interface SdjPlaylistRepository extends JpaRepository<Playlists, String> 
     @Query("SELECT p FROM Playlists p JOIN FETCH p.user WHERE p.user.userId IN :userIds")
     List<Playlists> findAllByUserIdsWithUser(@Param("userIds") List<String> userIds);
 
-    @Query("SELECT p FROM Playlists p JOIN FETCH p.user u WHERE u.userId = :userId") // LEFT 의미 x
+    @Query("SELECT p FROM Playlists p JOIN FETCH p.user u WHERE u.userId = :userId")
     List<Playlists> findAllByUserIdWithUserFetch(@Param("userId") String userId);
 }
-
-//    @Modifying
-//    @Query("DELETE FROM Playlists p WHERE p.playlistId IN :playlistIds")
-//    void deleteAllByPlaylistIdsIn(@Param("playlistIds") List<String> playlistIds);

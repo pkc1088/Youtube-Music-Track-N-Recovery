@@ -21,5 +21,3 @@ public interface ActionLogRepository extends JpaRepository<ActionLog, Long> {
     Optional<ActionLog> findTodayRecoverLog(@Param("actionType") ActionLog.ActionType actionType,
                                             @Param("targetVideoId") String targetVideoId, @Param("today") LocalDateTime today);
 }
-
-//     void deleteByUserId(String userId);

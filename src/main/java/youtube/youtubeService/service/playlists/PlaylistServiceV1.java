@@ -29,7 +29,6 @@ public class PlaylistServiceV1 implements PlaylistService {
     private final ObjectMapper objectMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public List<Playlists> findAllPlaylistsByUserIds(List<String> userIds) {
         return playlistRepository.findAllPlaylistsByUserIds(userIds);
     }

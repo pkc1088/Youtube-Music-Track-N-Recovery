@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.domain.Users;
+import youtube.youtubeService.exception.UserQuitException;
 import youtube.youtubeService.repository.users.UserRepository;
 import java.io.IOException;
 import java.util.List;
@@ -28,13 +29,11 @@ public class UserServiceV1 implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    @Transactional(readOnly = true)
     public List<Users> findAllUsers() {
         return userRepository.findAllUsers();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Users> getUserByUserId(String userId) {
         return Optional.ofNullable(userRepository.findByUserId(userId));
     }
@@ -47,11 +46,11 @@ public class UserServiceV1 implements UserService {
 
     @Override
     @Transactional
-    public void deleteUserAccount(String userId) {
+    public void deleteAndRevokeUserAccount(String userId) {
         Users user = getUserByUserId(userId).orElseThrow(() -> new IllegalArgumentException("[No User Found]"));
         String refreshToken = user.getRefreshToken();
         revokeUser(refreshToken);
-        userRepository.deleteUser(user);
+        deleteByUserIdRaw(userId);
     }
 
     @Override
@@ -61,6 +60,7 @@ public class UserServiceV1 implements UserService {
             String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + refreshToken;
             try {
                 restTemplate.postForEntity(revokeUrl, null, String.class);
+                log.info("User has been revoked from the service");
             } catch (Exception e) {
                 log.warn("Failed to revoke Google token for user", e);
             }
@@ -69,18 +69,19 @@ public class UserServiceV1 implements UserService {
 
     @Override
     @Transactional
+    public void deleteByUserIdRaw(String userId) {
+        userRepository.deleteByUserIdRaw(userId);
+        log.info("[User [{}] has been deleted from DB]", userId);
+    }
+
+    @Override
     public String getNewAccessTokenByUserId(String userId, String refreshToken) {
         log.info("[once a day : accessToken <- refreshToken]");
-
-        String accessToken;
         try {
-            accessToken = refreshAccessToken(refreshToken);
+            return refreshAccessToken(refreshToken);
         } catch (IOException e) {
-            log.info("[{}]", e.getMessage());
-            userRepository.deleteById(userId);  // deleteBy(entity) 대신 id를 넘겨서 평시에 findByUserId 할 필요 없도록해서 쿼리 줄임
-            return "";
+            throw new UserQuitException(e.getMessage());
         }
-        return accessToken;
     }
 
     private String refreshAccessToken(String refreshToken) throws IOException {

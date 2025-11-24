@@ -1,8 +1,7 @@
 package youtube.youtubeService.exception;
 
-import java.io.IOException;
 
-public class UserQuitException extends IOException {
+public class UserQuitException extends RuntimeException {
     public UserQuitException(String message) {
         super(message);
     }

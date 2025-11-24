@@ -9,6 +9,7 @@ import youtube.youtubeService.dto.internal.MusicSummaryDto;
 import youtube.youtubeService.dto.internal.PlaylistRecoveryPlanDto;
 import youtube.youtubeService.exception.NoPlaylistFoundException;
 import youtube.youtubeService.exception.QuotaExceededException;
+import youtube.youtubeService.exception.UserQuitException;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
@@ -52,11 +53,15 @@ public class RecoverOrchestrationService {
                     String userId = user.getUserId();
                     String countryCode = user.getCountryCode();
                     String refreshToken = user.getRefreshToken();
-                    String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
-                    log.info("[userId: {}]", userId);
+                    String accessToken;
 
-                    if (accessToken.equals("")) {
-                        log.info("abort scheduling bc user left");
+                    try {
+                        log.info("[userId: {}]", userId);
+                        accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
+                    } catch (UserQuitException e) {
+                        log.warn("[User Left] Executing withdrawal process on user {}", userId);
+                        userService.deleteByUserIdRaw(userId);
+                        log.info("[Abort scheduling bc user left -> skip to the user]");
                         return;
                     }
 

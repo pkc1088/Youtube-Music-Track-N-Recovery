@@ -94,7 +94,7 @@ public class YoutubeController {
 
     @PostMapping("/delete")
     public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
-        userService.deleteUserAccount(principal.getName());
+        userService.deleteAndRevokeUserAccount(principal.getName());
 
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();
@@ -107,76 +107,3 @@ public class YoutubeController {
     }
 
 }
-
-/** OGCODE BEFORE 0903
- @Slf4j
- @Controller
- @RequiredArgsConstructor
- public class YoutubeController {
-
- private final UserService userService;
- private final PlaylistService playlistService;
- private final ActionLogService actionLogService;
-
- @GetMapping("/denied")
- public String permissionDenied() {
- return "retry"; // session 끊는 행위 필요함
- }
-
- @GetMapping("/")
- public String index(Principal principal) {
- return principal != null ? "afterLogin" : "login";
- }
-
- @GetMapping("/welcome")
- public String welcomePage() {
- return "welcome";
- }
-
- @GetMapping("/playlist")
- public String redirectToUserPlaylist(@AuthenticationPrincipal OAuth2User principal) {
- return "redirect:/playlist/" + principal.getName();
- }
-
- @GetMapping("/playlist/{userId}")
- public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
- UserRegisterPlaylistsResponseDto dto = playlistService.userRegisterPlaylists(userId);
- model.addAttribute("dto", dto);
- return "playlist_selection";
- }
-
- @PostMapping("/playlist/register")
- public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request) {
- playlistService.registerPlaylists(request);
- return "redirect:/welcome";
- }
-
- @GetMapping("/recovery")
- public String redirectToRecoveryHistory(@AuthenticationPrincipal OAuth2User principal) {
- return "redirect:/recovery/" + principal.getName();
- }
-
- @GetMapping("/recovery/{userId}")
- public String searchRecoveryHistory(@PathVariable String userId, Model model) {
- ActionLogDto dto = actionLogService.findByUserIdOrderByCreatedAtDesc(userId);
- model.addAttribute("dto", dto);
- return "recovery_history";
- }
-
- @PostMapping("/delete")
- public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
- userService.deleteUserAccount(principal.getName());
-
- SecurityContextHolder.clearContext();
- request.getSession().invalidate();
- Cookie cookie = new Cookie("JSESSIONID", null);
- cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
- cookie.setMaxAge(0); // 즉시 만료
- response.addCookie(cookie);
-
- return "redirect:/";
- }
-
- }
-
- */

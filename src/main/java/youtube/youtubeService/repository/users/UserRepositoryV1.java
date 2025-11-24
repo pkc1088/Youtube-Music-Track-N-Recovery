@@ -23,15 +23,11 @@ public class UserRepositoryV1 implements UserRepository {
         repository.save(user);
     }
 
-    public void deleteUser(Users user) {
-        repository.delete(user);
-    }
-
     public List<Users> findAllUsers() {
         return repository.findAll(); // 정렬 없음
     }
 
-    public void deleteById(String userId) {
-        repository.deleteById(userId);
+    public void deleteByUserIdRaw(String userId) {
+        repository.deleteByUserIdRaw(userId);
     }
 }

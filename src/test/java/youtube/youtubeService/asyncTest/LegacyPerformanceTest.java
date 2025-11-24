@@ -250,7 +250,7 @@ public class LegacyPerformanceTest {
     @AfterEach
     void cleanupMockData() {
         log.info("--- Cleaning Up Mock Data ---");
-        for (String userId : mockUserIds) userRepository.deleteById(userId);
+        for (String userId : mockUserIds) userRepository.deleteByUserIdRaw(userId);
         mockUserIds.clear();
         log.info("--- Mock Data Cleanup Done ---");
     }

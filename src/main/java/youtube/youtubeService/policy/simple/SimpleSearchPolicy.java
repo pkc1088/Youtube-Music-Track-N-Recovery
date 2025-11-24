@@ -1,6 +1,5 @@
 package youtube.youtubeService.policy.simple;
 
-import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.policy.SearchPolicy;
 

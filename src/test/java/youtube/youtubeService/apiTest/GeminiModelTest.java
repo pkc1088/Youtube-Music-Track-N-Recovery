@@ -22,8 +22,7 @@ import java.util.concurrent.*;
 public class GeminiModelTest {
 
     @Autowired
-    @Qualifier("geminiSearchQuery")
-    SearchPolicy searchPolicy;
+    SearchPolicy geminiSearchQuery;
 
     private final MusicDetailsDto musicToSearch = new MusicDetailsDto(
             7777L, "videoId123", "Kiss And Say GoodBye", "Manhattans",
@@ -62,7 +61,7 @@ public class GeminiModelTest {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 try {
                     // searchPolicy (RateLimiter 포함)가 여기서 호출됨
-                    String resultQuery = searchPolicy.search(musicToSearch);
+                    String resultQuery = geminiSearchQuery.search(musicToSearch);
                     log.info("[{}] ------------> [{}]", index, resultQuery);
                 } catch (Exception e) {
                     // 개별 스레드에서 발생하는 예외 로깅

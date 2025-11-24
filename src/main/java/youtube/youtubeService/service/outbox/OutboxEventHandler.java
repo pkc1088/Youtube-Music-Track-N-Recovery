@@ -27,8 +27,8 @@ public class OutboxEventHandler {
     private final OutboxProcessor outboxProcessor;
     private final OutboxStatusUpdater outboxStatusUpdater;
     private final QuotaService quotaService;
-    private final Map<String, List<CompletableFuture<Void>>> pendingUserTasks = new ConcurrentHashMap<>();
     private final PartitionedExecutor partitionedOutboxExecutor;
+    private final Map<String, List<CompletableFuture<Void>>> pendingUserTasks = new ConcurrentHashMap<>();
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleInitialOutboxEvent(OutboxCreatedEventDto eventDto) {

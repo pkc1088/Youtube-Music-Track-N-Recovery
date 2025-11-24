@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class ExecutorConfig {
 
-    // 고정된 스레드 풀 - 이 숫자는 동시에 처리할 수 있는 최대 플레이리스트 파티션 수
+    // 고정된 스레드 풀
     private static final int PARTITION_SIZE = 10;
 
     /**
@@ -50,9 +50,7 @@ public class ExecutorConfig {
         }
 
         /**
-         * 파티션 키(playlistId)를 기반으로 적절한 스레드에 작업을 제출합니다.
-         * @param partitionKey 순서를 보장해야 하는 리소스 ID (e.g., playlistId)
-         * @param task         실행할 작업
+         * 파티션 키(playlistId)를 기반으로 적절한 스레드에 작업을 제출
          */
         public CompletableFuture<Void> submit(String partitionKey, Runnable task) {
             // 키를 해시하여 어떤 파티션(스레드)에 할당할지 결정
@@ -61,9 +59,6 @@ public class ExecutorConfig {
             return CompletableFuture.runAsync(task, partitions[index]);
         }
 
-        /**
-         * Spring이 이 빈을 파괴하기 직전에 호출
-         */
         @PreDestroy
         public void shutdown() {
             log.info("Shutting down PartitionedExecutor...");

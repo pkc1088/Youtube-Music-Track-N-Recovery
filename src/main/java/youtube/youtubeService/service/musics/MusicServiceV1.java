@@ -2,9 +2,9 @@ package youtube.youtubeService.service.musics;
 
 import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -23,22 +23,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MusicServiceV1 implements MusicService {
 
     private final MusicRepository musicRepository;
-    private final SearchPolicy searchPolicy;
+    private final SearchPolicy geminiSearchQuery;
     private final YoutubeApiClient youtubeApiClient;
     private final JdbcTemplate jdbcTemplate;
     private final MusicConverterHelper musicConverterHelper;
-
-    public MusicServiceV1(MusicRepository musicRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy, YoutubeApiClient youtubeApiClient,
-                          JdbcTemplate jdbcTemplate, MusicConverterHelper musicConverterHelper) {
-        this.musicRepository = musicRepository;
-        this.searchPolicy = searchPolicy;
-        this.youtubeApiClient = youtubeApiClient;
-        this.jdbcTemplate = jdbcTemplate;
-        this.musicConverterHelper = musicConverterHelper;
-    }
 
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
@@ -117,7 +109,7 @@ public class MusicServiceV1 implements MusicService {
         String query = null;
 
         try {
-            query = searchPolicy.search(musicToSearch);
+            query = geminiSearchQuery.search(musicToSearch);
             log.info("[searched with]: {}", query);
 
             // 이미 할당량 체크는 YoutubeService 에서 100 + 1 로 체크해줬음

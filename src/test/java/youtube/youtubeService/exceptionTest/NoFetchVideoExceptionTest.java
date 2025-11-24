@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import youtube.youtubeService.api.YoutubeApiClient;
+import youtube.youtubeService.config.AuthenticatedYouTubeFactory;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 public class NoFetchVideoExceptionTest {
 
     private YoutubeApiClient youtubeApiClient;
+    private AuthenticatedYouTubeFactory youTubeFactory;
 
     @Mock
     private YouTube youtubeMock;
@@ -40,8 +42,7 @@ public class NoFetchVideoExceptionTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        youtubeApiClient = new YoutubeApiClient();
-
+        youtubeApiClient = new YoutubeApiClient(youtubeMock, youTubeFactory);
         Field youtubeField = YoutubeApiClient.class.getDeclaredField("youtube");
         youtubeField.setAccessible(true);
         youtubeField.set(youtubeApiClient, youtubeMock);

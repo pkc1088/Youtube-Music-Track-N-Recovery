@@ -5,6 +5,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ManagementScheduler {
 
     @Value("${youtube.api.key}")
@@ -46,7 +48,7 @@ public class ManagementScheduler {
     private final PlaylistService playlistService;
     private final UserService userService;
     private final UserRepository userRepository;
-    private final SearchPolicy searchPolicy;
+    private final SearchPolicy geminiSearchQuery;
     private final PlaylistRepository playlistRepository;
     private final MusicRepository musicRepository;
     private final YoutubeApiClient youtubeApiClient;
@@ -54,26 +56,6 @@ public class ManagementScheduler {
     private final OutboxEventHandler outboxEventHandler;
     private final MusicService musicService;
     private final YouTube youtube;
-
-    @Autowired
-    public ManagementScheduler(PlaylistService playlistService, UserService userService,
-                               UserRepository userRepository, @Qualifier("geminiSearchQuery") SearchPolicy searchPolicy,
-                               MusicRepository musicRepository, PlaylistRepository playlistRepository, YoutubeApiClient youtubeApiClient,
-                               RecoverOrchestrationService recoverOrchestrationService, OutboxEventHandler outboxEventHandler, MusicService musicService) {
-        this.playlistService = playlistService;
-        // this.youtubeService = youtubeService;
-        this.userService = userService;
-        this.userRepository = userRepository;
-        this.musicRepository = musicRepository;
-        this.searchPolicy = searchPolicy;
-        this.playlistRepository = playlistRepository;
-        this.youtubeApiClient = youtubeApiClient;
-        this.recoverOrchestrationService = recoverOrchestrationService;
-        this.outboxEventHandler = outboxEventHandler;
-        // @Qualifier("simpleSearchQuery")
-        this.musicService = musicService;
-        youtube = new YouTube.Builder(new NetHttpTransport(), new GsonFactory(), request -> {}).setApplicationName("youtube").build();
-    }
 
 //    @Scheduled(fixedRate = 500000, initialDelayString = "1000")
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {

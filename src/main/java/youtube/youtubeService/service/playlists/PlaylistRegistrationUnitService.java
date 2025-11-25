@@ -5,7 +5,8 @@ import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.Video;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,9 @@ import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicService;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import static jakarta.transaction.Transactional.TxType.REQUIRES_NEW;
 
 @Slf4j
 @Service
@@ -38,19 +36,33 @@ public class PlaylistRegistrationUnitService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    @Transactional(REQUIRES_NEW)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveSinglePlaylist(PlaylistDto playlistDto, String userId, String countryCode) {
 
-        Playlists playlist = new Playlists();
-        playlist.setPlaylistId(playlistDto.getId());
-        playlist.setPlaylistTitle(playlistDto.getTitle());
-        playlist.setServiceType(Playlists.ServiceType.RECOVER);
+//        Playlists playlist = new Playlists();
+//        playlist.setPlaylistId(playlistDto.getId());
+//        playlist.setPlaylistTitle(playlistDto.getTitle());
+//        playlist.setServiceType(Playlists.ServiceType.RECOVER);
+//
+//        Users userRef = entityManager.getReference(Users.class, userId); // 불필요한 playlist 관련 select 쿼리 1회 막는 용(바로 persist)
+//        playlist.setUser(userRef);
+//        entityManager.persist(playlist);
+//        entityManager.flush(); // bulk insert 용
+//        saveAllVideos(userId, playlist, countryCode);
 
-        Users userRef = entityManager.getReference(Users.class, userId); // 불필요한 playlist 관련 select 쿼리 1회 막는 용(바로 persist)
-        playlist.setUser(userRef);
+        Users userRef = entityManager.getReference(Users.class, userId);
+        Playlists playlist = new Playlists(playlistDto.getId(), playlistDto.getTitle(), Playlists.ServiceType.RECOVER, userRef);
         entityManager.persist(playlist);
-        entityManager.flush(); // bulk insert 용
+        entityManager.flush();
         saveAllVideos(userId, playlist, countryCode);
+        /*
+        Playlists playlist = Playlists.builder()
+                .playlistId(playlistDto.getId())
+                .playlistTitle(playlistDto.getTitle())
+                .serviceType(Playlists.ServiceType.RECOVER)
+                .user(userRef)
+                .build();
+        */
     }
 
     private void saveAllVideos(String userId, Playlists playlist, String countryCode) {

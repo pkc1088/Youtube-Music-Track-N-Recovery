@@ -11,7 +11,6 @@ import java.util.List;
 public interface MusicService {
 
     List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet);
-    void deleteById(Long pk);
 
     void deleteAllByIdInBatch(List<Long> ids);
 

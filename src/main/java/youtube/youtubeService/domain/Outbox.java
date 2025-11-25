@@ -10,9 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Outbox {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,12 +28,11 @@ public class Outbox {
     private String playlistItemId;
 
     @Enumerated(EnumType.STRING)
-    private Status status = Status.PENDING;
+    private Status status;
 
-    private int retryCount = 0;
-    private LocalDateTime lastAttemptedAt;
+    private int failCount;
+    private LocalDateTime lastUpdatedAt;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public enum ActionType { ADD, DELETE }
     public enum Status { PENDING, SUCCESS, FAILED, DEAD }
@@ -42,10 +40,25 @@ public class Outbox {
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
     }
-    @PreUpdate
-    public void preUpdate() {
-        updatedAt = LocalDateTime.now();
+
+    public Outbox(ActionType actionType, String accessToken, String userId, String playlistId, String videoId, String playlistItemId) {
+        this.actionType = actionType;
+        this.accessToken = accessToken;
+        this.userId = userId;
+        this.playlistId = playlistId;
+        this.videoId = videoId;
+        this.playlistItemId = playlistItemId;
+
+        this.status = Status.PENDING;
+        this.failCount = 0;
+    }
+
+    public void updateStatus(Status newStatus) {
+        if (newStatus == Status.FAILED || newStatus == Status.DEAD) {
+            this.failCount++;
+        }
+        this.status = newStatus;
+        this.lastUpdatedAt = LocalDateTime.now();
     }
 }

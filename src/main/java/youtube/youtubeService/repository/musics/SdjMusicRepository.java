@@ -43,5 +43,3 @@ public interface SdjMusicRepository extends JpaRepository<Music, Long> {
     void updateMusicWithReplacement(@Param("pk") Long pk, @Param("music") Music music);
 }
 
-//    @Query("SELECT m FROM Music m WHERE m.videoId = :videoId AND m.playlist.playlistId = :playlistId")
-//  List<Music> findAllByVideoIdAndPlaylistId(@Param("videoId") String videoId, @Param("playlistId") String playlistId);

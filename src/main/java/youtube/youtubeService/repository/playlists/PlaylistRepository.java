@@ -1,8 +1,6 @@
 package youtube.youtubeService.repository.playlists;
 
-import org.springframework.data.repository.query.Param;
 import youtube.youtubeService.domain.Playlists;
-
 import java.util.List;
 
 public interface PlaylistRepository {

@@ -17,6 +17,6 @@ public class OutboxStatusUpdater {
     public void updateOutboxStatus(Long outboxId, Outbox.Status status) {
 
         Outbox outbox = outboxRepository.findOutboxById(outboxId).orElseThrow();
-        outbox.setStatus(status);
+        outbox.updateStatus(status);
     }
 }

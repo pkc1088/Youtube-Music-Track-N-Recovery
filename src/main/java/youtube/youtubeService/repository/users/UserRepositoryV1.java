@@ -2,9 +2,7 @@ package youtube.youtubeService.repository.users;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import youtube.youtubeService.domain.Users;
-
 import java.util.List;
 
 @Repository

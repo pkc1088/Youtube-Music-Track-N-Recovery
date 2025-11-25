@@ -2,12 +2,8 @@ package youtube.youtubeService.repository.playlists;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import youtube.youtubeService.domain.Playlists;
-import youtube.youtubeService.domain.Users;
 
 import java.util.List;
 
@@ -25,7 +21,7 @@ public class PlaylistRepositoryV1 implements PlaylistRepository {
 
     @Override
     public void deleteAllByPlaylistIdsIn(List<String> deselectedPlaylistIds) {
-        repository.deleteAllByIdInBatch(deselectedPlaylistIds); // repository.deleteAllByPlaylistIdsIn(deselectedPlaylistIds);
+        repository.deleteAllByIdInBatch(deselectedPlaylistIds);
     }
 
     @Override

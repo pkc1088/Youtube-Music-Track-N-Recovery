@@ -28,11 +28,6 @@ public class MusicRepositoryV1 implements MusicRepository{
     }
 
     @Override
-    public void deleteById(Long pk) {
-        repository.deleteById(pk);
-    }
-
-    @Override
     public void deleteAllByIdInBatch(List<Long> pks) {
         repository.deleteAllByIdInBatch(pks);
     }

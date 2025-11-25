@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,6 +34,7 @@ public class YoutubeController {
     private final UserService userService;
     private final PlaylistService playlistService;
     private final ActionLogService actionLogService;
+    // private final OAuth2AuthorizedClientService authorizedClientService;
 
     @GetMapping("/channelNotFound")
     public String channelNotFound() {
@@ -75,7 +78,7 @@ public class YoutubeController {
     @PostMapping("/playlist/register")
     public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, RedirectAttributes redirectAttributes) {
         PlaylistRegisterResponseDto dto = playlistService.registerPlaylists(request);
-        redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute에 담아서 리다이렉트 시 전달
+        redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute 에 담아서 리다이렉트 시 전달
         return "redirect:/welcome";
     }
 
@@ -93,8 +96,11 @@ public class YoutubeController {
     }
 
     @PostMapping("/delete")
-    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
-        userService.deleteAndRevokeUserAccount(principal.getName());
+    public String deleteAccount(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient authorizedClient, HttpServletRequest request, HttpServletResponse response) {
+
+        String userId = authorizedClient.getPrincipalName();
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        userService.deleteAndRevokeUserAccount(userId, accessToken);
 
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();

@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor
 public class GeminiResponse {
 
     private List<Candidate> candidates;
@@ -14,7 +14,6 @@ public class GeminiResponse {
     @Getter
     public static class Candidate {
         private Content content;
-
     }
 
     @Getter

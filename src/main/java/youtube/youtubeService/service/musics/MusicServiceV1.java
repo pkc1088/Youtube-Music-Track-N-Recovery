@@ -39,12 +39,6 @@ public class MusicServiceV1 implements MusicService {
 
     @Override
     @Transactional
-    public void deleteById(Long pk) {
-        musicRepository.deleteById(pk);
-    }
-
-    @Override
-    @Transactional
     public void deleteAllByIdInBatch(List<Long> pks) {
         musicRepository.deleteAllByIdInBatch(pks);
     }
@@ -69,15 +63,14 @@ public class MusicServiceV1 implements MusicService {
     @Override
     @Transactional
     public void saveAllVideos(List<Video> legalVideos, Playlists playlist) {
-        // 1. Video 리스트를 Music 리스트로 변환
+        // Video 리스트를 Music 리스트로 변환
         List<Music> musicsToSave = legalVideos.stream()
                 .map(video -> musicConverterHelper.makeVideoToMusic(video, playlist))
                 .collect(Collectors.toList());
-        // 2. JdbcTemplate으로 bulk insert 실행
+        // JdbcTemplate으로 bulk insert 실행
         bulkInsertMusic(musicsToSave);
     }
 
-    // JdbcTemplate 을 사용하는 새 메서드
     @Override
     @Transactional
     public void bulkInsertMusic(List<Music> musics) {

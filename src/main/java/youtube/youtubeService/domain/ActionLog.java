@@ -9,8 +9,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@NoArgsConstructor
 public class ActionLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,15 +20,29 @@ public class ActionLog {
     private String playlistId;
 
     @Enumerated(EnumType.STRING)
-    private ActionType actionType = ActionType.RECOVER;
+    private ActionType actionType;
 
     private String targetVideoId;
     private String targetVideoTitle;
     private String sourceVideoId;
     private String sourceVideoTitle;
 
-    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+    }
+
     public enum ActionType { RECOVER, NOTIFY }
+
+    public ActionLog(String userId, String playlistId, ActionType actionType, String targetVideoId, String targetVideoTitle, String sourceVideoId, String sourceVideoTitle) {
+        this.userId = userId;
+        this.playlistId = playlistId;
+        this.actionType = (actionType != null) ? actionType : ActionType.RECOVER;
+        this.targetVideoId = targetVideoId;
+        this.targetVideoTitle = targetVideoTitle;
+        this.sourceVideoId = sourceVideoId;
+        this.sourceVideoTitle = sourceVideoTitle;
+    }
 }

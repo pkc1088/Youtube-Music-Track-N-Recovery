@@ -315,11 +315,11 @@ public class ManagementScheduler {
 
 //    @Scheduled(fixedRate = 30000, initialDelayString = "1000")
     public void geminiTest() {
-        Music musicToSearch = new Music();
-        musicToSearch.setVideoTitle("a good music");
-        musicToSearch.setVideoUploader("manhattan lover");
-        musicToSearch.setVideoDescription("kiss and say good bye is a good music sung by The Manhattans");
-        musicToSearch.setVideoTags("R&B, Soul");
+//        Music musicToSearch = new Music();
+//        musicToSearch.setVideoTitle("a good music");
+//        musicToSearch.setVideoUploader("manhattan lover");
+//        musicToSearch.setVideoDescription("kiss and say good bye is a good music sung by The Manhattans");
+//        musicToSearch.setVideoTags("R&B, Soul");
 //        String text = searchPolicy.search(musicToSearch);
 //        System.out.println(text);
     }

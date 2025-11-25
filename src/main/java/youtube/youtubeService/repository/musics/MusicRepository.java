@@ -13,8 +13,6 @@ public interface MusicRepository {
 
     void upsertMusic(Music music);
 
-    void deleteById(Long pk);
-
     void deleteAllByIdInBatch(List<Long> pks);
 
     List<MusicDetailsDto> getMusicListFromDBThruMusicId(String videoId, String playlistId);

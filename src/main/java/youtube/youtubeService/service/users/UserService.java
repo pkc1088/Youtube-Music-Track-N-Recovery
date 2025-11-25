@@ -15,7 +15,7 @@ public interface UserService {
 
     List<Users> findAllUsers();
 
-    void deleteAndRevokeUserAccount(String userId);
+    void deleteAndRevokeUserAccount(String userId, String accessToken);
 
     void revokeUser(String refreshToken);
 

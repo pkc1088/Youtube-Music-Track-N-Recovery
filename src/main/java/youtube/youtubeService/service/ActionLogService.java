@@ -28,14 +28,7 @@ public class ActionLogService {
 
     @Transactional
     public void actionLogSave(String userId, String playlistId, ActionLog.ActionType actionType, MusicDetailsDto trgVid, Music srcVid) {
-        ActionLog log = new ActionLog();
-        log.setUserId(userId);
-        log.setPlaylistId(playlistId);
-        log.setActionType(actionType);
-        log.setTargetVideoId(trgVid.videoId());
-        log.setTargetVideoTitle(trgVid.videoTitle());
-        log.setSourceVideoId(srcVid.getVideoId());
-        log.setSourceVideoTitle(srcVid.getVideoTitle());
+        ActionLog log = new ActionLog(userId, playlistId, actionType, trgVid.videoId(), trgVid.videoTitle(), srcVid.getVideoId(), srcVid.getVideoTitle());
         actionLogRepository.save(log);
     }
 

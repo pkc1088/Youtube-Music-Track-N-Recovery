@@ -99,9 +99,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 String refreshToken = authorizedClient.getRefreshToken() != null ? authorizedClient.getRefreshToken().getTokenValue() : null;
                 String countryCode = geoIpService.getClientCountryCode(request);
 
-                saveUsersToDatabase(userId, userRole, fullName, channelId, email, refreshToken, countryCode);
+                saveUsersToDatabase(userId, userRole, fullName, channelId, email, countryCode, refreshToken);
             }
-//
+
             // 1) Authorities 생성
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + userRole));
             // 2) 새로운 Authentication 생성
@@ -111,7 +111,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             // 5) (권장) 세션에 SecurityContext 강제 저장 — 서버가 세션 재생성/fixation 처리해도 안전하게
             HttpSession session = request.getSession();
             session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-//
+
         }
 
         response.sendRedirect("/");// super.onAuthenticationSuccess(request, response, authentication);>simpleUrlAuthenticationSuccessHandler>AbstractAuthenticationTargetUrlRequestHandler 타고 들어가보면 기본 defaultTargetUrl = "/"; 이렇게 셋팅 되어서 에러 뜬거임.
@@ -132,8 +132,8 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     private void saveUpdatedRefreshToken(Users user, String updatedRefreshToken) {
-        user.setRefreshToken(updatedRefreshToken);
-        userService.saveUser(user); // 이 클래스엔 트잭 없으니까 애초에  User 가 영속 상태가 아님, 그래서 save 명시적으로 해줘야함, 그래야 mysql 에 반영됨 (userService 에 트잭 있어서 영속성 컨텍스트 내 반영이 됨, 트잭 시작 지점)
+        user.updateRefreshToken(updatedRefreshToken);
+        userService.saveUser(user);
     }
 
     private Optional<Users> alreadyMember(String userId) {
@@ -144,7 +144,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         return user;
     }
 
-    private void saveUsersToDatabase(String id, Users.UserRole userRole, String fullName, String channelId, String email, String refreshToken, String countryCode) {
+    private void saveUsersToDatabase(String id, Users.UserRole userRole, String fullName, String channelId, String email, String countryCode, String refreshToken) {
         log.info("[New Member Id]: {}", id);
         log.info("[New Member Role]: {}", userRole);
         log.info("[New Member Name]: {}", fullName);

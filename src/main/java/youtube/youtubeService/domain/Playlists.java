@@ -1,16 +1,11 @@
 package youtube.youtubeService.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-//@Data
 @Entity
-@Getter @Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Playlists {
 
     @Id
@@ -18,12 +13,20 @@ public class Playlists {
     private String playlistTitle;
 
     @Enumerated(EnumType.STRING)
-    private ServiceType serviceType = ServiceType.RECOVER;
+    private ServiceType serviceType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
     private Users user;
 
     public enum ServiceType { RECOVER, NOTIFY }
+
+
+    public Playlists(String playlistId, String playlistTitle, ServiceType serviceType, Users user) {
+        this.playlistId = playlistId;
+        this.playlistTitle = playlistTitle;
+        this.serviceType = (serviceType != null) ? serviceType : ServiceType.RECOVER;
+        this.user = user;
+    }
 }
 

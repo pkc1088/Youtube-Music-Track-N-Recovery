@@ -172,14 +172,13 @@ public class LegacyPerformanceTest {
     }
 
     public Music makeFakeMusic(String videoId, String title, String uploader, String description, String tags, Playlists playlist) {
-        Music music = new Music();
-        music.setVideoId(videoId);
-        music.setVideoTitle(title);
-        music.setVideoUploader(uploader);
-        music.setVideoDescription(description);
-        music.setVideoTags(tags);
-        music.setPlaylist(playlist);
-        return music;
+//        music.setVideoId(videoId);
+//        music.setVideoTitle(title);
+//        music.setVideoUploader(uploader);
+//        music.setVideoDescription(description);
+//        music.setVideoTags(tags);
+//        music.setPlaylist(playlist);
+        return new Music(videoId, title, uploader, description, tags, playlist);
     }
 
     private List<PlaylistItem> makeFakePlaylistItem(String userId, String playlistId) {

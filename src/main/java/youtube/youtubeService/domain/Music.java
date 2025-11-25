@@ -1,15 +1,11 @@
 package youtube.youtubeService.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
-@Getter @Setter
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Music {
 
     @Id
@@ -27,6 +23,16 @@ public class Music {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "playlistId", nullable = false)
     private Playlists playlist;
+
+
+    public Music(String videoId, String videoTitle, String videoUploader, String videoDescription, String videoTags, Playlists playlist) {
+        this.videoId = videoId;
+        this.videoTitle = videoTitle;
+        this.videoUploader = videoUploader;
+        this.videoDescription = videoDescription;
+        this.videoTags = videoTags;
+        this.playlist = playlist;
+    }
 }
 
 

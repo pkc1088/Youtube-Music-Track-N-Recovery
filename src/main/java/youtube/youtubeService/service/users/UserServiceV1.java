@@ -46,18 +46,16 @@ public class UserServiceV1 implements UserService {
 
     @Override
     @Transactional
-    public void deleteAndRevokeUserAccount(String userId) {
-        Users user = getUserByUserId(userId).orElseThrow(() -> new IllegalArgumentException("[No User Found]"));
-        String refreshToken = user.getRefreshToken();
-        revokeUser(refreshToken);
+    public void deleteAndRevokeUserAccount(String userId, String accessToken) {
+        revokeUser(accessToken);
         deleteByUserIdRaw(userId);
     }
 
     @Override
-    public void revokeUser(String refreshToken) {
+    public void revokeUser(String token) {
         RestTemplate restTemplate = new RestTemplate();
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + refreshToken;
+        if (token != null && !token.isBlank()) {
+            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + token;
             try {
                 restTemplate.postForEntity(revokeUrl, null, String.class);
                 log.info("User has been revoked from the service");

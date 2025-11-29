@@ -1,27 +1,21 @@
 package youtube.youtubeService.scheduler;
 
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.api.YoutubeApiClient;
-import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.dto.internal.QuotaPlaylistItemPageDto;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
@@ -31,7 +25,7 @@ import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
+import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +46,7 @@ public class ManagementScheduler {
     private final PlaylistRepository playlistRepository;
     private final MusicRepository musicRepository;
     private final YoutubeApiClient youtubeApiClient;
-    private final RecoverOrchestrationService recoverOrchestrationService;
+    private final RecoveryOrchestratorService recoveryOrchestratorService;
     private final OutboxEventHandler outboxEventHandler;
     private final MusicService musicService;
     private final YouTube youtube;
@@ -61,7 +55,7 @@ public class ManagementScheduler {
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
         log.info("auto scheduler activated");
 
-        recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+        recoveryOrchestratorService.allPlaylistsRecoveryOfAllUsers();
 
         log.info("auto scheduler done");
     }

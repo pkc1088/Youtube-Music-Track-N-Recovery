@@ -12,6 +12,7 @@ import youtube.youtubeService.exception.QuotaExceededException;
 import youtube.youtubeService.exception.UserQuitException;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
+import youtube.youtubeService.service.playlists.PlaylistPersistenceService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RecoverOrchestrationService {
+public class RecoveryOrchestratorService {
 
     private final UserService userService;
     private final PlaylistService playlistService;
@@ -33,6 +34,7 @@ public class RecoverOrchestrationService {
     private final OutboxEventHandler outboxEventHandler;
     private final RecoveryPlanService recoveryPlanService;
     private final RecoveryExecuteService recoveryExecuteService;
+    private final PlaylistPersistenceService playlistPersistenceService;
     private final Executor userExecutor;
 
     public void allPlaylistsRecoveryOfAllUsers() {
@@ -86,7 +88,7 @@ public class RecoverOrchestrationService {
                         } catch (QuotaExceededException ex) {
                             log.warn("[Quota Exceed EX at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), ex.getMessage());
                         } catch (NoPlaylistFoundException npe) {
-                            playlistService.removePlaylistsFromDB(Collections.singletonList(playlist.getPlaylistId()));
+                            playlistPersistenceService.removeDeselectedPlaylists(Collections.singletonList(playlist.getPlaylistId()));
                             log.warn("[NoPlaylistFoundException is successfully handled -> skip to the next]");
                         } catch (Exception e) {
                             log.warn("[Unexpected Error at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), e.getMessage());

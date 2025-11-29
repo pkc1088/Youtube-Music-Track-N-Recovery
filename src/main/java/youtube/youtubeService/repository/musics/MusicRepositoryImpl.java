@@ -13,7 +13,7 @@ import java.util.List;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class MusicRepositoryV1 implements MusicRepository{
+public class MusicRepositoryImpl implements MusicRepository{
 
     private final SdjMusicRepository repository;
 

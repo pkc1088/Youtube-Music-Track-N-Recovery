@@ -20,7 +20,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceV1 implements UserService {
+public class UserServiceImpl implements UserService {
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;

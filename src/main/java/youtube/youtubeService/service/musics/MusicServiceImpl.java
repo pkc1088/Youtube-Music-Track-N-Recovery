@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MusicServiceV1 implements MusicService {
+public class MusicServiceImpl implements MusicService {
 
     private final MusicRepository musicRepository;
     private final SearchPolicy geminiSearchQuery;

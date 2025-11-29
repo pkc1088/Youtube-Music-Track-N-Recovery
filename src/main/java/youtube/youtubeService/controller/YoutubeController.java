@@ -20,9 +20,8 @@ import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
 import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
 import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
 import youtube.youtubeService.service.ActionLogService;
-import youtube.youtubeService.service.playlists.PlaylistService;
+import youtube.youtubeService.service.playlists.PlaylistRegistrationOrchestratorService;
 import youtube.youtubeService.service.users.UserService;
-
 import java.io.IOException;
 import java.security.Principal;
 
@@ -32,9 +31,8 @@ import java.security.Principal;
 public class YoutubeController {
 
     private final UserService userService;
-    private final PlaylistService playlistService;
     private final ActionLogService actionLogService;
-    // private final OAuth2AuthorizedClientService authorizedClientService;
+    private final PlaylistRegistrationOrchestratorService playlistRegistrationOrchestratorService;
 
     @GetMapping("/channelNotFound")
     public String channelNotFound() {
@@ -70,14 +68,14 @@ public class YoutubeController {
     @GetMapping("/playlist/{userId}")
     @PreAuthorize("#userId == authentication.principal.name")
     public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
-        UserRegisterPlaylistsResponseDto dto = playlistService.userRegisterPlaylists(userId);
+        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId);
         model.addAttribute("dto", dto);
         return "playlist_selection";
     }
 
     @PostMapping("/playlist/register")
     public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, RedirectAttributes redirectAttributes) {
-        PlaylistRegisterResponseDto dto = playlistService.registerPlaylists(request);
+        PlaylistRegisterResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistRegistration(request);
         redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute 에 담아서 리다이렉트 시 전달
         return "redirect:/welcome";
     }

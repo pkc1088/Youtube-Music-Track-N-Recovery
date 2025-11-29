@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-public class PlaylistRepositoryV1 implements PlaylistRepository {
+public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     private final SdjPlaylistRepository repository;
 

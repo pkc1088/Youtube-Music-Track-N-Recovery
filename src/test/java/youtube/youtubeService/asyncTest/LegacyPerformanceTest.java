@@ -8,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.util.StopWatch;
-import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
@@ -23,9 +22,8 @@ import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
-import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
+import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import youtube.youtubeService.service.youtube.RecoveryExecuteService;
 
 import java.io.IOException;
@@ -40,7 +38,7 @@ import static org.mockito.Mockito.*;
 public class LegacyPerformanceTest {
 
     @Autowired
-    private RecoverOrchestrationService recoverOrchestrationService;
+    private RecoveryOrchestratorService recoveryOrchestratorService;
 
     @MockitoSpyBean
     UserService userService;
@@ -266,7 +264,7 @@ public class LegacyPerformanceTest {
         totalWatch.start();
 
         // 핵심 측정 대상
-        recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+        recoveryOrchestratorService.allPlaylistsRecoveryOfAllUsers();
 
         totalWatch.stop();
 

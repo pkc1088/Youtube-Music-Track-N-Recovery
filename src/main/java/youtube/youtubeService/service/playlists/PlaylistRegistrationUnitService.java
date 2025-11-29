@@ -29,58 +29,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PlaylistRegistrationUnitService {
+
     private final YoutubeApiClient youtubeApiClient;
-    private final MusicService musicService;
     private final QuotaService quotaService;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveSinglePlaylist(PlaylistDto playlistDto, String userId, String countryCode) {
-
-//        Playlists playlist = new Playlists();
-//        playlist.setPlaylistId(playlistDto.getId());
-//        playlist.setPlaylistTitle(playlistDto.getTitle());
-//        playlist.setServiceType(Playlists.ServiceType.RECOVER);
-//
-//        Users userRef = entityManager.getReference(Users.class, userId); // 불필요한 playlist 관련 select 쿼리 1회 막는 용(바로 persist)
-//        playlist.setUser(userRef);
-//        entityManager.persist(playlist);
-//        entityManager.flush(); // bulk insert 용
-//        saveAllVideos(userId, playlist, countryCode);
-
-        Users userRef = entityManager.getReference(Users.class, userId);
-        Playlists playlist = new Playlists(playlistDto.getId(), playlistDto.getTitle(), Playlists.ServiceType.RECOVER, userRef);
-        entityManager.persist(playlist);
-        entityManager.flush();
-        saveAllVideos(userId, playlist, countryCode);
-        /*
-        Playlists playlist = Playlists.builder()
-                .playlistId(playlistDto.getId())
-                .playlistTitle(playlistDto.getTitle())
-                .serviceType(Playlists.ServiceType.RECOVER)
-                .user(userRef)
-                .build();
-        */
-    }
-
-    private void saveAllVideos(String userId, Playlists playlist, String countryCode) {
-        List<PlaylistItem> playlistItems;
-        try {
-            playlistItems = fetchAllPlaylistItems(userId, playlist.getPlaylistId());
-        } catch (IOException e) {
-            log.info("The playlist is deleted in a very short amount of time");
-            return; // 이미 진입전에 1 소모한걸 반영했으니 여기선 처리 필요 x
-        }
-        // 2. 검색할 비디오 ID 리스트 만들기
-        List<String> videoIds = playlistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
-        // 3. 페이지네이션으로 정상 음악만 세부사항 필터링 해오기
-        VideoFilterResultPageDto videoFilterResult = fetchAllVideos(userId, videoIds, countryCode);
-        List<Video> legalVideos = videoFilterResult.legalVideos();
-        // 4. DB 에 최초 등록
-        musicService.saveAllVideos(legalVideos, playlist);
-    }
 
     public List<PlaylistItem> fetchAllPlaylistItems(String userId, String playlistId) throws IOException {
         List<PlaylistItem> playlistItems = new ArrayList<>();
@@ -133,5 +85,4 @@ public class PlaylistRegistrationUnitService {
         return playlists;
     }
 }
-
 

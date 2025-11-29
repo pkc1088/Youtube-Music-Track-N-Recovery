@@ -26,7 +26,7 @@ import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
+import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import youtube.youtubeService.service.youtube.RecoveryExecuteService;
 import youtube.youtubeService.service.youtube.RecoveryPlanService;
 
@@ -44,7 +44,8 @@ import static org.mockito.Mockito.doAnswer;
 @Import(CQSTest.TransactionTimeAspect.class)
 public class CQSTest {
 
-    @Autowired RecoverOrchestrationService recoverOrchestrationService;
+    @Autowired
+    RecoveryOrchestratorService recoveryOrchestratorService;
     @Autowired RecoveryPlanService recoveryPlanService;
     @Autowired RecoveryExecuteService recoveryExecuteService;
     @Autowired YoutubeApiClient youtubeApiClient;

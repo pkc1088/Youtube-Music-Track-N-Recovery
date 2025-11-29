@@ -62,7 +62,6 @@ public class RecoveryPlanService {
             List<String> playlistItemIdsToDelete = entry.getValue();
             int apiDuplicatedCount = playlistItemIdsToDelete.size();
             //  DB 에서 해당 videoId + playlistId 를 가진 모든 음악 조회
-//            List<Music> backupMusicListFromDb = musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId);
             List<MusicDetailsDto> backupMusicListFromDb = musicService.getMusicListFromDBThruMusicId(videoIdToDelete, playlistId);
 
             if (backupMusicListFromDb.isEmpty()) {
@@ -74,11 +73,8 @@ public class RecoveryPlanService {
                 continue;
             }
 
-//            Music backupMusic = backupMusicListFromDb.get(0);
             MusicDetailsDto backupMusic = backupMusicListFromDb.get(0);
-//            StopWatch transactionWatch = new StopWatch(); transactionWatch.start();
             Optional<ActionLog> recentLogOpt = actionLogService.findTodayRecoverLog(ActionLog.ActionType.RECOVER, backupMusic.videoId());
-//            transactionWatch.stop(); log.info("[Test] findTodayRecoverLog Time: {} ms", transactionWatch.getTotalTimeMillis());
             Music replacementMusic;
             Video replacementVideo;
 

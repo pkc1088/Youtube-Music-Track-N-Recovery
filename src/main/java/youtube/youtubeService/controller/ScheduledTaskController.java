@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
-import java.io.IOException;
+import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 
 @Slf4j
 @RestController
@@ -20,11 +19,11 @@ public class ScheduledTaskController {
     @Value("${youtube.api.key}")
     private String apiKey;
 
-    private final RecoverOrchestrationService recoverOrchestrationService;
+    private final RecoveryOrchestratorService recoveryOrchestratorService;
 
     @Autowired
-    public ScheduledTaskController(RecoverOrchestrationService recoverOrchestrationService) {
-        this.recoverOrchestrationService = recoverOrchestrationService;
+    public ScheduledTaskController(RecoveryOrchestratorService recoveryOrchestratorService) {
+        this.recoveryOrchestratorService = recoveryOrchestratorService;
     }
 
     @PostMapping("/track-recovery")
@@ -33,7 +32,7 @@ public class ScheduledTaskController {
         if (apiKey == null || !apiKey.equals(this.apiKey)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid API Key");
         }
-        recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+        recoveryOrchestratorService.allPlaylistsRecoveryOfAllUsers();
         log.info("track-recovery endpoint done");
         return ResponseEntity.ok("Auto Track&Recovery Task executed");
     }

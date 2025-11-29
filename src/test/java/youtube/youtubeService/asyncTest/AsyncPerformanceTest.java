@@ -22,9 +22,8 @@ import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
-import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import youtube.youtubeService.service.youtube.RecoverOrchestrationService;
+import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import java.io.IOException;
 import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.*;
 public class AsyncPerformanceTest {
 
     @Autowired
-    private RecoverOrchestrationService recoverOrchestrationService;
+    private RecoveryOrchestratorService recoveryOrchestratorService;
 
     @MockitoSpyBean
     UserService userService;
@@ -250,7 +249,7 @@ public class AsyncPerformanceTest {
         totalWatch.start();
 
         // 핵심 측정 대상
-        recoverOrchestrationService.allPlaylistsRecoveryOfAllUsers();
+        recoveryOrchestratorService.allPlaylistsRecoveryOfAllUsers();
 
         totalWatch.stop();
 

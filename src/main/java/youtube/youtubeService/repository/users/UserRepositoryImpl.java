@@ -7,7 +7,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class UserRepositoryV1 implements UserRepository {
+public class UserRepositoryImpl implements UserRepository {
 
     private final SdjUserRepository repository;
 

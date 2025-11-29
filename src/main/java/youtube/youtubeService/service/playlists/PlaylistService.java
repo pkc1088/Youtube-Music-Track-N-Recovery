@@ -12,9 +12,4 @@ public interface PlaylistService {
 
     List<Playlists> findAllPlaylistsByUserIds(List<String> userIds);
 
-    void removePlaylistsFromDB(List<String> deselectedPlaylistIds);
-
-    PlaylistRegisterResponseDto registerPlaylists(PlaylistRegisterRequestDto request);
-
-    UserRegisterPlaylistsResponseDto userRegisterPlaylists(String userId) throws IOException;
 }

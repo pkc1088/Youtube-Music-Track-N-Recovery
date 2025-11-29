@@ -16,6 +16,7 @@ import org.springframework.session.Session;
 import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,9 +27,6 @@ public class SessionService {
     private final StringRedisTemplate redisTemplate;
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
-    public List<String> listSessions() {
-        return new ArrayList<>(redisTemplate.keys("spring:session:sessions:*"));
-    }
 
     public Set<String> getAllUserIds() {
         Set<String> userIds = new HashSet<>();
@@ -99,4 +97,55 @@ public class SessionService {
         return Map.of("status", "세션 강제 종료됨", "sessionId", sessionId);
     }
 
+    private void cleanupKeysByPattern(String pattern, AtomicLong counter) {
+        redisTemplate.execute((RedisConnection connection) -> {
+            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match(pattern).count(1000).build())) {
+                while (cursor.hasNext()) {
+                    byte[] keyBytes = cursor.next();
+                    String key = new String(keyBytes, StandardCharsets.UTF_8);
+                    Long ttl = connection.ttl(keyBytes);
+                    // TTL 이 -1 (영구 보존)인 경우만 좀비로 간주하고 삭제
+                    if (ttl != null && ttl == -1 && !key.equals("quota:limit:daily")) {
+                        connection.del(keyBytes);
+                        counter.incrementAndGet();
+                        log.info("[Zombie Cleanup] Deleted key: {}", key);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error during zombie cleanup", e);
+            }
+            return null;
+        });
+    }
+
+    public Map<String, Long> cleanupZombieKeys() {
+        AtomicLong deletedQuotaCount = new AtomicLong(0);
+        AtomicLong deletedSessionCount = new AtomicLong(0);
+        // 1. Quota 좀비 청소 (quota:*)
+        cleanupKeysByPattern("quota:*", deletedQuotaCount);
+        // 2. Spring Session Expiration 좀비 청소 (spring:session:expirations:*) 주의: sessions:expires:... 는 건드리면 안 됨!
+        cleanupKeysByPattern("spring:session:expirations:*", deletedSessionCount);
+
+        return Map.of(
+                "deletedQuotaKeys", deletedQuotaCount.get(),
+                "deletedSessionExpirationKeys", deletedSessionCount.get()
+        );
+    }
+
+    public List<String> getAllLegitKeys () {
+        List<String> keys = new ArrayList<>();
+        redisTemplate.execute((RedisConnection connection) -> {
+            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().count(100).build())) {
+                while (cursor.hasNext()) {
+                    byte[] keyBytes = cursor.next();
+                    String key = new String(keyBytes, StandardCharsets.UTF_8);
+                    keys.add(key + "\n");
+                }
+            } catch (Exception e) {
+                log.error("Error during getAllLegitQuotas", e);
+            }
+            return null;
+        });
+        return keys;
+    }
 }

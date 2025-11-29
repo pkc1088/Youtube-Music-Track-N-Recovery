@@ -9,7 +9,6 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +23,7 @@ public class QuotaService {
     private static final Set<String> ADMIN_USER_IDS = Set.of("112735690496635663877", "107155055893692546350");
     private static final long ADMIN_LIMIT = 100_000L;
     public static long DEFAULT_LIMIT = 3000L;
+
 
     @PostConstruct
     public void initGlobalLimit() {
@@ -42,7 +42,13 @@ public class QuotaService {
 
     // 특정 유저 Quota 특정 값 셋팅
     public void setUserQuota(String userId, long newUsage) {
-        redisTemplate.opsForValue().set(getQuotaKey(userId), String.valueOf(newUsage));
+        ZoneId pacific = ZoneId.of("America/Los_Angeles");
+        long secondsUntilUtcMidnight = Duration.between(
+                ZonedDateTime.now(pacific),
+                ZonedDateTime.now(pacific).toLocalDate().plusDays(1).atStartOfDay(pacific)
+        ).getSeconds();
+
+        redisTemplate.opsForValue().set(getQuotaKey(userId), String.valueOf(newUsage), Duration.ofSeconds(secondsUntilUtcMidnight));
     }
 
     // 특정 유저 Quota 증가 (disadvantage)
@@ -100,16 +106,12 @@ public class QuotaService {
         return result;
     }
 
-    /**
-     * 롤백 시 실제로 사용하지 않은 할당량은 되돌려줘야함
-     */
+    // 롤백 시 실제로 사용하지 않은 할당량은 되돌려줘야함
     public void rollbackQuota(String userId, long cost) {
         redisTemplate.opsForValue().decrement(getQuotaKey(userId), cost);
     }
 
-    /**
-     * 소비 시도 (원자적 증가)
-     */
+    // 소비 시도 (원자적 증가)
     public boolean checkAndConsumeLua(String userId, long cost) {
         String key = getQuotaKey(userId);
         String script =
@@ -119,13 +121,13 @@ public class QuotaService {
                 "   return 0 " + // quota 초과 → 실패
                 "else " +
                 "   local newVal = redis.call('INCRBY', KEYS[1], ARGV[1]) " +
-                "   if newVal == tonumber(ARGV[1]) then " +
+                "   local ttl = redis.call('TTL', KEYS[1])" +
+                "   if ttl < 0 then " +
                 "       redis.call('EXPIRE', KEYS[1], ARGV[3]) " + // 새 키면 TTL 설정
                 "   end " +
                 "   return 1 " + // 성공
                 "end";
 
-        // long secondsUntilMidnight = Duration.between(LocalDateTime.now(), LocalDate.now().plusDays(1).atStartOfDay()).getSeconds();
         ZoneId pacific = ZoneId.of("America/Los_Angeles");
         long secondsUntilUtcMidnight = Duration.between(
                 ZonedDateTime.now(pacific),
@@ -144,25 +146,18 @@ public class QuotaService {
         return result != null && result == 1L;
     }
 
-
-
-
-
-
-    public List<String> getAllLegitQuotas () {
-        List<String> keys = new ArrayList<>();
-
-        redisTemplate.execute((RedisConnection connection) -> {
-            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().count(100).build())) {
-                while (cursor.hasNext()) {
-                    byte[] keyBytes = cursor.next();
-                    String key = new String(keyBytes, StandardCharsets.UTF_8);
-                    keys.add(key + "\n");
-                }
-            }
-            return null;
-        });
-
-        return keys;
-    }
 }
+
+/*
+                "local current = redis.call('GET', KEYS[1]) " +
+                "if not current then current = 0 else current = tonumber(current) end " +
+                "if (current + tonumber(ARGV[1])) > tonumber(ARGV[2]) then " +
+                "   return 0 " + // quota 초과 → 실패
+                "else " +
+                "   local newVal = redis.call('INCRBY', KEYS[1], ARGV[1]) " +
+                "   if newVal == tonumber(ARGV[1]) then " +
+                "       redis.call('EXPIRE', KEYS[1], ARGV[3]) " + // 새 키면 TTL 설정
+                "   end " +
+                "   return 1 " + // 성공
+                "end";
+ */

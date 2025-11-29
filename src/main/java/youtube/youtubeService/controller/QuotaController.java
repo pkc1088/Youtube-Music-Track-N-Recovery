@@ -2,20 +2,12 @@ package youtube.youtubeService.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.Cursor;
-import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import youtube.youtubeService.service.QuotaService;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -25,6 +17,7 @@ import java.util.*;
 public class QuotaController {
 
     private final QuotaService quotaService;
+
 
     @GetMapping("/dashboard")
     public String dashboard() {
@@ -43,27 +36,21 @@ public class QuotaController {
         quotaService.setGlobalLimit(newLimit);
     }
 
-    @PostMapping("/{userId}/set")
     @ResponseBody
+    @PostMapping("/{userId}/set")
     public void setUserQuota(@PathVariable String userId, @RequestParam long newUsage) {
         quotaService.setUserQuota(userId, newUsage);
     }
 
-    @PostMapping("/{userId}/incr")
     @ResponseBody
+    @PostMapping("/{userId}/incr")
     public void incrementUserQuota(@PathVariable String userId, @RequestParam long delta) {
         quotaService.incrementUserQuota(userId, delta);
     }
 
-    @PostMapping("/{userId}/decr")
     @ResponseBody
+    @PostMapping("/{userId}/decr")
     public void decrementUserQuota(@PathVariable String userId, @RequestParam long delta) {
         quotaService.decrementUserQuota(userId, delta);
-    }
-
-    @GetMapping("/getAllLegitKeys")
-    @ResponseBody
-    public String getAllLegitQuotas() {
-        return quotaService.getAllLegitQuotas().toString();
     }
 }

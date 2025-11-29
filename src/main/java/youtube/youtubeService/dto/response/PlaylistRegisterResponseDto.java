@@ -1,14 +1,13 @@
 package youtube.youtubeService.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
+import java.io.Serial;
 import java.io.Serializable;
 
-@Getter
-@AllArgsConstructor
-public class PlaylistRegisterResponseDto implements Serializable {
+
+public record PlaylistRegisterResponseDto(
+        int succeedPlaylistCount,
+        int selectedPlaylistsCount
+) implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
-    private int succeedPlaylistCount;
-    private int selectedPlaylistsCount;
 }

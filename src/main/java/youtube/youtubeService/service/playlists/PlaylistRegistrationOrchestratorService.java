@@ -62,14 +62,14 @@ public class PlaylistRegistrationOrchestratorService {
      */
     public PlaylistRegisterResponseDto processPlaylistRegistration(PlaylistRegisterRequestDto request) {
         // DB 에서 사용자가 이미 등록한 플레이리스트 조회
-        List<Playlists> registeredPlaylists = playlistRepository.findAllByUserIdWithUserFetch(request.getUserId());
+        List<Playlists> registeredPlaylists = playlistRepository.findAllByUserIdWithUserFetch(request.userId());
         List<String> registeredPlaylistIds = registeredPlaylists.stream().map(Playlists::getPlaylistId).toList();
-        Users user = findUserOptimized(request.getUserId(), registeredPlaylists);
+        Users user = findUserOptimized(request.userId(), registeredPlaylists);
         // 중복된 플레이리스트는 제외하고 신규 플레이리스트만 필터
-        List<String> deselectedPlaylists = request.getDeselectedPlaylistIds();
-        List<PlaylistDto> newlySelectedPlaylists = request.getSelectedPlaylists(objectMapper).stream()
-                                                    .filter(dto -> dto != null && !dto.getId().isBlank())
-                                                    .filter(dto -> !registeredPlaylistIds.contains(dto.getId())).toList();
+        List<String> deselectedPlaylists = request.deselectedPlaylistIds();
+        List<PlaylistDto> newlySelectedPlaylists = request.getSelectedPlaylists().stream()
+                                                    .filter(dto -> dto != null && !dto.id().isBlank())
+                                                    .filter(dto -> !registeredPlaylistIds.contains(dto.id())).toList();
 
         // API 로 플레이리스트에 딸린 음악을 최대한의 뽑아온다
         List<FixedDataForRegistrationDto> accumulatedFixedDataForRegistrationDto = new ArrayList<>();
@@ -77,7 +77,7 @@ public class PlaylistRegistrationOrchestratorService {
             for (PlaylistDto playlistDto : newlySelectedPlaylists) {
                 // 하나의 등록 대기 플레이리스트에 딸린 모든 음악 데이터 다 수집 시도
                 // 일단 비영속 playlist 객체 하나 만들어 놓고, 저장은 어차피 나중에 다른 곳에서 할거임
-                Playlists playlist = new Playlists(playlistDto.getId(), playlistDto.getTitle(), Playlists.ServiceType.RECOVER, user);
+                Playlists playlist = new Playlists(playlistDto.id(), playlistDto.title(), Playlists.ServiceType.RECOVER, user);
                 List<Music> musicList = collectMusicsForPlaylist(playlist);
                 accumulatedFixedDataForRegistrationDto.add(new FixedDataForRegistrationDto(playlist, musicList));
             }

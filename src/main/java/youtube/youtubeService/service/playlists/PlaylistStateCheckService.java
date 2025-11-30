@@ -24,7 +24,6 @@ public class PlaylistStateCheckService {
 
     public PlannedPlaylistUpdateDto compareApiAndDbState(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException {
         String playlistId = playlist.getPlaylistId();
-        log.info("[Check playlist start: {}]", playlistId);
         List<PlaylistItem> pureApiPlaylistItems;
 
         try {
@@ -34,23 +33,23 @@ public class PlaylistStateCheckService {
             throw new NoPlaylistFoundException("[no playlist found exception]");
         }
 
-        // 3. API 에서 video 상태 조회
+        // API 에서 video 상태 조회
         List<String> pureApiVideoIds = pureApiPlaylistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();
         VideoFilterResultPageDto videoFilterResult = playlistRegistrationUnitService.fetchAllVideos(userId, pureApiVideoIds, countryCode);
         List<Video> legalVideos = videoFilterResult.legalVideos();
         List<Video> unlistedCountryVideos = videoFilterResult.unlistedCountryVideos();
 
-        // 4-1. 정상 비디오
+        // 정상 비디오
         List<String> legalVideoIds = legalVideos.stream().map(Video::getId).toList();
-        // 4-2. unlisted, 국가차단 비디오
+        // unlisted, 국가차단 비디오
         List<String> unlistedCountryVideoIds = unlistedCountryVideos.stream().map(Video::getId).toList();
-        // 4-3. Delete / Private 비디오 (응답 자체가 안 온 videoId)
+        // Delete / Private 비디오 (응답 자체가 안 온 videoId)
         List<String> privateDeletedVideoIds = pureApiVideoIds.stream().filter(videoId -> !legalVideoIds.contains(videoId) && !unlistedCountryVideoIds.contains(videoId)).toList();
 
         log.info("[legal] videos count : {}", legalVideoIds.size());
         log.info("[unlisted/country] video count : {}", unlistedCountryVideoIds.size());
         log.info("[deleted/private] video count : {}", privateDeletedVideoIds.size());
-        // 5. 둘의 차이를 비교 → DB 반영
+
         Map<String, Long> apiCounts = pureApiVideoIds.stream().collect(Collectors.groupingBy(v -> v, Collectors.counting()));
         Map<String, Long> dbCounts = pureDbMusicList.stream().collect(Collectors.groupingBy(MusicSummaryDto::videoId, Collectors.counting()));
 
@@ -58,8 +57,8 @@ public class PlaylistStateCheckService {
         allVideoIds.addAll(apiCounts.keySet());
         allVideoIds.addAll(dbCounts.keySet());
 
-        List<Video> videosToInsert = new ArrayList<>();
-        List<Long> videosToDelete = new ArrayList<>();
+        List<Video> toInsertVideos = new ArrayList<>();
+        List<Long> toDeleteVideoIds = new ArrayList<>();
 
         for (String videoId : allVideoIds) {
 
@@ -71,16 +70,14 @@ public class PlaylistStateCheckService {
 
             if (toInsertCount > 0 && legalVideoIds.contains(videoId)) { // toInsertCount 만큼 DBAddAction 을 반복
                 legalVideos.stream().filter(v -> v.getId().equals(videoId)).findFirst()
-                        .ifPresent(video -> IntStream.range(0, (int) toInsertCount).forEach(i -> videosToInsert.add(video)));
+                        .ifPresent(video -> IntStream.range(0, (int) toInsertCount).forEach(i -> toInsertVideos.add(video)));
             }
 
             if (toDeleteCount > 0 && !unlistedCountryVideoIds.contains(videoId) && !privateDeletedVideoIds.contains(videoId)) { // 삭제할 개수만큼만 제한 후 Music 객체에서 ID만 추출 각 ID를 사용하여 삭제
                 pureDbMusicList.stream().filter(m -> m.videoId().equals(videoId)).limit(toDeleteCount)
-                        .map(MusicSummaryDto::id).forEach(videosToDelete::add); // pk 추가임
+                        .map(MusicSummaryDto::id).forEach(toDeleteVideoIds::add); // pk 추가임
             }
         }
-
-        // 이제 여기서 DB 호출 X
 
         Map<String, List<String>> illegalVideos = new HashMap<>();
 
@@ -93,7 +90,6 @@ public class PlaylistStateCheckService {
             }
         }
 
-        log.info("[Check playlist done: {}]", playlistId);
-        return new PlannedPlaylistUpdateDto(videosToInsert, videosToDelete, illegalVideos);
+        return new PlannedPlaylistUpdateDto(toInsertVideos, toDeleteVideoIds, illegalVideos);
     }
 }

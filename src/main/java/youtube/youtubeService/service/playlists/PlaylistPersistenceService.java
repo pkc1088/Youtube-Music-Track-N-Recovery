@@ -59,7 +59,7 @@ public class PlaylistPersistenceService {
                 ps.setString(1, p.getPlaylistId());
                 ps.setString(2, p.getPlaylistTitle());
                 ps.setString(3, p.getServiceType().name());
-                ps.setString(4, p.getUser().getUserId());   // 객체 참조에서 ID만 꺼내서 저장 (User 는 이미 ID를 가지고 있음)
+                ps.setString(4, p.getUser().getUserId());
             }
 
             @Override

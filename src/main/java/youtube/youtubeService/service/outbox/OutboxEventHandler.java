@@ -12,6 +12,7 @@ import youtube.youtubeService.domain.enums.QuotaType;
 import youtube.youtubeService.repository.OutboxRepository;
 import youtube.youtubeService.service.QuotaService;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -30,37 +31,40 @@ public class OutboxEventHandler {
     private final PartitionedExecutor partitionedOutboxExecutor;
     private final Map<String, List<CompletableFuture<Void>>> pendingUserTasks = new ConcurrentHashMap<>();
 
+
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleInitialOutboxEvent(OutboxCreatedEventDto eventDto) {
 
         Outbox outbox = outboxRepository.findOutboxById(eventDto.outboxId()).orElseThrow(() -> new RuntimeException("Outbox not found, id=" + eventDto.outboxId()));
         handleOutboxEvent(outbox, Outbox.Status.FAILED);
-
     }
 
     public void retryFailedOutboxEvents(String userId) {
 
         List<Outbox> failedOutboxes = outboxRepository.findByUserIdAndStatus(userId, Outbox.Status.FAILED);
 
-        int failedOutboxesSize = failedOutboxes.size();
-
-        if(failedOutboxesSize == 0) {
+        if(failedOutboxes.isEmpty()) {
             log.info("[No failedOutboxes]");
             return;
         }
 
-        boolean affordToRetryAllAtOnce = quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_DELETE.getCost() * failedOutboxesSize);
+        // 우선순위 정렬 (ADD 먼저, 그 다음 DELETE, 같은 타입이면 ID 즉 생성순)
+        failedOutboxes.sort(Comparator.comparing((Outbox o) -> o.getActionType() == Outbox.ActionType.ADD ? 0 : 1).thenComparing(Outbox::getId));
 
-        if(!affordToRetryAllAtOnce) {
-            log.info("[Not Affordable Quota To Retry Failed Outboxes -> Make Them All DEAD]");
-            failedOutboxes.forEach(outbox -> outboxStatusUpdater.updateOutboxStatus(outbox.getId(), Outbox.Status.DEAD));
-            return;
-        }
-
-        log.info("[retryFailedOutboxEvents] Start retrying {} FAILED outbox events...", failedOutboxesSize);
+        log.info("[retryFailedOutboxEvents] Found {} FAILED events. Starting prioritized retry...", failedOutboxes.size());
 
         for (Outbox retryOutbox : failedOutboxes) {
-            handleOutboxEvent(retryOutbox, Outbox.Status.DEAD);
+            long cost = (retryOutbox.getActionType() == Outbox.ActionType.ADD) ? QuotaType.VIDEO_INSERT.getCost() : QuotaType.VIDEO_DELETE.getCost();
+
+            boolean isAffordable = quotaService.checkAndConsumeLua(userId, cost);
+
+            if (isAffordable) {
+                log.info("[retryFailedOutboxEvents] Retrying outbox {} (Type: {})", retryOutbox.getId(), retryOutbox.getActionType());
+                handleOutboxEvent(retryOutbox, Outbox.Status.DEAD);
+            } else {
+                log.warn("[retryFailedOutboxEvents] Not enough quota for outbox {}. Marking as DEAD", retryOutbox.getId());
+                outboxStatusUpdater.updateOutboxStatus(retryOutbox.getId(), Outbox.Status.DEAD);
+            }
         }
 
         log.info("[retryFailedOutboxEvents] Retry loop done");

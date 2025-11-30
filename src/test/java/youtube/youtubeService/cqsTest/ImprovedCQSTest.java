@@ -164,14 +164,6 @@ public class ImprovedCQSTest {
     }
 
     private Music makeMusic(Playlists playlist) {
-//        Music music = new Music();
-//        music.setVideoId(TEST_TARGET_VIDEO_ID);
-//        music.setVideoTitle("Regina Belle - So Many Tears(일부공개)");
-//        music.setVideoUploader("Whistle_Missile");
-//        music.setVideoDescription("");
-//        music.setVideoTags("");
-//        music.setPlaylist(playlist);
-//        return music;
         return new Music(TEST_TARGET_VIDEO_ID, "Regina Belle - So Many Tears(일부공개)", "Whistle_Missile", "", "", playlist);
     }
 

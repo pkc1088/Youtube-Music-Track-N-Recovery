@@ -6,6 +6,5 @@ import java.util.List;
 import java.util.Map;
 
 
-public record PlannedPlaylistUpdateDto(List<Video> videosToInsert, List<Long> videosToDelete,
-                                       Map<String, List<String>> illegalVideos) {
+public record PlannedPlaylistUpdateDto(List<Video> toInsertVideos, List<Long> toDeleteVideoIds, Map<String, List<String>> illegalVideos) {
 }

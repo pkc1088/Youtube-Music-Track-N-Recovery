@@ -7,13 +7,10 @@ import youtube.youtubeService.dto.internal.PlannedReplacementDto;
 
 import java.util.List;
 
-
-public record PlaylistRecoveryPlanDto(List<Video> videosToInsert, List<Long> videosToDelete,
-                                      List<PlannedOutboxDto> plannedOutboxList,
-                                      List<PlannedReplacementDto> plannedReplacementDtoList, List<Music> edgeInsert,
-                                      List<Long> edgeDelete) {
+public record PlaylistRecoveryPlanDto(List<Video> toInsertVideoIds, List<Long> toDeleteVideoIds, List<Long> redundantEdgeDeleteIds, List<RecoveryTaskDto> tasks) {
 
     public boolean hasActions() {
-        return !videosToDelete.isEmpty() || !videosToInsert.isEmpty() || !plannedOutboxList.isEmpty() || !plannedReplacementDtoList.isEmpty() || !edgeInsert.isEmpty() || !edgeDelete.isEmpty();
+        return !toInsertVideoIds.isEmpty() || !toDeleteVideoIds.isEmpty() || !redundantEdgeDeleteIds.isEmpty() || !tasks.isEmpty();
     }
 }
+

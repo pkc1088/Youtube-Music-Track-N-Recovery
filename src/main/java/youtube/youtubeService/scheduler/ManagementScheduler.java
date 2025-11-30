@@ -10,6 +10,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -51,7 +52,7 @@ public class ManagementScheduler {
     private final MusicService musicService;
     private final YouTube youtube;
 
-//    @Scheduled(fixedRate = 500000, initialDelayString = "1000")
+//    @Scheduled(fixedRate = 9000000, initialDelayString = "1000")
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
         log.info("auto scheduler activated");
 

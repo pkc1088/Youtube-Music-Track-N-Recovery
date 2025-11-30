@@ -52,10 +52,10 @@ public class RecoveryOrchestratorService {
 
             CompletableFuture<Void> userFuture = CompletableFuture.runAsync(() -> {
                 try {
+                    String accessToken;
                     String userId = user.getUserId();
                     String countryCode = user.getCountryCode();
                     String refreshToken = user.getRefreshToken();
-                    String accessToken;
 
                     try {
                         log.info("[userId: {}]", userId);
@@ -76,8 +76,10 @@ public class RecoveryOrchestratorService {
                     );
 
                     for (Playlists playlist : playListsSet) {
-                        log.info("[playlistTitle: {}]", playlist.getPlaylistTitle());
+
+                        log.info("[Playlist: {}({})]", playlist.getPlaylistTitle(), playlist.getPlaylistId());
                         List<MusicSummaryDto> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
+
                         try {
                             PlaylistRecoveryPlanDto plans = recoveryPlanService.prepareRecoveryPlan(userId, playlist, countryCode, accessToken, musicForThisPlaylist);
                             // 저기서 FTR no Tx -> updatePlaylist no Tx 거쳐서 나온 전체 명세서 받음

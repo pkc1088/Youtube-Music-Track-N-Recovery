@@ -33,7 +33,6 @@ public class PlaylistRegistrationOrchestratorService {
     private final PlaylistPersistenceService playlistPersistenceService;
     private final MusicConverterHelper musicConverterHelper;
     private final PlaylistRepository playlistRepository;
-    private final ObjectMapper objectMapper;
     private final UserService userService;
 
 
@@ -75,8 +74,7 @@ public class PlaylistRegistrationOrchestratorService {
         List<FixedDataForRegistrationDto> accumulatedFixedDataForRegistrationDto = new ArrayList<>();
         try {
             for (PlaylistDto playlistDto : newlySelectedPlaylists) {
-                // 하나의 등록 대기 플레이리스트에 딸린 모든 음악 데이터 다 수집 시도
-                // 일단 비영속 playlist 객체 하나 만들어 놓고, 저장은 어차피 나중에 다른 곳에서 할거임
+                // 하나의 등록 대기 플레이리스트에 딸린 모든 음악 데이터 다 수집 시도, 일단 비영속 playlist 객체 하나 만들어 놓고, 저장은 어차피 나중에 다른 곳에서 할거임
                 Playlists playlist = new Playlists(playlistDto.id(), playlistDto.title(), Playlists.ServiceType.RECOVER, user);
                 List<Music> musicList = collectMusicsForPlaylist(playlist);
                 accumulatedFixedDataForRegistrationDto.add(new FixedDataForRegistrationDto(playlist, musicList));

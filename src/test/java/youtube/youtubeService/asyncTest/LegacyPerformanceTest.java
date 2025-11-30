@@ -77,9 +77,9 @@ public class LegacyPerformanceTest {
             PlaylistRecoveryPlanDto plan = i.getArgument(3);
             int apiCallCount = 0;
 
-            if (plan.plannedReplacementDtoList() != null) {
-                apiCallCount += plan.plannedReplacementDtoList().size();
-            }
+//            if (plan.plannedReplacementDtoList() != null) {
+//                apiCallCount += plan.plannedReplacementDtoList().size();
+//            }
             if (apiCallCount == 2) {
                 // Add + Delete + Action Log, Music Replacement
                 long latency = 950 + 770 + 10;

@@ -1,6 +1,8 @@
 package youtube.youtubeService.repository.playlists;
 
 import youtube.youtubeService.domain.Playlists;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PlaylistRepository {
@@ -9,7 +11,9 @@ public interface PlaylistRepository {
 
     void deleteAllByPlaylistIdsIn(List<String> deselectedPlaylistIds);
 
-    List<Playlists> findAllPlaylistsByUserIds(List<String> userIds);
+    List<Playlists> findAllPlaylistsByUserIdsOrderByLastChecked(List<String> userIds);
 
     List<Playlists> findAllByUserIdWithUserFetch(String userId);
+
+    void updateLastCheckedAt(String playlistId, LocalDateTime now);
 }

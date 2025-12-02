@@ -13,6 +13,7 @@ import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.service.musics.MusicService;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Slf4j
@@ -50,7 +51,7 @@ public class PlaylistPersistenceService {
 
     @Transactional
     public void bulkInsertPlaylists(List<Playlists> playlists) {
-        String sql = "INSERT INTO playlists (playlist_id, playlist_title, service_type, user_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO playlists (playlist_id, playlist_title, service_type, last_checked_at, user_id) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -59,7 +60,8 @@ public class PlaylistPersistenceService {
                 ps.setString(1, p.getPlaylistId());
                 ps.setString(2, p.getPlaylistTitle());
                 ps.setString(3, p.getServiceType().name());
-                ps.setString(4, p.getUser().getUserId());
+                ps.setTimestamp(4, Timestamp.valueOf(p.getLastCheckedAt()));
+                ps.setString(5, p.getUser().getUserId());
             }
 
             @Override

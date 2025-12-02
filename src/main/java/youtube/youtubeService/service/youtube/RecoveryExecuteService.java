@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.dto.internal.PlaylistRecoveryPlanDto;
 import youtube.youtubeService.dto.internal.RecoveryTaskDto;
-import youtube.youtubeService.exception.QuotaExceededException;
+import youtube.youtubeService.exception.quota.QuotaExceededException;
 
 @Slf4j
 @Service

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+        }
+
+        .message-title {
+            font-size: 28px;
+            color: #e53935; /* error 느낌의 붉은 톤 */
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .message-text {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 40px;
+            white-space: pre-line;
+        }
+
+        .btn-action {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-action:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="message-title">Error</h1>
+    <p class="message-text">
+        <span th:text="${errorMessage}">요청 처리 중 오류가 발생했습니다.</span>
+    </p>
+
+    <a href="/" class="btn-action">Back to Home</a>
+</div>
+</body>
+</html>

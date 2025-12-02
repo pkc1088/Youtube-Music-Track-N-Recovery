@@ -11,7 +11,7 @@ import youtube.youtubeService.domain.enums.QuotaType;
 import youtube.youtubeService.dto.internal.PlannedOutboxDto;
 import youtube.youtubeService.dto.internal.PlaylistRecoveryPlanDto;
 import youtube.youtubeService.dto.internal.RecoveryTaskDto;
-import youtube.youtubeService.exception.QuotaExceededException;
+import youtube.youtubeService.exception.quota.QuotaExceededException;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicService;
@@ -58,7 +58,7 @@ public class RecoveryExecuteUnitService {
                 .sum();
 
         // 할당량 선확보: 실패 시 예외 던짐 -> 트랜잭션 롤백 -> 상위 루프에서 다음으로 skip
-        if (!quotaService.checkAndConsumeLua(userId, requiredCost)) throw new QuotaExceededException("[Not enough quota for this task]");
+        if (!quotaService.checkAndConsumeLua(userId, requiredCost)) throw new QuotaExceededException("processSingleTask");
 
         try {
             if (task.type() == RecoveryTaskDto.TaskType.RECOVERY && task.swapInfo() != null) {  // 기본 복구

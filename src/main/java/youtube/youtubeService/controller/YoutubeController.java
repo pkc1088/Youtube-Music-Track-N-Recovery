@@ -67,8 +67,9 @@ public class YoutubeController {
 
     @GetMapping("/playlist/{userId}")
     @PreAuthorize("#userId == authentication.principal.name")
-    public String userRegisterPlaylists(@PathVariable String userId, Model model) throws IOException {
-        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId);
+    public String userRegisterPlaylists(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient authorizedClient, @PathVariable String userId, Model model) {
+        String accessToken = authorizedClient.getAccessToken().getTokenValue();
+        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId, accessToken);
         model.addAttribute("dto", dto);
         return "playlist_selection";
     }

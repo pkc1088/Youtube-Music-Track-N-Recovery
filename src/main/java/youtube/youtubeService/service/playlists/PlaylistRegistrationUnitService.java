@@ -11,9 +11,9 @@ import youtube.youtubeService.domain.enums.QuotaType;
 import youtube.youtubeService.dto.internal.QuotaApiPlaylistsPageDto;
 import youtube.youtubeService.dto.internal.QuotaPlaylistItemPageDto;
 import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
-import youtube.youtubeService.exception.QuotaExceededException;
+import youtube.youtubeService.exception.quota.QuotaExceededException;
 import youtube.youtubeService.service.QuotaService;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,12 +26,12 @@ public class PlaylistRegistrationUnitService {
     private final QuotaService quotaService;
 
 
-    public List<PlaylistItem> fetchAllPlaylistItems(String userId, String playlistId) throws IOException {
+    public List<PlaylistItem> fetchAllPlaylistItems(String userId, String playlistId) {
         List<PlaylistItem> playlistItems = new ArrayList<>();
         String nextPageToken = null;
 
         do {
-            if (!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
+            if (!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("fetchAllPlaylistItems");
 
             QuotaPlaylistItemPageDto dto = youtubeApiClient.fetchPlaylistItemPage(playlistId, nextPageToken);
             playlistItems.addAll(dto.allPlaylists());
@@ -50,7 +50,7 @@ public class PlaylistRegistrationUnitService {
         List<Video> unlistedCountryVideos = new ArrayList<>();
 
         for (int i = 0; i < pagination; i++) {
-            if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
+            if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("fetchAllVideos");
 
             int fromIndex = i * batchSize;
             int toIndex = Math.min(fromIndex + batchSize, total);
@@ -63,11 +63,11 @@ public class PlaylistRegistrationUnitService {
         return new VideoFilterResultPageDto(legalVideos, unlistedCountryVideos);
     }
 
-    public List<Playlist> fetchAllPlaylists(String userId, String channelId) throws IOException {
+    public List<Playlist> fetchAllPlaylists(String userId, String channelId) {
         List<Playlist> playlists = new ArrayList<>();
         String nextPageToken = null;
         do {
-            if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("Quota Exceed");
+            if(!quotaService.checkAndConsumeLua(userId, QuotaType.PAGINATION.getCost())) throw new QuotaExceededException("fetchAllPlaylists");
 
             QuotaApiPlaylistsPageDto dto = youtubeApiClient.fetchPlaylistPage(channelId, nextPageToken);
             playlists.addAll(dto.playlists());

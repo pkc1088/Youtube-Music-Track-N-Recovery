@@ -64,7 +64,7 @@ public class ImprovedCQSTest {
 
         List<Users> users = userService.findAllUsers();
         List<String> userIds = users.stream().map(Users::getUserId).toList();
-        List<Playlists> allPlaylists = playlistService.findAllPlaylistsByUserIds(userIds);
+        List<Playlists> allPlaylists = playlistService.findAllPlaylistsByUserIdsOrderByLastChecked(userIds);//findAllPlaylistsByUserIds(userIds);
         Map<String, List<Playlists>> playlistsByUser = allPlaylists.stream().collect(Collectors.groupingBy(playlist -> playlist.getUser().getUserId()));
 
         String accessToken = userService.getNewAccessTokenByUserId(TEST_USER_ID, REFRESH_TOKEN);

@@ -25,6 +25,7 @@ import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
 import youtube.youtubeService.service.users.UserService;
 import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -210,7 +211,7 @@ public class AsyncPerformanceTest {
             mockUserIds.add(user.getUserId());
 
             for (int p = 1; p <= PLAYLISTS_PER_USER; p++) {
-                Playlists playlist = new Playlists("playlist-" + p + "-" + user.getUserId(), "Mock Playlist", Playlists.ServiceType.RECOVER, user);
+                Playlists playlist = new Playlists("playlist-" + p + "-" + user.getUserId(), "Mock Playlist", Playlists.ServiceType.RECOVER, LocalDateTime.now(), user);
                 allPlaylists.add(playlist);
 
                 for (int m = 1; m <= MUSIC_PER_PLAYLIST; m++) {

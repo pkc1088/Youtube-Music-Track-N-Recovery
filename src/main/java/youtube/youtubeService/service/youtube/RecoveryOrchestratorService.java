@@ -7,18 +7,15 @@ import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.dto.internal.MusicSummaryDto;
 import youtube.youtubeService.dto.internal.PlaylistRecoveryPlanDto;
-import youtube.youtubeService.exception.NoPlaylistFoundException;
-import youtube.youtubeService.exception.QuotaExceededException;
-import youtube.youtubeService.exception.UserQuitException;
+import youtube.youtubeService.exception.youtube.NoPlaylistFoundException;
+import youtube.youtubeService.exception.quota.QuotaExceededException;
+import youtube.youtubeService.exception.users.UserQuitException;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistPersistenceService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
@@ -41,10 +38,14 @@ public class RecoveryOrchestratorService {
 
         List<Users> users = userService.findAllUsers();
         List<String> userIds = users.stream().map(Users::getUserId).toList();
-        List<Playlists> allPlaylists = playlistService.findAllPlaylistsByUserIds(userIds); // JOIN FETCH
-        Map<String, List<Playlists>> playlistsByUser = allPlaylists.stream().collect(
-                Collectors.groupingBy(playlist -> playlist.getUser().getUserId())          // N+1 발생 안 함 (위에서 join fetch 했으니)
-        );
+
+        List<Playlists> sortedPlaylists = playlistService.findAllPlaylistsByUserIdsOrderByLastChecked(userIds); // JOIN FETCH
+        Map<String, List<Playlists>> playlistsByUser = sortedPlaylists.stream()                                 // N+1 발생 X
+                .collect(Collectors.groupingBy(
+                        playlist -> playlist.getUser().getUserId(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
 
         List<CompletableFuture<Void>> allUserFutures = new ArrayList<>();
 
@@ -77,7 +78,7 @@ public class RecoveryOrchestratorService {
 
                     for (Playlists playlist : playListsSet) {
 
-                        log.info("[Playlist: {}({})]", playlist.getPlaylistTitle(), playlist.getPlaylistId());
+                        log.info("[Playlist: {} ({})]", playlist.getPlaylistTitle(), playlist.getPlaylistId());
                         List<MusicSummaryDto> musicForThisPlaylist = musicMapByPlaylistId.getOrDefault(playlist.getPlaylistId(), Collections.emptyList());
 
                         try {
@@ -94,6 +95,8 @@ public class RecoveryOrchestratorService {
                             log.warn("[NoPlaylistFoundException is successfully handled -> skip to the next]");
                         } catch (Exception e) {
                             log.warn("[Unexpected Error at playlist({}), {} -> skip to the next]", playlist.getPlaylistId(), e.getMessage());
+                        } finally {
+                            playlistService.updateLastCheckedAt(playlist.getPlaylistId());
                         }
                     }
 

@@ -20,13 +20,13 @@ import org.springframework.stereotype.Component;
 import youtube.youtubeService.api.YoutubeApiClient;
 import youtube.youtubeService.domain.Users;
 import youtube.youtubeService.domain.enums.QuotaType;
-import youtube.youtubeService.exception.ChannelNotFoundException;
-import youtube.youtubeService.exception.CheckBoxNotActivatedException;
+import youtube.youtubeService.exception.youtube.ChannelNotFoundException;
+import youtube.youtubeService.exception.youtube.YoutubeApiException;
+import youtube.youtubeService.exception.youtube.YoutubeNetworkException;
 import youtube.youtubeService.service.GeoIpService;
 import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.users.UserService;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.*;
 
 @Slf4j
@@ -86,7 +86,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
                     channelId = youtubeApiClient.fetchChannelId(accessToken);
 
-                } catch (GeneralSecurityException | ChannelNotFoundException e) {
+                } catch (ChannelNotFoundException | YoutubeApiException | YoutubeNetworkException e) {
                     log.info("{}", e.getMessage());
                     revokeAndInvalidate(request, response, accessToken, "/channelNotFound");
                     return;
@@ -114,7 +114,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         }
 
-        response.sendRedirect("/");// super.onAuthenticationSuccess(request, response, authentication);>simpleUrlAuthenticationSuccessHandler>AbstractAuthenticationTargetUrlRequestHandler 타고 들어가보면 기본 defaultTargetUrl = "/"; 이렇게 셋팅 되어서 에러 뜬거임.
+        response.sendRedirect("/");
     }
 
     private void revokeAndInvalidate(HttpServletRequest request, HttpServletResponse response, String accessToken, String redirectUrl) throws IOException {
@@ -156,7 +156,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     private boolean isTemporaryEmail(String email) {
-        return email != null && email.endsWith("@pages.plusgoogle.com");        // 임시 이메일 주소인지 확인
+        return email != null && email.endsWith("@pages.plusgoogle.com");
     }
 
     private String getRealEmail(String email) {

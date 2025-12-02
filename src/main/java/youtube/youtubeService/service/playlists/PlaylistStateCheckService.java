@@ -9,8 +9,7 @@ import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.dto.internal.MusicSummaryDto;
 import youtube.youtubeService.dto.internal.PlannedPlaylistUpdateDto;
 import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
-import youtube.youtubeService.exception.NoPlaylistFoundException;
-import java.io.IOException;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,16 +21,11 @@ public class PlaylistStateCheckService {
 
     private final PlaylistRegistrationUnitService playlistRegistrationUnitService;
 
-    public PlannedPlaylistUpdateDto compareApiAndDbState(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) throws IOException {
+    public PlannedPlaylistUpdateDto compareApiAndDbState(String userId, String countryCode, Playlists playlist, List<MusicSummaryDto> pureDbMusicList) {
         String playlistId = playlist.getPlaylistId();
         List<PlaylistItem> pureApiPlaylistItems;
 
-        try {
-            pureApiPlaylistItems = playlistRegistrationUnitService.fetchAllPlaylistItems(userId, playlistId);
-        } catch (IOException e) {
-            log.warn("[This playlist has been removed by the owner({})]", playlistId);
-            throw new NoPlaylistFoundException("[no playlist found exception]");
-        }
+        pureApiPlaylistItems = playlistRegistrationUnitService.fetchAllPlaylistItems(userId, playlistId);
 
         // API 에서 video 상태 조회
         List<String> pureApiVideoIds = pureApiPlaylistItems.stream().map(item -> item.getSnippet().getResourceId().getVideoId()).toList();

@@ -11,10 +11,11 @@ import youtube.youtubeService.config.AuthenticatedYouTubeFactory;
 import youtube.youtubeService.dto.internal.QuotaApiPlaylistsPageDto;
 import youtube.youtubeService.dto.internal.QuotaPlaylistItemPageDto;
 import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
-import youtube.youtubeService.exception.ChannelNotFoundException;
-
+import youtube.youtubeService.exception.youtube.ChannelNotFoundException;
+import youtube.youtubeService.exception.youtube.NoPlaylistFoundException;
+import youtube.youtubeService.exception.youtube.YoutubeApiException;
+import youtube.youtubeService.exception.youtube.YoutubeNetworkException;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,30 +54,27 @@ public class YoutubeApiClient {
         return createPlaceholderVideo("This video was supposed to be [" + videoId + "]");
     }
 
-    public String fetchChannelId(String accessToken) throws IOException, GeneralSecurityException, ChannelNotFoundException {
+    public String fetchChannelId(String accessToken) throws ChannelNotFoundException {
         try {
             YouTube youtube = youTubeFactory.create(accessToken);
 
             ChannelListResponse response = youtube.channels().list(Collections.singletonList("snippet")).setMine(true).execute();   // 현재 인증된 사용자의 채널 정보 조회
-
             List<Channel> channels = response.getItems();
 
             if (channels == null || channels.isEmpty()) {
-                throw new ChannelNotFoundException("[channel not found]");
+                throw new ChannelNotFoundException("[ChannelNotFoundException]");
             }
 
             return channels.get(0).getId();
 
         } catch (GoogleJsonResponseException e) {
-            log.warn("Google API error while retrieving fetchChannelId : {}", e.getDetails().getMessage());
-            throw e;
+            throw new YoutubeApiException("Youtube API Logic Fail at 'fetchChannelId': ", e.getStatusCode(), e);
+        } catch (IOException e) {
+            throw new YoutubeNetworkException("Failed to connect to Youtube at 'fetchChannelId': ", e);
         }
     }
 
-    /**
-     * 1개의 페이지 단위로 주고 받기.
-     */
-    public QuotaApiPlaylistsPageDto fetchPlaylistPage(String channelId, String pageToken) throws IOException {
+    public QuotaApiPlaylistsPageDto fetchPlaylistPage(String channelId, String pageToken) {
         try {
             YouTube.Playlists.List request = youtube.playlists().list(Collections.singletonList("snippet, id, contentDetails"));
             request.setKey(apiKey);
@@ -90,16 +88,29 @@ public class YoutubeApiClient {
             String nextPageToken = response.getNextPageToken();
 
             return new QuotaApiPlaylistsPageDto(PlaylistsBatch, nextPageToken);
-        } catch (GoogleJsonResponseException e) {
-            log.warn("Google API error while retrieving fetchPlaylistPage : {}", e.getDetails().getMessage());
-            throw e;
-        }
 
+        } catch (GoogleJsonResponseException e) {
+            int status = e.getStatusCode();
+            String reason = null;
+
+            if (e.getDetails() != null && e.getDetails().getErrors() != null && !e.getDetails().getErrors().isEmpty()) {
+                reason = e.getDetails().getErrors().get(0).getReason();
+            }
+
+            boolean isChannelNotFound = status == 404 && "channelNotFound".equals(reason);
+            boolean isChannelClosedOrSuspended = status == 403 && ("channelClosed".equals(reason) || "channelSuspended".equals(reason));
+
+            if (isChannelNotFound || isChannelClosedOrSuspended) {
+                log.warn("Channel ID [{}] is invalid (Status: {}, Reason: {}). Throwing ChannelNotFoundException.", channelId, status, reason);
+                throw new ChannelNotFoundException("Invalid Channel ID: " + channelId);
+            }
+
+            throw new YoutubeApiException("Youtube API Logic Fail at 'fetchPlaylistPage': ", e.getStatusCode(), e);
+        } catch (IOException e) {
+            throw new YoutubeNetworkException("Failed to connect to Youtube at 'fetchPlaylistPage': ", e);
+        }
     }
 
-    /**
-     * 1개의 페이지 단위로 주고 받기.
-     */
     public VideoFilterResultPageDto fetchVideoPage(List<String> videoIds, String countryCode) {
         List<Video> legal = new ArrayList<>();
         List<Video> unlistedCountryVideos = new ArrayList<>();
@@ -138,19 +149,18 @@ public class YoutubeApiClient {
                 }
             }
 
-        } catch (Exception ex) {
-            log.info("Batch 실패: {}", ex.getMessage());
+        } catch (GoogleJsonResponseException e) {
+            throw new YoutubeApiException("Youtube API Logic Fail at 'fetchVideoPage': ", e.getStatusCode(), e);
+        } catch (IOException e) {
+            throw new YoutubeNetworkException("Failed to connect to Youtube at 'fetchVideoPage': ", e);
         }
 
         return new VideoFilterResultPageDto(legal, unlistedCountryVideos);
     }
 
-    /**
-     * 1개의 페이지 단위로 주고 받기.
-     */
-    public QuotaPlaylistItemPageDto fetchPlaylistItemPage(String playlistId, String pageToken) throws IOException {
+    public QuotaPlaylistItemPageDto fetchPlaylistItemPage(String playlistId, String pageToken) {
         try {
-            YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id")); // , status
+            YouTube.PlaylistItems.List request = youtube.playlistItems().list(Collections.singletonList("snippet, id"));
             request.setKey(apiKey);
             request.setPlaylistId(playlistId);
             request.setMaxResults(50L);
@@ -161,12 +171,14 @@ public class YoutubeApiClient {
             String nextPageToken = response.getNextPageToken();
 
             return new QuotaPlaylistItemPageDto(items, nextPageToken);
+
         } catch (GoogleJsonResponseException e) {
-            log.warn("Google API error while retrieving playlists for user : {}", e.getDetails().getMessage());
             if (e.getStatusCode() == 403 || e.getStatusCode() == 404) {
-                log.warn("Playlist fetch forbidden or not found. Possibly deleted or private.");
+                throw new NoPlaylistFoundException("Playlist fetch forbidden or not found at 'fetchPlaylistItemPage'. Possibly deleted or private");
             }
-            throw new IOException("the playlist is deleted");
+            throw new YoutubeApiException("Youtube API Logic Fail at 'fetchVideoPage': ", e.getStatusCode(), e);
+        } catch (IOException e) {
+            throw new YoutubeNetworkException("Failed to connect to Youtube at 'fetchVideoPage': ", e);
         }
     }
 
@@ -310,8 +322,10 @@ public class YoutubeApiClient {
             // 3. update 요청
             youtube.videos().update(Collections.singletonList("status"), updatedVideo).execute();
             log.info("Video Status Changed to: {}", changedStatus);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (GoogleJsonResponseException e) {
+            throw new YoutubeApiException("Youtube API Logic Fail at 'fetchVideoPage': ", e.getStatusCode(), e);
+        } catch (IOException e) {
+            throw new YoutubeNetworkException("Failed to connect to Youtube at 'fetchVideoPage': ", e);
         }
 
     }

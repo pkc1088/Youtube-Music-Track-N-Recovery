@@ -11,8 +11,7 @@ import youtube.youtubeService.domain.Outbox;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.domain.enums.QuotaType;
 import youtube.youtubeService.dto.internal.*;
-import youtube.youtubeService.exception.NoPlaylistFoundException;
-import youtube.youtubeService.exception.QuotaExceededException;
+import youtube.youtubeService.exception.quota.QuotaExceededException;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.musics.MusicConverterHelper;
@@ -44,14 +43,7 @@ public class RecoveryPlanService {
         PlannedPlaylistUpdateDto plannedPlaylistUpdateDto;
         String playlistId = playlist.getPlaylistId();
 
-        try {
-            plannedPlaylistUpdateDto = playlistStateCheckService.compareApiAndDbState(userId, countryCode, playlist, preFetchedMusicList);
-        } catch (NoPlaylistFoundException npe) {
-            throw npe;
-        } catch (IOException e) {
-            log.info("[skip this playlist: {}]", playlistId);
-            throw e;
-        }
+        plannedPlaylistUpdateDto = playlistStateCheckService.compareApiAndDbState(userId, countryCode, playlist, preFetchedMusicList);
 
         for (Map.Entry<String, List<String>> entry : plannedPlaylistUpdateDto.illegalVideos().entrySet()) {
 
@@ -77,11 +69,11 @@ public class RecoveryPlanService {
             Video replacementVideo = recentLogOpt
                     .map(recent -> {
                         log.info("[Reuse Replacement Video]: {}", recent.getSourceVideoId());
-                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("Quota Exceed");
+                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan");
                         return youtubeApiClient.fetchSingleVideo(recent.getSourceVideoId());
                     })
                     .orElseGet(() -> {
-                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("Quota Exceed");
+                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan");
                         return musicService.searchVideoToReplace(backupMusic);
                     });
 

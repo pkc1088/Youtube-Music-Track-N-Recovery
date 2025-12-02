@@ -11,7 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import youtube.youtubeService.domain.Users;
-import youtube.youtubeService.exception.UserQuitException;
+import youtube.youtubeService.exception.users.UserRevokeException;
+import youtube.youtubeService.exception.users.UserQuitException;
 import youtube.youtubeService.repository.users.UserRepository;
 import java.io.IOException;
 import java.util.List;
@@ -60,7 +61,8 @@ public class UserServiceImpl implements UserService {
                 restTemplate.postForEntity(revokeUrl, null, String.class);
                 log.info("User has been revoked from the service");
             } catch (Exception e) {
-                log.warn("Failed to revoke Google token for user", e);
+                log.error("Failed to revoke Google token for user");
+                throw new UserRevokeException("Failed to revoke Google token for user", e);
             }
         }
     }
@@ -83,19 +85,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private String refreshAccessToken(String refreshToken) throws IOException {
-        try {
-            GoogleRefreshTokenRequest refreshTokenRequest = new GoogleRefreshTokenRequest(
-                    new NetHttpTransport(),
-                    new GsonFactory(),
-                    refreshToken,
-                    clientId,
-                    clientSecret
-            );
-            TokenResponse tokenResponse = refreshTokenRequest.execute();
-            return tokenResponse.getAccessToken();
-        } catch (IOException e) {
-            throw new IOException("[user quit thru security page -> gotta delete users from my service]");
-        }
+        GoogleRefreshTokenRequest refreshTokenRequest = new GoogleRefreshTokenRequest(
+                new NetHttpTransport(),
+                new GsonFactory(),
+                refreshToken,
+                clientId,
+                clientSecret
+        );
+        TokenResponse tokenResponse = refreshTokenRequest.execute();
+
+        return tokenResponse.getAccessToken();
     }
 
 }

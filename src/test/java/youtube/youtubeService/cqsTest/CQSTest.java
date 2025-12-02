@@ -249,7 +249,7 @@ public class CQSTest {
 //        music.setVideoTags("");
 //        music.setPlaylist(playlist);
 //        return music;
-        return new Music(TEST_TARGET_VIDEO_ID, "Regina Belle - So Many Tears(일부공개)", "Whistle_Missile", "", "", playlist);
+        return new Music(TEST_TARGET_VIDEO_ID, "Regina Belle - So Many Tears(일부공개)", "Whistle_Missile", 200, "", "", playlist);
     }
 
     void sleep(int seconds) {

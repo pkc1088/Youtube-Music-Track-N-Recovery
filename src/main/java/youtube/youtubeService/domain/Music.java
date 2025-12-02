@@ -15,6 +15,8 @@ public class Music {
     private String videoId;
     private String videoTitle;
     private String videoUploader;
+    private Integer videoDuration;
+
     @Column(length = 5010)
     private String videoDescription;
     @Column(length = 510)
@@ -25,10 +27,11 @@ public class Music {
     private Playlists playlist;
 
 
-    public Music(String videoId, String videoTitle, String videoUploader, String videoDescription, String videoTags, Playlists playlist) {
+    public Music(String videoId, String videoTitle, String videoUploader, Integer videoDuration, String videoDescription, String videoTags, Playlists playlist) {
         this.videoId = videoId;
         this.videoTitle = videoTitle;
         this.videoUploader = videoUploader;
+        this.videoDuration = videoDuration;
         this.videoDescription = videoDescription;
         this.videoTags = videoTags;
         this.playlist = playlist;

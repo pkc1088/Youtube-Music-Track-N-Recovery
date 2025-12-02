@@ -38,7 +38,7 @@ public class GeminiFallbackTest {
     RestClient.ResponseSpec responseSpec;
 
     private final MusicDetailsDto musicToSearch = new MusicDetailsDto(
-            123L, "videoId123", "Kiss And Say GoodBye", "Manhattans", "This is an American Group", "R&B SOUL", "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t"
+            123L, "videoId123", "Kiss And Say GoodBye", "Manhattans", 200, "This is an American Group", "R&B SOUL", "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t"
     );
 
     @BeforeEach

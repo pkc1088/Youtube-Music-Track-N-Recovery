@@ -129,7 +129,7 @@ public class LegacyPerformanceTest {
             Thread.sleep(978); // GEMINI Search + API Query search + API SingleVideo search
             MusicDetailsDto backupMusic = i.getArgument(0, MusicDetailsDto.class);
             return makeFakeReplacementVideo(backupMusic);
-        }).when(musicService).searchVideoToReplace(any());
+        }).when(musicService).searchVideoToReplace(any(), any());
 
 
         doNothing().when(outboxEventHandler).retryFailedOutboxEvents(any());
@@ -170,14 +170,14 @@ public class LegacyPerformanceTest {
         return video;
     }
 
-    public Music makeFakeMusic(String videoId, String title, String uploader, String description, String tags, Playlists playlist) {
+    public Music makeFakeMusic(String videoId, String title, String uploader, int duration, String description, String tags, Playlists playlist) {
 //        music.setVideoId(videoId);
 //        music.setVideoTitle(title);
 //        music.setVideoUploader(uploader);
 //        music.setVideoDescription(description);
 //        music.setVideoTags(tags);
 //        music.setPlaylist(playlist);
-        return new Music(videoId, title, uploader, description, tags, playlist);
+        return new Music(videoId, title, uploader, duration, description, tags, playlist);
     }
 
     private List<PlaylistItem> makeFakePlaylistItem(String userId, String playlistId) {
@@ -231,7 +231,7 @@ public class LegacyPerformanceTest {
 
                 for (int m = 1; m <= MUSIC_PER_PLAYLIST; m++) {
                     String videoId = "video-" + m + "-" +  playlist.getPlaylistId();
-                    allMusic.add(makeFakeMusic(videoId, "Mock Title", "Mock Uploader", "Mock Description", "Mock Tags", playlist));
+                    allMusic.add(makeFakeMusic(videoId, "Mock Title", "Mock Uploader", 200, "Mock Description", "Mock Tags", playlist));
                 }
 
             }

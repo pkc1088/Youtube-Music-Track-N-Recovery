@@ -25,7 +25,7 @@ public class GeminiModelTest {
     SearchPolicy geminiSearchQuery;
 
     private final MusicDetailsDto musicToSearch = new MusicDetailsDto(
-            7777L, "videoId123", "Kiss And Say GoodBye", "Manhattans",
+            7777L, "videoId123", "Kiss And Say GoodBye", "Manhattans", 200,
             "This is an American Group", "R&B SOUL", "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t"
     );
 

@@ -24,6 +24,6 @@ public interface MusicService {
 
     void bulkInsertMusic(List<Music> musics);
 
-    Video searchVideoToReplace(MusicDetailsDto musicToSearch);
+    Video searchVideoToReplace(MusicDetailsDto musicToSearch, String countryCode);
 
 }

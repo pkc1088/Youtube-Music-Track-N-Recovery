@@ -74,7 +74,7 @@ public class RecoveryPlanService {
                     })
                     .orElseGet(() -> {
                         if (!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan");
-                        return musicService.searchVideoToReplace(backupMusic);
+                        return musicService.searchVideoToReplace(backupMusic, countryCode);
                     });
 
             Music replacementMusic = musicConverterHelper.makeVideoToMusic(replacementVideo, playlist);

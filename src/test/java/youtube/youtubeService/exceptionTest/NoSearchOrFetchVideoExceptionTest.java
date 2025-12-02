@@ -27,7 +27,7 @@ public class NoSearchOrFetchVideoExceptionTest {
     void setUp() {
 
         try {
-            doReturn(null).when(youtubeApiClient).searchFromYoutube(anyString());
+            doReturn(null).when(youtubeApiClient).searchFromYoutube(anyString(), "KR");
 
         } catch (Exception e) {
 

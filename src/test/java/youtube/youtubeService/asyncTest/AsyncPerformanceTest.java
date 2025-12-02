@@ -104,7 +104,7 @@ public class AsyncPerformanceTest {
             Thread.sleep(978); // Primary GEMINI Search + API Query search + API SingleVideo search
             MusicDetailsDto backupMusic = i.getArgument(0, MusicDetailsDto.class);
             return makeFakeReplacementVideo(backupMusic);
-        }).when(musicService).searchVideoToReplace(any());
+        }).when(musicService).searchVideoToReplace(any(), any());
 
         doAnswer(i -> {
             Thread.sleep(793);
@@ -154,7 +154,7 @@ public class AsyncPerformanceTest {
         return video;
     }
 
-    public Music makeFakeMusic(String videoId, String title, String uploader, String description, String tags, Playlists playlist) {
+    public Music makeFakeMusic(String videoId, String title, String uploader, int duration, String description, String tags, Playlists playlist) {
 //        Music music = new Music();
 //        music.setVideoId(videoId);
 //        music.setVideoTitle(title);
@@ -162,7 +162,7 @@ public class AsyncPerformanceTest {
 //        music.setVideoDescription(description);
 //        music.setVideoTags(tags);
 //        music.setPlaylist(playlist);
-        return new Music(videoId, title, uploader, description, tags, playlist);
+        return new Music(videoId, title, uploader, duration, description, tags, playlist);
     }
 
     private List<PlaylistItem> makeFakePlaylistItem(String userId, String playlistId) {
@@ -217,7 +217,7 @@ public class AsyncPerformanceTest {
                 for (int m = 1; m <= MUSIC_PER_PLAYLIST; m++) {
                     // 100 개 중 1개는 복구 대상(illegal)이라고 가정
                     String videoId = "video-" + m + "-" +  playlist.getPlaylistId(); // (m == 1) ? "illegal-video-" + i :  여기서 하는게 아님 DB 는 항상 깨끗해야함
-                    allMusic.add(makeFakeMusic(videoId, "Mock Title", "Mock Uploader", "Mock Description", "Mock Tags", playlist));
+                    allMusic.add(makeFakeMusic(videoId, "Mock Title", "Mock Uploader", 200, "Mock Description", "Mock Tags", playlist));
                 }
 
             }

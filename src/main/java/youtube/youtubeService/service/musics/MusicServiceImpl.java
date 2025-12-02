@@ -13,6 +13,7 @@ import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.dto.internal.MusicDetailsDto;
 import youtube.youtubeService.dto.internal.MusicSummaryDto;
+import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.policy.SearchPolicy;
 import youtube.youtubeService.repository.musics.MusicRepository;
 import java.sql.PreparedStatement;
@@ -26,11 +27,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MusicServiceImpl implements MusicService {
 
+    private final MusicConverterHelper musicConverterHelper;
+    private final YoutubeApiClient youtubeApiClient;
+    private final VideoRecommender videoRecommender;
     private final MusicRepository musicRepository;
     private final SearchPolicy geminiSearchQuery;
-    private final YoutubeApiClient youtubeApiClient;
     private final JdbcTemplate jdbcTemplate;
-    private final MusicConverterHelper musicConverterHelper;
 
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
@@ -74,8 +76,8 @@ public class MusicServiceImpl implements MusicService {
     @Override
     @Transactional
     public void bulkInsertMusic(List<Music> musics) {
-        String sql = "INSERT INTO music (video_id, video_title, video_uploader, video_description, video_tags, playlist_id) " +
-                        "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO music (video_id, video_title, video_uploader, video_duration, video_description, video_tags, playlist_id) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
@@ -84,9 +86,10 @@ public class MusicServiceImpl implements MusicService {
                 ps.setString(1, music.getVideoId());
                 ps.setString(2, music.getVideoTitle());
                 ps.setString(3, music.getVideoUploader());
-                ps.setString(4, music.getVideoDescription());
-                ps.setString(5, music.getVideoTags());
-                ps.setString(6, music.getPlaylist().getPlaylistId());
+                ps.setInt(4, music.getVideoDuration());
+                ps.setString(5, music.getVideoDescription());
+                ps.setString(6, music.getVideoTags());
+                ps.setString(7, music.getPlaylist().getPlaylistId());
             }
 
             @Override
@@ -97,7 +100,7 @@ public class MusicServiceImpl implements MusicService {
     }
 
     @Override
-    public Video searchVideoToReplace(MusicDetailsDto musicToSearch) {
+    public Video searchVideoToReplace(MusicDetailsDto musicToSearch, String countryCode) {
 
         String query = null;
 
@@ -106,14 +109,20 @@ public class MusicServiceImpl implements MusicService {
             log.info("[searched with]: {}", query);
 
             // 이미 할당량 체크는 YoutubeService 에서 100 + 1 로 체크해줬음
-            SearchResult searchResult = youtubeApiClient.searchFromYoutube(query);
+            List<SearchResult> searchResults = youtubeApiClient.searchFromYoutube(query, countryCode);
 
-            if (searchResult == null) {
+            if (searchResults == null) {
                 log.warn("Search found no results for query [{}]. Returning placeholder.", query);
                 return youtubeApiClient.createPlaceholderVideo("This video was supposed to be searched with [" + query + "]");
             }
 
-            Video video = youtubeApiClient.fetchSingleVideo(searchResult.getId().getVideoId());
+            // Video video = youtubeApiClient.fetchSingleVideo(searchResult.getId().getVideoId());
+            List<String> videoIdsToSearch = searchResults.stream().map(result -> result.getId().getVideoId()).toList();
+            VideoFilterResultPageDto videoDetails = youtubeApiClient.fetchVideoPage(videoIdsToSearch, countryCode);
+            List<Video> candidatesVideos = videoDetails.legalVideos();
+
+            Video video = videoRecommender.recommendBestMatch(musicToSearch, candidatesVideos);
+
             log.info("[Found a music to replace]: {}, {}", video.getSnippet().getTitle(), video.getSnippet().getChannelTitle());
 
             return video;

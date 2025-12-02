@@ -24,15 +24,17 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class YoutubeApiClient {
+
     @Value("${youtube.api.key}")
     private String apiKey;
     private final YouTube youtube;
+    private static final long SEARCH_MAX_RESULT = 10L;
     private final AuthenticatedYouTubeFactory youTubeFactory;
     private static final String FALLBACK_VIDEO_ID = "t3M2oxdoWuI";
 
     public Video fetchSingleVideo(String videoId) {
         try {
-            YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails"));
+            YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails, statistics"));
             request.setKey(apiKey);
             request.setId(Collections.singletonList(videoId));
             VideoListResponse response = request.execute();
@@ -116,7 +118,7 @@ public class YoutubeApiClient {
         List<Video> unlistedCountryVideos = new ArrayList<>();
 
         try {
-            YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails"));
+            YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails, statistics"));
             request.setKey(apiKey);
             request.setId(videoIds);
             request.setMaxResults((long) videoIds.size());
@@ -263,17 +265,19 @@ public class YoutubeApiClient {
         return true;
     }
 
-    public SearchResult searchFromYoutube(String query) {
+    public List<SearchResult> searchFromYoutube(String query, String countryCode) {
         try {
             YouTube.Search.List search = youtube.search().list(Collections.singletonList("id, snippet"));
             search.setKey(apiKey);
             search.setQ(query);
-            search.setType(Collections.singletonList("video")); // 비디오만 검색 (추가사항)
+            search.setRegionCode(countryCode);
+            search.setMaxResults(SEARCH_MAX_RESULT);
+            search.setType(Collections.singletonList("video"));
 
             SearchListResponse searchResponse = search.execute();
             // 1. 리스트가 null 이 아니고 비어있지 않은지 확인
             if (searchResponse != null && searchResponse.getItems() != null && !searchResponse.getItems().isEmpty()) {
-                return searchResponse.getItems().get(0);
+                return searchResponse.getItems(); // return searchResponse.getItems().get(0);
             }
             // 2. (실패 1) 검색 결과가 없는 경우
             log.warn("YouTube API Search for query '{}' yielded no results. Returning placeholder.", query);

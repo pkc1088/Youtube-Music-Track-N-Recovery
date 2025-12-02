@@ -86,7 +86,7 @@ public class OutboxPerformanceTest {
 
                 // AFTER (복구 됐을 영상을 다시 비정상 영상으로 돌려놔야 다음 iteration 때 탐지함)
                 sleep();
-                musicService.upsertMusic(new Music(brokenVideoId, title, uploader, description, tags, playlist));
+                musicService.upsertMusic(new Music(brokenVideoId, title, uploader, 200, description, tags, playlist));
             } catch (Exception e) {
                 log.error("Error Occurred At {} - {}", i, e.toString(), e);
             }

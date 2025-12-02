@@ -5,6 +5,7 @@ public record MusicDetailsDto (
         String videoId,
         String videoTitle,
         String videoUploader,
+        Integer videoDuration,
         String videoDescription,
         String videoTags,
         String playlistId

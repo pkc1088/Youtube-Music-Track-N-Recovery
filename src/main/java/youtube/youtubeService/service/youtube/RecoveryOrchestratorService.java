@@ -15,6 +15,8 @@ import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistPersistenceService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
+
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class RecoveryOrchestratorService {
 
     private final UserService userService;
+    private final UserTokenService userTokenService;
     private final PlaylistService playlistService;
     private final MusicService musicService;
     private final OutboxEventHandler outboxEventHandler;
@@ -33,6 +36,7 @@ public class RecoveryOrchestratorService {
     private final RecoveryExecuteService recoveryExecuteService;
     private final PlaylistPersistenceService playlistPersistenceService;
     private final Executor userExecutor;
+
 
     public void allPlaylistsRecoveryOfAllUsers() {
 
@@ -60,7 +64,7 @@ public class RecoveryOrchestratorService {
 
                     try {
                         log.info("[userId: {}]", userId);
-                        accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
+                        accessToken = userTokenService.getNewAccessTokenByUserId(refreshToken);
                     } catch (UserQuitException e) {
                         log.warn("[User Left] Executing withdrawal process on user {}", userId);
                         userService.deleteByUserIdRaw(userId);

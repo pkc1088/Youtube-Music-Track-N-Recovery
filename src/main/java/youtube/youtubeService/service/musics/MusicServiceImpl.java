@@ -34,6 +34,7 @@ public class MusicServiceImpl implements MusicService {
     private final SearchPolicy geminiSearchQuery;
     private final JdbcTemplate jdbcTemplate;
 
+
     @Override
     public List<MusicSummaryDto> findAllMusicSummaryByPlaylistIds(List<Playlists> playListsSet) {
         return musicRepository.findAllMusicSummaryByPlaylistIds(playListsSet);
@@ -102,7 +103,7 @@ public class MusicServiceImpl implements MusicService {
     @Override
     public Video searchVideoToReplace(MusicDetailsDto musicToSearch, String countryCode) {
 
-        String query = null;
+        String query = "Unknown Query";
 
         try {
             query = geminiSearchQuery.search(musicToSearch);
@@ -111,28 +112,36 @@ public class MusicServiceImpl implements MusicService {
             // 이미 할당량 체크는 YoutubeService 에서 100 + 1 로 체크해줬음
             List<SearchResult> searchResults = youtubeApiClient.searchFromYoutube(query, countryCode);
 
-            if (searchResults == null) {
+            if (searchResults == null || searchResults.isEmpty()) {
                 log.warn("Search found no results for query [{}]. Returning placeholder.", query);
-                return youtubeApiClient.createPlaceholderVideo("This video was supposed to be searched with [" + query + "]");
+                return createFallbackVideo(query);
             }
 
-            // Video video = youtubeApiClient.fetchSingleVideo(searchResult.getId().getVideoId());
             List<String> videoIdsToSearch = searchResults.stream().map(result -> result.getId().getVideoId()).toList();
             VideoFilterResultPageDto videoDetails = youtubeApiClient.fetchVideoPage(videoIdsToSearch, countryCode);
             List<Video> candidatesVideos = videoDetails.legalVideos();
 
-            Video video = videoRecommender.recommendBestMatch(musicToSearch, candidatesVideos);
+            if (candidatesVideos.isEmpty()) {
+                log.warn("All search results were filtered out (Region/Status) for [{}].", query);
+                return createFallbackVideo(query);
+            }
 
-            log.info("[Found a music to replace]: {}, {}", video.getSnippet().getTitle(), video.getSnippet().getChannelTitle());
+            Video bestVideo = videoRecommender.recommendBestMatch(musicToSearch, candidatesVideos);
 
-            return video;
+            if (bestVideo != null) {
+                log.info("[Found a music to replace]: {}, {}", bestVideo.getSnippet().getTitle(), bestVideo.getSnippet().getChannelTitle());
+                return bestVideo;
+            }
 
         } catch (Exception e) { // GEMINI Error 는 이미 search() 에서 처리함
             log.error("Video for a replacement Searching Error");
-            return youtubeApiClient.createPlaceholderVideo("This video was supposed to be searched with [" + query + "]");
         }
 
+        return createFallbackVideo(query);
+    }
 
+    private Video createFallbackVideo(String query) {
+        return youtubeApiClient.createPlaceholderVideo("This video was supposed to be searched with [" + query + "]");
     }
 
 }

@@ -32,6 +32,31 @@ public class YoutubeApiClient {
     private final AuthenticatedYouTubeFactory youTubeFactory;
     private static final String FALLBACK_VIDEO_ID = "t3M2oxdoWuI";
 
+
+    public boolean isVideoPlayable(Video video, String countryCode) {
+
+        if (video == null) return false;
+
+        if (!"public".equals(video.getStatus().getPrivacyStatus()) || !"processed".equals(video.getStatus().getUploadStatus())) {
+            return false;
+        }
+
+        if (video.getContentDetails().getRegionRestriction() != null) {
+
+            if (video.getContentDetails().getRegionRestriction().getAllowed() != null
+                    && !video.getContentDetails().getRegionRestriction().getAllowed().contains(countryCode)) {
+                return false;
+            }
+
+            if (video.getContentDetails().getRegionRestriction().getBlocked() != null
+                    && video.getContentDetails().getRegionRestriction().getBlocked().contains(countryCode)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public Video fetchSingleVideo(String videoId) {
         try {
             YouTube.Videos.List request = youtube.videos().list(Collections.singletonList("snippet, id, status, contentDetails, statistics"));

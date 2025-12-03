@@ -26,6 +26,7 @@ import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
 import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,19 +39,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ManagementScheduler {
 
-    @Value("${youtube.api.key}")
-    private String apiKey;
-    private final PlaylistService playlistService;
-    private final UserService userService;
-    private final UserRepository userRepository;
-    private final SearchPolicy geminiSearchQuery;
-    private final PlaylistRepository playlistRepository;
-    private final MusicRepository musicRepository;
-    private final YoutubeApiClient youtubeApiClient;
+    @Value("${youtube.api.key}") private String apiKey;
     private final RecoveryOrchestratorService recoveryOrchestratorService;
-    private final OutboxEventHandler outboxEventHandler;
-    private final MusicService musicService;
+    private final UserTokenService userTokenService;
+    private final YoutubeApiClient youtubeApiClient;
     private final YouTube youtube;
+
 
 //    @Scheduled(fixedRate = 9000000, initialDelayString = "1000")
     public void allPlaylistsRecoveryOfAllUsersOutboxOrchestraTest() {
@@ -65,7 +59,7 @@ public class ManagementScheduler {
     public void addPrivateVideoTest() {
         // updatePrivacyStatusTest();
         String refreshToken = "abc";
-        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId("112735690496635663877", refreshToken);
+        String accessTokenForRecoverUser = userTokenService.getNewAccessTokenByUserId(refreshToken);
         String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
         youtubeApiClient.addVideoToActualPlaylist(accessTokenForRecoverUser, playlistId, "XzEoBAltBII");
     }
@@ -74,7 +68,7 @@ public class ManagementScheduler {
     public void updatePrivacyStatusTest() {
         String userId = "107155055893692546350";
         String refreshToken = "abc";
-        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
+        String accessToken = userTokenService.getNewAccessTokenByUserId(refreshToken);
         String videoId = "XzEoBAltBII";
         String status = "public"; //"private";
 
@@ -87,7 +81,7 @@ public class ManagementScheduler {
         String refreshToken = "";
         String playlistId = "PLNj4bt23RjfsajCmUzYQbvZp0v-M8PU8t";
         String videoId = "gQHcttM8niw";
-        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
+        String accessToken = userTokenService.getNewAccessTokenByUserId(refreshToken);
 
         for (int i = 1; i <= 1; i++) {
             log.info("[Attempt : {}]", i);
@@ -101,7 +95,7 @@ public class ManagementScheduler {
     public void deleteTest() throws IOException {
         String userId = "111103817226176952211";
         String refreshToken = "";
-        String accessToken = userService.getNewAccessTokenByUserId(userId, refreshToken);
+        String accessToken = userTokenService.getNewAccessTokenByUserId(refreshToken);
         String playlistId = "PLP2GOU1oCmVCJYbPqGqald-598Wzybumx";
 
         QuotaPlaylistItemPageDto dto = youtubeApiClient.fetchPlaylistItemPage(playlistId, null);

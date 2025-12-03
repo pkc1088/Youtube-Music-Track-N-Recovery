@@ -16,6 +16,8 @@ import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxProcessor;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
+
 import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,6 +35,8 @@ public class OutboxPerformanceTest {
 
     @Autowired//MockitoSpyBean
     private UserService userService;
+    @Autowired
+    private UserTokenService userTokenService;
     @Autowired
     private PlaylistRepository playlistRepository;
     @Autowired
@@ -65,7 +69,7 @@ public class OutboxPerformanceTest {
     void testEachRecover() {
         String userId = "112735690496635663877";
         String refreshToken = userService.getUserByUserId(userId).orElseThrow(() -> new EntityNotFoundException("User not found: " + userId)).getRefreshToken();
-        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId(userId, refreshToken);  // pkc1088
+        String accessTokenForRecoverUser = userTokenService.getNewAccessTokenByUserId(refreshToken);  // pkc1088
         // String accessTokenForUploader = userService.getNewAccessTokenByUserId("107155055893692546350");     // WhistleMissile
         List<Long> data = new ArrayList<>();
 

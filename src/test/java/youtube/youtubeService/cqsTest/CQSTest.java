@@ -26,6 +26,7 @@ import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
 import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import youtube.youtubeService.service.youtube.RecoveryExecuteService;
 import youtube.youtubeService.service.youtube.RecoveryPlanService;
@@ -51,6 +52,7 @@ public class CQSTest {
     @Autowired YoutubeApiClient youtubeApiClient;
 
     @Autowired UserService userService;
+    @Autowired UserTokenService userTokenService;
     @Autowired MusicService musicService;
     @Autowired PlaylistService playlistService;
     @Autowired OutboxRepository outboxRepository;
@@ -84,7 +86,7 @@ public class CQSTest {
         Map<String, List<Playlists>> playlistsByUser = allPlaylists.stream().collect(Collectors.groupingBy(playlist -> playlist.getUser().getUserId()));
 
 
-        String accessToken = userService.getNewAccessTokenByUserId(TEST_USER_ID, REFRESH_TOKEN);
+        String accessToken = userTokenService.getNewAccessTokenByUserId(REFRESH_TOKEN);
 
         for (int i = 1; i <= ITERATIONS; i++) {
 

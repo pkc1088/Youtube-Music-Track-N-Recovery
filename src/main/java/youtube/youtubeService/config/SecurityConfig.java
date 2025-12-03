@@ -11,14 +11,13 @@ import org.springframework.security.oauth2.client.web.HttpSessionOAuth2Authoriza
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession;
 
 @Slf4j
 @Configuration
 @EnableWebSecurity
-@EnableRedisIndexedHttpSession //@EnableRedisHttpSession // 추가
-@EnableMethodSecurity(prePostEnabled = true) // 추가
+@EnableRedisIndexedHttpSession
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final AuthenticationSuccessHandler oauth2LoginSuccessHandler;
@@ -38,7 +37,7 @@ public class SecurityConfig {
                     .requestMatchers("/js/**", "/images/**", "/css/**", "/", "/api/scheduler/**", "/google9cce108361f8ecd7.html",
                                     "/privacy-policy.html", "/terms-of-service.html", "/checkboxNotActivated", "/channelNotFound", "/bad-user")
                     .permitAll()
-                    .anyRequest().authenticated()   // 해당 경로 외 모든 요청은 인증 필요, 로그인되지 않은 사용자라면 / 으로 리다이렉트
+                    .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                     .loginPage("/")

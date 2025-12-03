@@ -19,6 +19,7 @@ import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
 import youtube.youtubeService.service.youtube.RecoveryExecuteService;
 import youtube.youtubeService.service.youtube.RecoveryPlanService;
 
@@ -37,6 +38,8 @@ public class ImprovedCQSTest {
     @Autowired RecoveryExecuteService recoveryExecuteService;
     @Autowired YoutubeApiClient youtubeApiClient;
     @Autowired UserService userService;
+    @Autowired
+    UserTokenService userTokenService;
     @Autowired MusicService musicService;
     @Autowired PlaylistService playlistService;
     @Autowired OutboxRepository outboxRepository;
@@ -67,7 +70,7 @@ public class ImprovedCQSTest {
         List<Playlists> allPlaylists = playlistService.findAllPlaylistsByUserIdsOrderByLastChecked(userIds);//findAllPlaylistsByUserIds(userIds);
         Map<String, List<Playlists>> playlistsByUser = allPlaylists.stream().collect(Collectors.groupingBy(playlist -> playlist.getUser().getUserId()));
 
-        String accessToken = userService.getNewAccessTokenByUserId(TEST_USER_ID, REFRESH_TOKEN);
+        String accessToken = userTokenService.getNewAccessTokenByUserId(REFRESH_TOKEN);
 
         // Warm-up (첫 번째 실행 버리기용)
         log.info("...Warming up...");

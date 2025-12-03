@@ -15,6 +15,8 @@ import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +38,8 @@ public class YoutubeApiStressTest {
     private OutboxInsertTest outboxInsertTest;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserTokenService userTokenService;
     @Autowired
     private PlaylistRepository playlistRepository;
     @Autowired
@@ -69,7 +73,7 @@ public class YoutubeApiStressTest {
     void testEachRecover() {
         String userId = "112735690496635663877";
         String refreshToken = userService.getUserByUserId(userId).orElseThrow(() -> new EntityNotFoundException("User not found: " + userId)).getRefreshToken();
-        String accessTokenForRecoverUser = userService.getNewAccessTokenByUserId(userId, refreshToken);  // pkc1088
+        String accessTokenForRecoverUser = userTokenService.getNewAccessTokenByUserId(refreshToken);  // pkc1088
         List<String> videoIdToInsertList = List.of("Oz-b86LZ21c", "cJLH5yXoqi8", "Uc8wmLul3uw", "wtjro7_R3-4");
         List<PlaylistItem> pureApiPlaylistItems = new ArrayList<>();
 

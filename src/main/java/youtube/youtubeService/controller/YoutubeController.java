@@ -8,21 +8,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
-import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import youtube.youtubeService.dto.response.ActionLogResponseDto;
 import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
+import youtube.youtubeService.dto.response.ActionLogResponseDto;
 import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
 import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationOrchestratorService;
-import youtube.youtubeService.service.users.UserService;
-import java.io.IOException;
+import youtube.youtubeService.service.users.UserTokenService;
+
 import java.security.Principal;
 
 @Slf4j
@@ -30,9 +31,10 @@ import java.security.Principal;
 @RequiredArgsConstructor
 public class YoutubeController {
 
-    private final UserService userService;
-    private final ActionLogService actionLogService;
     private final PlaylistRegistrationOrchestratorService playlistRegistrationOrchestratorService;
+    private final ActionLogService actionLogService;
+    private final UserTokenService userTokenService;
+
 
     @GetMapping("/channelNotFound")
     public String channelNotFound() {
@@ -67,9 +69,8 @@ public class YoutubeController {
 
     @GetMapping("/playlist/{userId}")
     @PreAuthorize("#userId == authentication.principal.name")
-    public String userRegisterPlaylists(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient authorizedClient, @PathVariable String userId, Model model) {
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
-        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId, accessToken);
+    public String userRegisterPlaylists(@PathVariable String userId, Model model) {
+        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId);
         model.addAttribute("dto", dto);
         return "playlist_selection";
     }
@@ -95,17 +96,15 @@ public class YoutubeController {
     }
 
     @PostMapping("/delete")
-    public String deleteAccount(@RegisteredOAuth2AuthorizedClient("google") OAuth2AuthorizedClient authorizedClient, HttpServletRequest request, HttpServletResponse response) {
+    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
 
-        String userId = authorizedClient.getPrincipalName();
-        String accessToken = authorizedClient.getAccessToken().getTokenValue();
-        userService.deleteAndRevokeUserAccount(userId, accessToken);
+        userTokenService.withdrawUser(principal.getAttribute("sub"));
 
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();
         Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setPath("/"); // 도메인 루트에 설정된 JSESSIONID 라면
-        cookie.setMaxAge(0); // 즉시 만료
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
         response.addCookie(cookie);
 
         return "redirect:/";

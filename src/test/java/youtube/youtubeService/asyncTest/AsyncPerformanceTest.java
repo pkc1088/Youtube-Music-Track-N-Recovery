@@ -23,6 +23,7 @@ import youtube.youtubeService.service.musics.MusicService;
 import youtube.youtubeService.service.outbox.OutboxEventHandler;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationUnitService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
 import youtube.youtubeService.service.youtube.RecoveryOrchestratorService;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -40,7 +41,7 @@ public class AsyncPerformanceTest {
     private RecoveryOrchestratorService recoveryOrchestratorService;
 
     @MockitoSpyBean
-    UserService userService;
+    UserTokenService userTokenService;
     @MockitoSpyBean
     ActionLogService actionLogService;
     @MockitoSpyBean
@@ -75,7 +76,7 @@ public class AsyncPerformanceTest {
         doAnswer(i -> {
             Thread.sleep(370);
             return "mock-access-token";
-        }).when(userService).getNewAccessTokenByUserId(any(), any());
+        }).when(userTokenService).getNewAccessTokenByUserId(any());
 
         // (Planner) '읽기' 할당량 항상 통과
         doReturn(true).when(quotaService).checkAndConsumeLua(any(), any(Long.class));

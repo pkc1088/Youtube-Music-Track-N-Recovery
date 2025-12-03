@@ -1,24 +1,25 @@
 package youtube.youtubeService.service.musics;
 
 import com.google.api.services.youtube.model.Video;
+import com.google.api.services.youtube.model.VideoContentDetailsRegionRestriction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import youtube.youtubeService.domain.Music;
 import youtube.youtubeService.dto.internal.MusicDetailsDto;
 
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class VideoRecommender {
 
-    private static final double TITLE_WEIGHT = 0.5;
-    private static final double CHANNEL_TITLE_WEIGHT = 0.2;
+    private static final double TITLE_WEIGHT = 0.45;
+    private static final double CHANNEL_TITLE_WEIGHT = 0.15;
     private static final double DURATION_WEIGHT = 0.15;
     private static final double STATISTICS_WEIGHT = 0.15;
+    private static final double REGION_WEIGHT = 0.10;
+
     private static final double MAX_LOG_VIEW = Math.log10(10_000_000);
     private static final double MAX_LOG_LIKE = Math.log10(100_000);
     private static final double MAX_LOG_COMMENT = Math.log10(10_000);
@@ -31,7 +32,7 @@ public class VideoRecommender {
 
         for (Video candidate : candidates) {
             double score = computeScore(original, candidate);
-            log.info("Final Score: {} | Candidate: {}, Title: {}, Uploader: {}", score, candidate.getId(), candidate.getSnippet().getTitle(), candidate.getSnippet().getChannelTitle());
+            log.info("└──→ [Final Score]: {} | Candidate: {}, Title: {}, Uploader: {}", String.format("%.2f", score), candidate.getId(), candidate.getSnippet().getTitle(), candidate.getSnippet().getChannelTitle());
             if (score > bestScore) {
                 bestScore = score;
                 bestVideo = candidate;
@@ -47,9 +48,12 @@ public class VideoRecommender {
         double channelSimilarity = computeTitleSimilarityJaccard(original.videoUploader(), candidate.getSnippet().getChannelTitle());
         double durationScore = computeDurationSimilarity(original.videoDuration(), candidate.getContentDetails().getDuration());
         double statisticsScore = computeStatisticsScore(candidate.getStatistics().getViewCount(), candidate.getStatistics().getLikeCount(), candidate.getStatistics().getCommentCount());
-        log.info("[Candidate Score Breakdown] Title: {}, Channel: {}, Duration: {}, Stats: {}",titleSimilarity, channelSimilarity, durationScore, statisticsScore);
+        double regionScore = computeRegionScore(candidate);
+        log.info("[Candidate Score Breakdown] Title: {}, Channel: {}, Duration: {}, Stats: {}, region: {}",
+                String.format("%.2f", titleSimilarity), String.format("%.2f", channelSimilarity), String.format("%.2f", durationScore), String.format("%.2f", statisticsScore), String.format("%.2f", regionScore));
+                //titleSimilarity, channelSimilarity, durationScore, statisticsScore, regionScore);
 
-        return titleSimilarity * TITLE_WEIGHT + channelSimilarity * CHANNEL_TITLE_WEIGHT + durationScore * DURATION_WEIGHT + statisticsScore  * STATISTICS_WEIGHT;
+        return (titleSimilarity * TITLE_WEIGHT) + (channelSimilarity * CHANNEL_TITLE_WEIGHT) + (durationScore * DURATION_WEIGHT) + (statisticsScore  * STATISTICS_WEIGHT) + (regionScore * REGION_WEIGHT);
     }
 
     private double computeDurationSimilarity(int originalSeconds, String candidateDuration) {
@@ -126,13 +130,30 @@ public class VideoRecommender {
 
         String cleaned = text.toLowerCase()
                 .replaceAll("\\(.*?\\)|\\[.*?\\]", "") // (Official), [MV] 제거
-                .replaceAll("[^a-z0-9가-힣\\s]", "")    // 특수문자 제거
+                .replaceAll("[^\\p{L}\\p{N}\\s]", "")
+                //.replaceAll("[^a-z0-9가-힣\\s]", "")    // 특수문자 제거
                 .trim();
 
         if (cleaned.isEmpty()) return Collections.emptySet();
 
         // 중복 제거(HashSet)
         return new HashSet<>(Arrays.asList(cleaned.split("\\s+")));
+    }
+
+    private double computeRegionScore(Video video) {
+
+        VideoContentDetailsRegionRestriction restriction = video.getContentDetails().getRegionRestriction();
+
+        // 전 세계 허용
+        if (restriction == null) return 1.0;
+
+        // 객체는 있는데 내용이 비어있는 경우 (방어용 코드임)
+        boolean noAllowedList = (restriction.getAllowed() == null || restriction.getAllowed().isEmpty());
+        boolean noBlockedList = (restriction.getBlocked() == null || restriction.getBlocked().isEmpty());
+        if (noAllowedList && noBlockedList) return 1.0;
+
+        // 지역빨 타는 영상
+        return 0.0;
     }
 
 

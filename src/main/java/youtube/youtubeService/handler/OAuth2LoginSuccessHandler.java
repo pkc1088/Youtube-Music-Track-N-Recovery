@@ -26,6 +26,8 @@ import youtube.youtubeService.exception.youtube.YoutubeNetworkException;
 import youtube.youtubeService.service.GeoIpService;
 import youtube.youtubeService.service.QuotaService;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -36,6 +38,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final QuotaService quotaService;
     private final UserService userService;
+    private final UserTokenService userTokenService;
     private final GeoIpService geoIpService;
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final YoutubeApiClient youtubeApiClient;
@@ -119,7 +122,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private void revokeAndInvalidate(HttpServletRequest request, HttpServletResponse response, String accessToken, String redirectUrl) throws IOException {
 
-        userService.revokeUser(accessToken);
+        userTokenService.revokeUser(accessToken);
 
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();

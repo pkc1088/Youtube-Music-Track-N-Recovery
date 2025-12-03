@@ -36,6 +36,7 @@ public class RecoveryPlanService {
     private final MusicService musicService;
     private final QuotaService quotaService;
 
+
     public PlaylistRecoveryPlanDto prepareRecoveryPlan(String userId, Playlists playlist, String countryCode, String accessToken, List<MusicSummaryDto> preFetchedMusicList) throws IOException {
 
         List<RecoveryTaskDto> recoveryTasks = new ArrayList<>();
@@ -69,11 +70,18 @@ public class RecoveryPlanService {
             Video replacementVideo = recentLogOpt
                     .map(recent -> {
                         log.info("[Reuse Replacement Video]: {}", recent.getSourceVideoId());
-                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan");
+                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan - Reuse");
                         return youtubeApiClient.fetchSingleVideo(recent.getSourceVideoId());
                     })
+                    .filter(video -> {
+                        boolean playable = youtubeApiClient.isVideoPlayable(video, countryCode);
+                        if (!playable) {
+                            log.info("[Reuse Failed] Candidate {} is not playable in {}. Fallback to full search.", video.getId(), countryCode);
+                        }
+                        return playable;
+                    })
                     .orElseGet(() -> {
-                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan");
+                        if (!quotaService.checkAndConsumeLua(userId, QuotaType.VIDEO_SEARCH.getCost() + QuotaType.SINGLE_SEARCH.getCost())) throw new QuotaExceededException("prepareRecoveryPlan - Search");
                         return musicService.searchVideoToReplace(backupMusic, countryCode);
                     });
 

@@ -15,15 +15,17 @@ import youtube.youtubeService.dto.internal.VideoFilterResultPageDto;
 import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
 import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
 import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
+import youtube.youtubeService.exception.users.UserQuitException;
 import youtube.youtubeService.exception.youtube.ChannelNotFoundException;
 import youtube.youtubeService.exception.quota.QuotaExceededException;
 import youtube.youtubeService.repository.playlists.PlaylistRepository;
 import youtube.youtubeService.service.musics.MusicConverterHelper;
 import youtube.youtubeService.service.users.UserService;
+import youtube.youtubeService.service.users.UserTokenService;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -34,20 +36,21 @@ public class PlaylistRegistrationOrchestratorService {
     private final PlaylistPersistenceService playlistPersistenceService;
     private final MusicConverterHelper musicConverterHelper;
     private final PlaylistRepository playlistRepository;
+    private final UserTokenService userTokenService;
     private final UserService userService;
 
 
     private Users findUserOptimized(String userId, List<Playlists> fetchedPlaylists) {
         if (fetchedPlaylists == null || fetchedPlaylists.isEmpty()) {
             // (쿼리 2 - A) 등록된 플리가 없으면(신규 유저 등), User 를 별도 조회
-            return userService.getUserByUserId(userId).orElseThrow(() -> new NoSuchElementException("user not found"));
+            return userService.getUserByUserId(userId).orElseThrow(() -> new UserQuitException("user not found"));
         } else {
             // (쿼리 2 - B) 등록된 플리가 있다면, 쿼리 1에서 JOIN FETCH 한 User 객체를 재사용 (추가 쿼리 없음)
             return fetchedPlaylists.get(0).getUser();
         }
     }
 
-    public UserRegisterPlaylistsResponseDto processPlaylistSelection(String userId, String accessToken) {
+    public UserRegisterPlaylistsResponseDto processPlaylistSelection(String userId) {
         // DB 에서 사용자가 이미 등록한 플레이리스트 조회
         List<Playlists> registeredPlaylists = playlistRepository.findAllByUserIdWithUserFetch(userId);
         List<String> registeredPlaylistIds = registeredPlaylists.stream().map(Playlists::getPlaylistId).toList();
@@ -58,7 +61,7 @@ public class PlaylistRegistrationOrchestratorService {
             playlists = playlistRegistrationUnitService.fetchAllPlaylists(userId, user.getUserChannelId());
         } catch (ChannelNotFoundException e) {
             log.warn("[User Cleanup] User {} has NO channel. Deleting user...", userId);
-            userService.deleteAndRevokeUserAccount(userId, accessToken);
+            userTokenService.withdrawUser(userId);
             throw e;
         }
 

@@ -11,13 +11,7 @@ public interface UserService {
 
     void saveUser(Users user);
 
-    String getNewAccessTokenByUserId(String userId, String refreshToken);
-
     List<Users> findAllUsers();
-
-    void deleteAndRevokeUserAccount(String userId, String accessToken);
-
-    void revokeUser(String refreshToken);
 
     void deleteByUserIdRaw(String userId);
 }

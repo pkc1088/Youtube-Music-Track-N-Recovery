@@ -16,15 +16,19 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import youtube.youtubeService.domain.Playlists;
 import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
 import youtube.youtubeService.dto.response.ActionLogResponseDto;
 import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
 import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationOrchestratorService;
+import youtube.youtubeService.service.playlists.PlaylistService;
 import youtube.youtubeService.service.users.UserTokenService;
 
 import java.security.Principal;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Controller
@@ -34,6 +38,7 @@ public class YoutubeController {
     private final PlaylistRegistrationOrchestratorService playlistRegistrationOrchestratorService;
     private final ActionLogService actionLogService;
     private final UserTokenService userTokenService;
+    private final PlaylistService playlistService;
 
 
     @GetMapping("/channelNotFound")
@@ -57,8 +62,15 @@ public class YoutubeController {
         return principal != null ? "afterLoginIndex" : "beforeLoginIndex";
     }
 
+//    @GetMapping("/welcome")
+//    public String welcomePage() {
+//        return "welcome";
+//    }
+
     @GetMapping("/welcome")
-    public String welcomePage() {
+    public String welcomePage(@AuthenticationPrincipal OAuth2User principal, Model model) {
+        List<Playlists> sortedPlaylists = playlistService.findAllPlaylistsByUserIdsOrderByLastChecked(Collections.singletonList(principal.getName()));
+        model.addAttribute("dto", sortedPlaylists);
         return "welcome";
     }
 
@@ -98,7 +110,7 @@ public class YoutubeController {
     @PostMapping("/delete")
     public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
 
-        userTokenService.withdrawUser(principal.getAttribute("sub"));
+        userTokenService.withdrawUser(principal.getName());// == principal.getAttribute("sub"));
 
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();

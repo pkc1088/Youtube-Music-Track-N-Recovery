@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>FixMyPlaylist</title>
-    <link rel="icon" type="image/x-icon" href="/images/FixMyPlaylist_120.webp" />
-    <link href="/css/styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" th:href="@{/images/FixMyPlaylist_120.webp}" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,96 +13,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,600;1,600&amp;display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,300;0,500;0,600;0,700;1,300;1,500;1,600;1,700&amp;display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;1,400&amp;display=swap" rel="stylesheet" />
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: "Mulish", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            padding-top: 100px;
-        }
-
-        header {
-            padding: 3rem 1rem;
-            text-align: center;
-            position: relative;
-        }
-
-        header h1 {
-            font-weight: 700;
-            font-size: 2.5rem;
-        }
-
-        header p {
-            color: #6c757d;
-            font-size: 1.05rem;
-        }
-
-        /* 주의사항 박스 */
-        .notice-box {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            background-color: #fff;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-
-        .notice-box h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .notice-box ul {
-            margin: 0;
-            padding-left: 1.2rem;
-        }
-
-        /* 기능 박스 */
-        .feature-box {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            background-color: #fff;
-            padding: 2rem 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            text-align: center;
-        }
-
-        .feature-icon1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #0d6efd;
-        }
-
-        .feature-icon2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #198754;
-        }
-
-        .btn-custom {
-            min-width: 200px;
-            margin-top: 1rem;
-        }
-
-        /* 결과 메시지 */
-        .result-msg {
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: #555;
-            text-align: center;
-        }
-
-    </style>
 </head>
 
 <body>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
     <div class="container px-5">
-        <a class="navbar-brand fw-bold" href="#page-top">FixMyPlaylist</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
-            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <a class="navbar-brand fw-bold" href="#page-top">
+            <img th:src="@{/images/FixMyPlaylist_120.webp}" alt="FixMyPlaylist Logo" style="height: 2.2rem; margin-right: 0.7rem;" />
+            FixMyPlaylist
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
             Menu
             <i class="bi-list"></i>
         </button>
@@ -115,7 +35,7 @@
                     <form th:action="@{/delete}" method="post" style="display:inline;">
                         <button type="submit" class="btn btn-link nav-link me-lg-3"
                                 style="text-decoration:none; color:inherit;"
-                                onclick="return confirm('정말로 탈퇴하시겠습니까?')">
+                                onclick="return confirm('Really delete account? This cannot be undone.')">
                             Delete Account
                         </button>
                     </form>
@@ -125,50 +45,91 @@
     </div>
 </nav>
 
-<div class="container">
+<div class="main-content container">
+
+    <div class="result-msg" th:if="${playlistResult}">
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi-check-circle-fill me-2"></i>
+            <div>
+                <strong>Registration Complete!</strong>
+                <span th:text="'Total: ' + ${playlistResult.selectedPlaylistsCount} + ' | Success: ' + ${playlistResult.succeedPlaylistCount} + ' | Failed: ' + (${playlistResult.selectedPlaylistsCount} - ${playlistResult.succeedPlaylistCount})">
+                </span>
+            </div>
+        </div>
+    </div>
+
     <div class="notice-box">
-        <h3>⚠ Caution</h3>
+        <h3><i class="bi-exclamation-triangle-fill"></i> Caution</h3>
         <ul>
-            <li><strong>When registering a playlist, if it already contains videos that are unavailable, they will be removed the following day.</strong></li>
-            <li>For your current playlists, we recommend registering them only when all of their videos are in a normal, accessible state.</li>
-            <li>A limited quota is assigned to each user. This quota is consumed when registering, viewing, or recovering playlists.</li>
-            <li>Please refrain from using a VPN during sign-up, as we identify region-locked videos based on your location.</li>
-            <li>Please avoid adding duplicate videos(those with the same video ID) to your playlists.</li>
+            <li><strong>When you attempt to register a playlist, any unavailable videos at that moment will be removed the next day.</strong></li>
+            <li>For the best experience, we highly advise registering your playlists only when all videos are accessible.</li>
+            <li>Do not use a VPN during sign-up as region-locked videos are identified based on your location.</li>
+            <li>A limited quota is assigned daily. Registering, viewing, or recovering consumes this quota.</li>
             <li>Feel free to add or remove videos from your registered playlists at any time.</li>
             <li>The recovery and sync process runs once a day at a scheduled time.</li>
-            <li>For more details, refer to our Privacy Policy and Terms of Service.</li>
         </ul>
     </div>
 
     <div class="row">
-        <!-- Feature 1 -->
         <div class="col-md-6">
             <div class="feature-box">
                 <i class="bi-collection-play-fill feature-icon1"></i>
                 <h3>Register Playlists</h3>
-                <p class="text-muted">Select playlists you'd like to be tracked</p>
+                <p class="text-muted">Select playlists to track & recover</p>
                 <a th:href="@{/playlist}" class="btn btn-primary btn-custom">Register</a>
             </div>
         </div>
-        <!-- Feature 2 -->
         <div class="col-md-6">
             <div class="feature-box">
                 <i class="bi-clock-history feature-icon2"></i>
                 <h3>Recovery History</h3>
-                <p class="text-muted">View recovery history of your playlists</p>
-                <a th:href="@{/recovery}" class="btn btn-success2 btn-custom">Check</a>
+                <p class="text-muted">Check recovery logs & replaced videos</p>
+                <a th:href="@{/recovery}" class="btn btn-success btn-custom" style="background-color: #198754; border-color: #198754; color: white;">Check</a>
             </div>
         </div>
     </div>
-    <!-- Reulst Message -->
-    <div class="result-msg" th:if="${playlistResult}">
-        <p th:text="'총 ' + ${playlistResult.selectedPlaylistsCount} + '개 중 ' + ${playlistResult.succeedPlaylistCount} + '개 등록 완료, ' +
-            (${playlistResult.selectedPlaylistsCount} - ${playlistResult.succeedPlaylistCount}) + '개 실패'">
-        </p>
+
+    <div class="playlist-status-section">
+        <div class="section-title">
+            <i class="bi-list-check"></i>
+            Tracked Playlists
+            <span class="badge bg-secondary rounded-pill fs-6 ms-2"
+                  th:text="${dto != null ? dto.size() : 0}">0</span>
+        </div>
+
+        <div th:if="${dto != null and !dto.isEmpty()}">
+            <div class="playlist-card" th:each="playlist : ${dto}">
+                <div class="playlist-info">
+                    <span class="playlist-title">
+                        <i class="bi-music-note-list me-2 text-primary"></i>
+                        <span th:text="${playlist.playlistTitle}">My Playlist</span>
+                    </span>
+                    <span class="playlist-id" th:text="'ID: ' + ${playlist.playlistId}">ID: PL1234...</span>
+                </div>
+                <div class="playlist-meta">
+                    <span class="last-checked-label">Last Checked</span>
+                    <span class="last-checked-time"
+                          th:if="${playlist.lastCheckedAt != null}"
+                          th:text="${#temporals.format(playlist.lastCheckedAt, 'yyyy-MM-dd HH:mm')}">
+                        2023-10-25 14:30
+                    </span>
+                    <span class="badge-new" th:if="${playlist.lastCheckedAt == null}">
+                        Pending...
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" th:if="${dto == null or dto.isEmpty()}">
+            <i class="bi-folder-x"></i>
+            <p>No playlists are currently being tracked.</p>
+            <p class="small">Click "Register" to add your playlists.</p>
+        </div>
     </div>
+
 </div>
 
-<footer class="bg-black text-center py-5">
+<footer class="bg-black text-center py-5 mt-auto">
     <div class="container px-5">
         <div class="text-white-50 small">
             <div class="mb-2">&copy; FixMyPlaylist 2025. All Rights Reserved.</div>

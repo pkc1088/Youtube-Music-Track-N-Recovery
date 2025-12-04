@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>FixMyPlaylist</title>
-    <link rel="icon" type="image/x-icon" href="/images/FixMyPlaylist_120.webp" />
-    <link href="/css/styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" th:href="@{/images/FixMyPlaylist_120.webp}" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,8 +18,8 @@
 <body id="page-top">
 <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm" id="mainNav">
     <div class="container px-5">
-        <a class="navbar-brand fw-bold d-flex align-items-center" href="#page-top">
-            <img src="/images/FixMyPlaylist_120.webp" alt="FixMyPlaylist Logo" style="height: 2.2rem; margin-right: 0.7rem;" />
+        <a class="navbar-brand fw-bold" href="#page-top">
+            <img th:src="@{/images/FixMyPlaylist_120.webp}" alt="FixMyPlaylist Logo" style="height: 2.2rem; margin-right: 0.7rem;" />
             FixMyPlaylist
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,12 +34,10 @@
         </div>
     </div>
 </nav>
-<!-- Mashead header-->
 <header class="masthead">
     <div class="container px-5">
         <div class="row gx-5 align-items-center">
             <div class="col-lg-6">
-                <!-- Mashead text and app badges-->
                 <div class="mb-5 mb-lg-0 text-center text-lg-start">
                     <h1 class="display-1 lh-1 mb-3">Fix Your Broken <span style="color: red;">YouTube</span> Playlist</h1>
                     <p class="lead fw-normal text-muted mb-5 text-center">Automatically Track & Recover Unavailable Musics</p>
@@ -58,12 +56,11 @@
                 </div>
             </div>
             <div class="col-lg-6">
-                <!-- Masthead device mockup feature-->
                 <div class="masthead-device-mockup">
                     <div class="device-wrapper">
                         <div class="device" data-device="iPhoneX" data-orientation="portrait" data-color="black">
                             <div class="screen bg-black">
-                                <img src="/images/privateEnv.webp" style="max-width: 100%; height: 100%; object-fit: contain;" alt="Private Environment" />
+                                <img th:src="@{/images/privateEnv.webp}" style="max-width: 100%; height: 100%; object-fit: contain;" alt="Private Environment" />
                             </div>
                         </div>
                     </div>
@@ -72,7 +69,6 @@
         </div>
     </div>
 </header>
-<!-- Quote/testimonial aside-->
 <aside class="text-center bg-gradient-primary-to-secondary">
     <div class="container px-5">
         <div class="row gx-5 justify-content-center">
@@ -82,7 +78,6 @@
         </div>
     </div>
 </aside>
-<!-- App features section-->
 <section id="features">
     <div class="container px-5">
         <div class="row gx-5 align-items-center">
@@ -90,7 +85,6 @@
                 <div class="container-fluid px-5">
                     <div class="row gx-5">
                         <div class="col-md-6 mb-5">
-                            <!-- Feature item-->
                             <div class="text-center">
                                 <i class="bi-phone icon-feature text-gradient d-block mb-3"></i>
                                 <h3 class="font-alt">Youtube Connection</h3>
@@ -98,7 +92,6 @@
                             </div>
                         </div>
                         <div class="col-md-6 mb-5">
-                            <!-- Feature item-->
                             <div class="text-center">
                                 <i class="bi-gift icon-feature text-gradient d-block mb-3"></i>
                                 <h3 class="font-alt">Free Registration</h3>
@@ -108,7 +101,6 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-5 mb-md-0">
-                            <!-- Feature item-->
                             <div class="text-center">
                                 <i class="bi-camera icon-feature text-gradient d-block mb-3"></i>
                                 <h3 class="font-alt">Daily Tracking</h3>
@@ -116,7 +108,6 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <!-- Feature item-->
                             <div class="text-center">
                                 <i class="bi-patch-check icon-feature text-gradient d-block mb-3"></i>
                                 <h3 class="font-alt">AI Recovery</h3>
@@ -128,19 +119,15 @@
             </div>
 
             <div class="col-lg-4 order-lg-0">
-                <!-- Masthead device mockup feature -->
                 <div class="masthead-device-mockup">
                     <div class="device-wrapper">
                         <div class="device" data-device="iPhoneX" data-orientation="portrait" data-color="black">
                             <div class="screen bg-black">
-                                <!-- 썸네일 + 클릭 버튼 -->
                                 <a href="https://www.youtube.com/watch?v=dqOrLUjCFic" target="_blank"
                                    style="display: block; width: 100%; height: 100%; position: relative;">
-                                    <!-- 유튜브 썸네일 -->
-                                    <img src="/images/recoveredEnv.webp"
+                                    <img th:src="@{/images/recoveredEnv.webp}"
                                          style="width: 100%; height: 100%; object-fit: cover;"
                                          alt="Demo Thumbnail" />
-                                    <!-- 중앙 클릭 아이콘 & 안내 -->
                                     <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
                                             display: flex; flex-direction: column; align-items: center; pointer-events: none;">
                                         <i class="bi bi-play-circle-fill" style="font-size: 3rem; color: rgb(255,0,0); pointer-events: auto;"></i>
@@ -158,7 +145,6 @@
         </div>
     </div>
 </section>
-<!-- Basic features section-->
 <section class="bg-light">
     <div class="container px-5">
         <div class="row gx-5 align-items-center justify-content-center justify-content-lg-between">
@@ -171,7 +157,6 @@
         </div>
     </div>
 </section>
-<!-- Call to action section-->
 <section class="cta" id="howto">
     <div class="cta-content">
         <div class="container px-5 text-white text-start">
@@ -197,7 +182,6 @@
         </div>
     </div>
 </section>
-<!-- Footer-->
 <footer class="bg-black text-center py-5">
     <div class="container px-5">
         <div class="text-white-50 small">

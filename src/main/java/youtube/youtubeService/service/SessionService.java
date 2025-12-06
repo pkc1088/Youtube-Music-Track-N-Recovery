@@ -9,11 +9,12 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Service;
+import youtube.youtubeService.handler.CustomOAuth2User;
+
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,21 +25,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SessionService {
 
-    private final StringRedisTemplate redisTemplate;
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
+    private final StringRedisTemplate redisTemplate;
 
 
     public Set<String> getAllUserIds() {
         Set<String> userIds = new HashSet<>();
 
         RedisConnection connection = Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection();
-        // 한번에 1000개씩 가져오기 힌트
+
         Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match("spring:session:sessions:*").count(1000).build());
 
         while (cursor.hasNext()) {
             String key = new String(cursor.next(), StandardCharsets.UTF_8);
 
-            if (key.contains("expires")) continue; // expires 키는 건너뜀
+            if (key.contains("expires")) continue;
 
             String sessionId = key.substring("spring:session:sessions:".length());
             Session session = sessionRepository.findById(sessionId);
@@ -46,11 +47,9 @@ public class SessionService {
             Object scObj = session.getAttribute("SPRING_SECURITY_CONTEXT");
             if (scObj instanceof SecurityContext securityContext) {
                 Authentication auth = securityContext.getAuthentication();
-                if (auth instanceof OAuth2AuthenticationToken oauthToken) {
-                    Object principal = oauthToken.getPrincipal();
-                    if (principal instanceof OidcUser oidcUser) {
-                        userIds.add(oidcUser.getName() + " : " + key); // 바로 userId
-                    }
+
+                if (auth != null && auth.getPrincipal() instanceof OAuth2User oauth2User) {
+                    userIds.add(oauth2User.getName() + " : " + key);
                 }
             }
         }
@@ -71,19 +70,28 @@ public class SessionService {
 
         Map<String, Object> result = new HashMap<>();
         try {
-            // SecurityContext 객체 확인
             SecurityContext securityContext = (SecurityContext) securityContextObj;
             Authentication authentication = securityContext.getAuthentication();
             result.put("authenticated", authentication.isAuthenticated());
-            result.put("principalClass", authentication.getPrincipal().getClass().getName());
-            // OAuth2User 정보 추출
-            if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
-                Object principal = oauthToken.getPrincipal();
-                if (principal instanceof OidcUser oidcUser) {
-                    Map<String, Object> attributes = new HashMap<>(oidcUser.getAttributes());
-                    result.put("attributes", attributes);
-                    result.put("roles", authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()));
-                }
+
+            Object principal = authentication.getPrincipal();
+            result.put("principalClass", principal.getClass().getName());
+
+            // [수정 포인트 2] CustomOAuth2User 우선 체크 및 상세 정보 추출
+            if (principal instanceof CustomOAuth2User customUser) {
+                // 1. 기본 속성
+                Map<String, Object> attributes = new HashMap<>(customUser.getAttributes());
+                result.put("attributes", attributes);
+
+                // 2. [NEW] 커스텀 필드 추가 (대시보드에서 확인 가능!)
+                result.put("countryCode", customUser.getCountryCode());
+                result.put("channelId", customUser.getChannelId());
+
+                // 3. 권한 정보
+                result.put("roles", authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()));
+
             }
         } catch (Exception e) {
             result.put("error", "세션 정보 파싱 실패");

@@ -29,9 +29,8 @@ public class GeoIpService {
         try {
             InetAddress ipAddress = InetAddress.getByName(clientIp);
             CountryResponse response = databaseReader.country(ipAddress);
-            String countryCode = response.getCountry().getIsoCode();
-            log.info("[country code: {}]", countryCode);
-            return countryCode; // 예: "KR"
+            // log.info("[country code: {}]", countryCode);
+            return response.getCountry().getIsoCode();
         } catch (Exception e) {
             log.info("[country code: UNKNOWN -> KR]");
             return "KR";
@@ -42,9 +41,8 @@ public class GeoIpService {
         String xfHeader = request.getHeader("X-Forwarded-For");
         //log.info("[xfHeader: {}]", xfHeader);
         if (xfHeader == null) {
-            String remoteAddr = request.getRemoteAddr();
             //log.info("[xfHeader Remote: {}]", remoteAddr);
-            return remoteAddr;
+            return request.getRemoteAddr();
         }
         return xfHeader.split(",")[0];
     }

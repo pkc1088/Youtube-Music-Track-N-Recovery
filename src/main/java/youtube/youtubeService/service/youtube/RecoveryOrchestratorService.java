@@ -27,14 +27,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RecoveryOrchestratorService {
 
-    private final UserService userService;
+    private final PlaylistPersistenceService playlistPersistenceService;
+    private final RecoveryExecuteService recoveryExecuteService;
+    private final RecoveryPlanService recoveryPlanService;
+    private final OutboxEventHandler outboxEventHandler;
     private final UserTokenService userTokenService;
     private final PlaylistService playlistService;
     private final MusicService musicService;
-    private final OutboxEventHandler outboxEventHandler;
-    private final RecoveryPlanService recoveryPlanService;
-    private final RecoveryExecuteService recoveryExecuteService;
-    private final PlaylistPersistenceService playlistPersistenceService;
+    private final UserService userService;
     private final Executor userExecutor;
 
 

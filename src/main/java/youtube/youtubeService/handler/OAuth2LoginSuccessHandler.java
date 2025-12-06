@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -36,16 +37,19 @@ import java.util.*;
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    private static final Set<String> ADMIN_USER_IDS = Set.of("112735690496635663877", "107155055893692546350");
+    private final OAuth2AuthorizedClientService authorizedClientService;
+    private final UserTokenService userTokenService;
+    private final YoutubeApiClient youtubeApiClient;
+    private final GeoIpService geoIpService;
     private final QuotaService quotaService;
     private final UserService userService;
-    private final UserTokenService userTokenService;
-    private final GeoIpService geoIpService;
-    private final OAuth2AuthorizedClientService authorizedClientService;
-    private final YoutubeApiClient youtubeApiClient;
-    private static final Set<String> ADMIN_USER_IDS = Set.of("112735690496635663877", "107155055893692546350");
+
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+        String channelId;
+        String countryCode;
 
         if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
 
@@ -64,22 +68,29 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             Users.UserRole userRole = ADMIN_USER_IDS.contains(userId) ? Users.UserRole.ADMIN : Users.UserRole.USER;
             Users user = alreadyMember(userId).orElse(null);
 
-            if (user != null) { // 등록된 유저 (보안에서 제거 후 재가입 시, 배포와 로컬 간 일관성 유지 시, 브라우저 캐시 삭제 후 시도 시)
-                if(authorizedClient.getRefreshToken() != null) {
-                    String updatedRefreshToken = authorizedClient.getRefreshToken().getTokenValue();
-                    log.info("[New RefreshToken]: {}", updatedRefreshToken);
-                    log.info("[DB RefreshToken]: {}", user.getRefreshToken());
-                    if(user.getRefreshToken() == null || !user.getRefreshToken().equals(updatedRefreshToken)) {
-                        saveUpdatedRefreshToken(user, updatedRefreshToken);
+            if (user != null) {
+                // 등록된 유저 (보안에서 제거 후 재가입 시, 배포와 로컬 간 일관성 유지 시, 브라우저 캐시 삭제 후 시도 시)
+                channelId = user.getUserChannelId();
+                countryCode = user.getCountryCode();
+
+                log.info("[DB RefreshToken]: {}", user.getRefreshToken());
+
+                OAuth2RefreshToken refreshTokenObj = authorizedClient.getRefreshToken();
+                String refreshTokenValue = (refreshTokenObj != null) ? refreshTokenObj.getTokenValue() : null;
+
+                if(refreshTokenValue != null) {
+                    log.info("[New RefreshToken]: {}", refreshTokenValue);
+
+                    if(user.getRefreshToken() == null || !user.getRefreshToken().equals(refreshTokenValue)) {
+                        saveUpdatedRefreshToken(user, refreshTokenValue);
                         log.info("[RefreshToken Updated]");
                     }
-                } else {
-                    log.info("[No New RefreshToken]");
-                    log.info("[DB RefreshToken]: {}", user.getRefreshToken());
                 }
+
             } else {
+                // 신규 등록 유저
                 String fullName = ((OidcUser) oauthToken.getPrincipal()).getFullName(); // pkc1088, whistle_missile 등
-                String channelId;
+
                 try {
                     // 악질 재가입 사보타지 고객 방지
                     if(!quotaService.checkAndConsumeLua(userId, QuotaType.SINGLE_SEARCH.getCost())) {
@@ -96,25 +107,26 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 }
 
                 String email = ((OidcUser) oauthToken.getPrincipal()).getEmail();
-
                 if (isTemporaryEmail(email)) email = getRealEmail(email);
 
                 String refreshToken = authorizedClient.getRefreshToken() != null ? authorizedClient.getRefreshToken().getTokenValue() : null;
-                String countryCode = geoIpService.getClientCountryCode(request);
+
+                countryCode = geoIpService.getClientCountryCode(request);
 
                 saveUsersToDatabase(userId, userRole, fullName, channelId, email, countryCode, refreshToken);
             }
 
-            // 1) Authorities 생성
+            // Authorities 생성
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + userRole));
-            // 2) 새로운 Authentication 생성
-            OAuth2AuthenticationToken newAuth = new OAuth2AuthenticationToken(oauthToken.getPrincipal(), authorities, oauthToken.getAuthorizedClientRegistrationId());
-            // 3) SecurityContext 에 저장
+            // 커스텀 OAuth2User 추가함 (countryCode, channelId 추가)
+            CustomOAuth2User customPrincipal = new CustomOAuth2User(oauthToken.getPrincipal(), countryCode, channelId);
+            // 새로운 Authentication 생성
+            OAuth2AuthenticationToken newAuth = new OAuth2AuthenticationToken(customPrincipal, authorities, oauthToken.getAuthorizedClientRegistrationId());
+            // SecurityContext 에 저장
             SecurityContextHolder.getContext().setAuthentication(newAuth);
-            // 5) (권장) 세션에 SecurityContext 강제 저장 — 서버가 세션 재생성/fixation 처리해도 안전하게
+            // 세션에 SecurityContext 강제 저장 — 서버가 세션 재생성/fixation 처리해도 안전
             HttpSession session = request.getSession();
             session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
-
         }
 
         response.sendRedirect("/");

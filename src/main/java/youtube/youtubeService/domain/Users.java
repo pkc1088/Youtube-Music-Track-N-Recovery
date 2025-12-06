@@ -39,5 +39,11 @@ public class Users {
     public void updateRefreshToken(String newRefreshToken) {
         this.refreshToken = newRefreshToken;
     }
+
+    public static Users createReference(String userId) {
+        Users user = new Users();
+        user.userId = userId;
+        return user;
+    }
 }
 

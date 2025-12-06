@@ -14,10 +14,6 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     private final SdjPlaylistRepository repository;
 
-    @Override
-    public Playlists findByPlaylistId(String playlistId) {
-        return repository.findByPlaylistId(playlistId);
-    }
 
     @Override
     public void deleteAllByPlaylistIdsIn(List<String> deselectedPlaylistIds) {

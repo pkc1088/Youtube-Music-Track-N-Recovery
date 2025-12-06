@@ -16,6 +16,12 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     private final PlaylistRepository playlistRepository;
 
+
+    @Override
+    public List<Playlists> findAllByUserIdWithUserFetch(String userId) {
+        return playlistRepository.findAllByUserIdWithUserFetch(userId);
+    }
+
     @Override
     public List<Playlists> findAllPlaylistsByUserIdsOrderByLastChecked(List<String> userIds) {
         return playlistRepository.findAllPlaylistsByUserIdsOrderByLastChecked(userIds);

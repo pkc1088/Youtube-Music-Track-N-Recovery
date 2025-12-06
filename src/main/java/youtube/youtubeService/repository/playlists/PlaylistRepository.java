@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface PlaylistRepository {
 
-    Playlists findByPlaylistId(String playlistId);
+//    Playlists findByPlaylistId(String playlistId);
 
     void deleteAllByPlaylistIdsIn(List<String> deselectedPlaylistIds);
 

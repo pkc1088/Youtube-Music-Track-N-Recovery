@@ -8,4 +8,6 @@ public interface PlaylistService {
     List<Playlists> findAllPlaylistsByUserIdsOrderByLastChecked(List<String> userIds);
 
     void updateLastCheckedAt(String playlistId);
+
+    List<Playlists> findAllByUserIdWithUserFetch(String userId);
 }

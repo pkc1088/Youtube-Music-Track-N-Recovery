@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import youtube.youtubeService.domain.Playlists;
+import youtube.youtubeService.dto.internal.PlaylistCacheDto;
 import youtube.youtubeService.dto.request.PlaylistRegisterRequestDto;
 import youtube.youtubeService.dto.response.ActionLogResponseDto;
 import youtube.youtubeService.dto.response.PlaylistRegisterResponseDto;
 import youtube.youtubeService.dto.response.UserRegisterPlaylistsResponseDto;
+import youtube.youtubeService.handler.CustomOAuth2User;
 import youtube.youtubeService.service.ActionLogService;
 import youtube.youtubeService.service.playlists.PlaylistRegistrationOrchestratorService;
 import youtube.youtubeService.service.playlists.PlaylistService;
@@ -62,40 +64,35 @@ public class YoutubeController {
         return principal != null ? "afterLoginIndex" : "beforeLoginIndex";
     }
 
-//    @GetMapping("/welcome")
-//    public String welcomePage() {
-//        return "welcome";
-//    }
-
     @GetMapping("/welcome")
-    public String welcomePage(@AuthenticationPrincipal OAuth2User principal, Model model) {
-        List<Playlists> sortedPlaylists = playlistService.findAllPlaylistsByUserIdsOrderByLastChecked(Collections.singletonList(principal.getName()));
-        model.addAttribute("dto", sortedPlaylists);
+    public String welcomePage(@AuthenticationPrincipal CustomOAuth2User principal, Model model) {
+        List<Playlists> playlists = playlistService.findAllByUserIdWithUserFetch(principal.getName()); //playlistService.findAllPlaylistsByUserIdsOrderByLastChecked(Collections.singletonList(principal.getName()));
+        model.addAttribute("dto", playlists);
         return "welcome";
     }
 
     @GetMapping("/playlist")
-    public String redirectToUserPlaylist(@AuthenticationPrincipal OAuth2User principal) {
+    public String redirectToUserPlaylist(@AuthenticationPrincipal CustomOAuth2User principal) {
         return "redirect:/playlist/" + principal.getName();
     }
 
     @GetMapping("/playlist/{userId}")
     @PreAuthorize("#userId == authentication.principal.name")
-    public String userRegisterPlaylists(@PathVariable String userId, Model model) {
-        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId);
+    public String userRegisterPlaylists(@PathVariable String userId, @AuthenticationPrincipal CustomOAuth2User principal, Model model) {
+        UserRegisterPlaylistsResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistSelection(userId, principal.getChannelId());
         model.addAttribute("dto", dto);
         return "playlist_selection";
     }
 
     @PostMapping("/playlist/register")
-    public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, RedirectAttributes redirectAttributes) {
-        PlaylistRegisterResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistRegistration(request);
-        redirectAttributes.addFlashAttribute("playlistResult", dto); // flash attribute 에 담아서 리다이렉트 시 전달
+    public String registerPlaylists(@ModelAttribute PlaylistRegisterRequestDto request, @AuthenticationPrincipal CustomOAuth2User principal, RedirectAttributes redirectAttributes) {
+        PlaylistRegisterResponseDto dto = playlistRegistrationOrchestratorService.processPlaylistRegistration(request, principal.getCountryCode());
+        redirectAttributes.addFlashAttribute("playlistResult", dto);
         return "redirect:/welcome";
     }
 
     @GetMapping("/recovery")
-    public String redirectToRecoveryHistory(@AuthenticationPrincipal OAuth2User principal) {
+    public String redirectToRecoveryHistory(@AuthenticationPrincipal CustomOAuth2User principal) {
         return "redirect:/recovery/" + principal.getName();
     }
 
@@ -108,9 +105,9 @@ public class YoutubeController {
     }
 
     @PostMapping("/delete")
-    public String deleteAccount(@AuthenticationPrincipal OAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
+    public String deleteAccount(@AuthenticationPrincipal CustomOAuth2User principal, HttpServletRequest request, HttpServletResponse response) {
 
-        userTokenService.withdrawUser(principal.getName());// == principal.getAttribute("sub"));
+        userTokenService.withdrawUser(principal.getName());
 
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();

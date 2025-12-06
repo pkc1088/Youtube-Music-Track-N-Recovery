@@ -79,7 +79,7 @@ public class OutboxPerformanceTest {
             try {
                 // Before
                 sleep();
-                Playlists playlist = playlistRepository.findByPlaylistId(playlistId);
+                Playlists playlist = playlistRepository.findAllPlaylistsByUserIdsOrderByLastChecked(Collections.singletonList(playlistId)).get(0); // playlistRepository.findByPlaylistId(playlistId);
                 // Test
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
